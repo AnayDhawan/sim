@@ -1,0 +1,29 @@
+# ALL COORDINATES BELOW ARE APPROXIMATE, FROM MEMORY, AND UNCONFIRMED.
+# Shaurya must confirm them before any result is published. confirmed: false triggers a warning at the start of
+# every validation run and stamps provisional: true into validation.json.
+# Validation uses the best-scoring tile within site_match_radius_km (run.yaml) of each point,
+# so small coordinate errors do not matter.
+primary:      # the 10 Nov validation set
+  lonar:               {lat: 19.98,  lon: 76.51,   bodies: [mars, moon], confirmed: false}
+  haughton:            {lat: 75.37,  lon: -89.68,  bodies: [mars, moon], confirmed: false}
+  mcmurdo_dry_valleys: {lat: -77.5,  lon: 162.0,   bodies: [mars],       confirmed: false}
+  atacama_salars:      {lat: -23.5,  lon: -68.25,  bodies: [mars],       confirmed: false}   # salars, not Yungay
+  ladakh_puga:         {lat: 33.22,  lon: 78.32,   bodies: [mars],       confirmed: false}
+  mdrs_utah:           {lat: 38.41,  lon: -110.79, bodies: [mars],       confirmed: false}
+secondary:    # in the novelty exclusion list and sensitivity checks, not in the pass criterion
+  sf_volcanic_field:   {lat: 35.35,  lon: -111.5,  bodies: [moon], radius_km: 30, confirmed: false}
+  gosses_bluff:        {lat: -23.8,  lon: 132.3,   bodies: [moon, mars], confirmed: false}   # the source file flags this as uncertain
+  mauna_kea:           {lat: 19.82,  lon: -155.47, bodies: [moon], confirmed: false}
+  askja:               {lat: 65.03,  lon: -16.75,  bodies: [moon, mars], confirmed: false}
+gate_tests:   # a correct pipeline must reject all three
+  manicouagan:         {lat: 51.1,   lon: -68.7,   expect: rejected, confirmed: false}      # coordinates as given in our files
+  tatacoa:             {lat: 3.23,   lon: -75.17,  expect: rejected, confirmed: false}      # as given in our files
+  samoylov:            {lat: 72.37,  lon: 126.48,  expect: rejected, confirmed: false}      # approximate
+negative_controls: # must score low
+  amazon_basin:        {lat: -3.0,   lon: -60.0,   confirmed: false}
+  congo_basin:         {lat: -0.5,   lon: 23.0,    confirmed: false}
+# Pre-registered pass criteria. Written into validation.json before anything is computed. Do not tune weights to pass.
+criteria:
+  primary_median_rank_pct_min: 90
+  negative_control_rank_pct_max: 25
+  gate_tests_all_rejected: true

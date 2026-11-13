@@ -1,0 +1,32 @@
+# Limits ledger. Reported beside every score, NEVER multiplied into it.
+# status_value: broken 0, partly 0.5, matchable 1. fidelity = 100 * mean(status_value over the rows relevant to a purpose).
+status_value: {broken: 0.0, partly: 0.5, matchable: 1.0}
+rows:
+  - {id: gravity, property: "Gravity", target: "1.62 m/s2 Moon, 3.71 m/s2 Mars", earth: "9.81 everywhere", status: broken, bodies: [moon, mars], source: "Fudali 1980; Foucher 2021"}
+  - {id: air_pressure, property: "Air pressure", target: "vacuum Moon; under 1% of Earth on Mars", earth: "about half sea level on the highest roads", status: broken, bodies: [moon, mars], source: "Pandey 2020"}
+  - {id: cold_traps, property: "Cold traps", target: "below 110 K, down to 38 K", earth: "about 184 K air-temperature record; satellite surface minimum is lower, check before quoting", status: broken, bodies: [moon], source: "Hayne; Paige"}
+  - {id: polar_lighting, property: "Polar lighting", target: "Sun within about 1.5 deg of the horizon all year, 18.6-year cycle", earth: "low Sun in polar spring and autumn only", status: partly, bodies: [moon], source: "Mazarico; Glaser"}
+  - {id: radiation_uv, property: "Radiation and UV", target: "no shielding", earth: "UV-A 10x sea level in Ladakh; no particle radiation", status: partly, bodies: [moon, mars], source: "Pandey; Harris"}
+  - {id: regolith, property: "Regolith", target: "unweathered, glass-welded, dry", earth: "weathered, oxidised, damp ash and basalt", status: partly, bodies: [moon, mars], source: "McKay 1993; Foucher"}
+  - {id: rock_chemistry, property: "Rock chemistry", target: "iron-rich Martian basalt; lunar anorthosite", earth: "basalt 45-52% silica; anorthosite rare", status: partly, bodies: [moon, mars], source: "Foucher 2021"}
+  - {id: oxidants, property: "Oxidants", target: "0.5-1 wt% perchlorate on Mars", earth: "up to 0.6 wt% in the Atacama", status: partly, bodies: [mars], source: "Harris 2022"}
+  - {id: sterility, property: "Sterility", target: "no known life", earth: "1.7-13.6 million cells per gram in desert cores", status: broken, bodies: [mars], source: "Stoker; Harris; Pandey"}
+  - {id: los_earth_gps, property: "Line of sight to Earth, GPS", target: "Moon site criterion; no GPS anywhere", earth: "always available", status: broken, bodies: [moon], source: "Artemis III; Young 2013"}
+  - {id: electrostatic_dust, property: "Electrostatic dust", target: "provisional", earth: "no global Earth data", status: broken, provisional: true, bodies: [moon, mars], source: "Shiven's report (unverified)"}
+  - {id: regolith_mechanics, property: "Regolith mechanics (grain size, density, abrasiveness)", target: "provisional", earth: "no global Earth data", status: partly, provisional: true, bodies: [moon, mars], source: "Shiven's report (unverified)"}
+# Draft relevance matrix: which rows matter for which purpose. DRAFT: Anay and Vihaan review it.
+relevance_provisional: true
+relevance:
+  base:             {rows: all, reason: "base profile uses every row that applies to the body"}
+  landing_mobility:
+    rows: [gravity, air_pressure, regolith, regolith_mechanics, electrostatic_dust, los_earth_gps]
+    reason: "landing and driving depend on gravity, atmosphere (descent, Mars), soil strength and dust, and Moon line of sight"
+  power_night:
+    rows: [polar_lighting, electrostatic_dust, radiation_uv, air_pressure]
+    reason: "power depends on lighting geometry, dust on panels, UV exposure and Mars atmospheric dust and heat loss"
+  ice_resources:
+    rows: [cold_traps, air_pressure, regolith, regolith_mechanics, oxidants, gravity]
+    reason: "ice survival and mining depend on cold traps, pressure, regolith, oxidants and gravity"
+  geology_life:
+    rows: [rock_chemistry, regolith, oxidants, sterility, radiation_uv, air_pressure]
+    reason: "geology and life detection depend on rock and soil chemistry, oxidants, background biology and exposure"

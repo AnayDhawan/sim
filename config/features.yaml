@@ -1,0 +1,38 @@
+# Feature columns and sources. Earth sources are LEADS TO VERIFY, not facts (see docs/UNVERIFIED.md).
+# Terrain operator: one numpy operator (src/gsop/operators.py) on Earth, Moon and Mars.
+operator:
+  slope_baseline_m: 500            # slope is computed on a 500 m mean-resampled DEM (Horn 3x3), then reduced to the tile
+  rough_a_baseline_m: 100          # TODO confirm with Vihaan
+  rough_b_baseline_m: 1000         # TODO confirm with Vihaan
+  tile_m: 6000
+  stride_m: 3000                   # target windows only
+sun_low_threshold_deg: 5           # sun_low_share = share of daylight with the Sun under this elevation
+columns:
+  slope_med:  {unit: deg, what: "median slope over the tile at the shared 500 m baseline", earth: "NASADEM (SRTM) 56S to 60N; Copernicus DEM GLO-30 above 60N (lead)", moon: "LOLA", mars: "MOLA"}
+  slope_p90:  {unit: deg, what: "90th percentile slope over the tile", earth: "as slope_med", moon: "LOLA", mars: "MOLA"}
+  relief:     {unit: m, what: "elevation range (max-min of 500 m cells) in the tile", earth: "as slope_med", moon: "LOLA", mars: "MOLA"}
+  rough_a:    {unit: m, what: "RMS height after plane removal, short baseline", earth: "as slope_med", moon: "LOLA", mars: "MOLA"}
+  rough_b:    {unit: m, what: "RMS height after plane removal, long baseline", earth: "as slope_med", moon: "LOLA", mars: "MOLA"}
+  sun_max_elev: {unit: deg, what: "maximum Sun elevation over the year, from latitude, obliquity, slope and aspect", earth: "computed", moon: "computed; pole targets about 1.5 deg", mars: "computed"}
+  sun_low_share: {unit: fraction, what: "share of daylight with the Sun under 5 deg", earth: "computed", moon: "pole targets about 1.0", mars: "computed"}
+  insol_annual: {unit: W/m2, what: "annual mean insolation", earth: "computed", moon: "n/a", mars: "computed"}
+  t_mean:     {unit: K, what: "annual mean surface temperature", earth: "MODIS LST 2015-2024 climatology (lead)", moon: "Diviner (not at the pole; flag)", mars: "climate data"}
+  t_coldest:  {unit: K, what: "coldest-month surface temperature", earth: "MODIS LST (lead)", moon: "Diviner (not at the pole; flag)", mars: "climate data"}
+  ti_proxy:   {unit: K, what: "day-night temperature swing in the dry season (three driest consecutive months; fall back to annual median and flag)", earth: "MODIS (lead)", moon: "Diviner", mars: "THEMIS"}
+  dust_index: {unit: "0-1", what: "Mars only; shares the thermal_inertia weight", earth: "MERRA-2 dust or MODIS aerosol (lead)", mars: "TES albedo / dust cover"}
+  water_index: {unit: "0-1", what: "WEAK cross-instrument proxy", earth: "mean of permafrost probability and a 0-1 aridity index (lead: GPM, SMAP)", moon: "PSR share of the tile", mars: "SWIM ice consistency"}
+  silica_index: {unit: ratio, what: "WEAK cross-instrument proxy; thermal-infrared emissivity band ratio", earth: "ASTER GED (EMIT only where available)", moon: "Diviner Christiansen feature", mars: "TES"}
+  air_density: {unit: kg/m3, what: "Mars family only; standard atmosphere from elevation on Earth, exponential pressure law on Mars", earth: "standard atmosphere", mars: "exponential law, constants TODO unsourced"}
+gate_layers:
+  water_ice_frac: "open water or permanent ice fraction of the tile"
+  ndvi_median: "MODIS NDVI median"
+  built_crop_frac: "built-up or cropland fraction (land-cover product)"
+# Sigma rule: sigma_k = max(target_spread_k, measurement_uncertainty_k, 0.25 * IQR_of_k_across_all_gated_Earth_tiles).
+# null = no sourced value, so the IQR term (and the target spread) alone applies. TODO marks a value a human must supply.
+measurement_uncertainty:
+  moon:
+    slope_med: 2.0      # Barker 2021 gives 1.5 to 2.5 deg; MIDPOINT chosen by the assistant, UNVERIFIED
+    slope_p90: 2.0      # same
+    relief: 0.4         # Barker 2021 height error 0.3 to 0.5 m; MIDPOINT chosen by the assistant, UNVERIFIED
+  mars: {}
+earth_uncertainty: {}   # systematic Earth bias per column. Empty: none sourced yet (TODO)

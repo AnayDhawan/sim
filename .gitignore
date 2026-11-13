@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/raw/*
+data/interim/*
+data/processed/*
+!data/*/.gitkeep
+results/*
+!results/.gitkeep
+*.zip
+.env
+docs/source/*
+!docs/source/.gitkeep

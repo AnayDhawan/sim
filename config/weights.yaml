@@ -1,0 +1,32 @@
+# derived = (paper_score / sum(paper_score)) * matchability, rescaled to sum 1.
+# Code computes it (gsop.weights.derive_weights); the derived values are never hard-coded.
+# D3: lunar thermal_inertia derives to 0.019; the published 0.03 is a rounding-up artifact. Both are kept here.
+moon:
+  slope:           {paper_score: 16, matchability: 1.0, range: [0.21, 0.39], published: 0.30, columns: [slope_med, slope_p90]}
+  illumination:    {paper_score: 19, matchability: 0.5, range: [0.10, 0.24], published: 0.18, columns: [sun_max_elev, sun_low_share]}
+  cold_dry:        {paper_score: 26, matchability: 0.3, range: [0.10, 0.20], published: 0.15, columns: [water_index]}
+  roughness:       {paper_score: 7,  matchability: 0.9, range: [0.07, 0.25], published: 0.12, columns: [rough_a, rough_b]}
+  relief:          {paper_score: 6,  matchability: 1.0, range: [0.07, 0.18], published: 0.11, columns: [relief]}
+  temperature:     {paper_score: 16, matchability: 0.2, range: [0.04, 0.09], published: 0.06, columns: [t_mean, t_coldest]}
+  composition:     {paper_score: 7,  matchability: 0.4, range: [0.03, 0.09], published: 0.05, columns: [silica_index]}
+  thermal_inertia: {paper_score: 2,  matchability: 0.5, range: [0.02, 0.04], published: 0.03, columns: [ti_proxy]}
+mars:
+  composition:       {paper_score: 26, matchability: 0.7,  range: [0.16, 0.30], published: 0.23, columns: [silica_index]}
+  water:             {paper_score: 22, matchability: 0.7,  range: [0.12, 0.25], published: 0.19, columns: [water_index]}
+  sunlight:          {paper_score: 17, matchability: 0.7,  range: [0.10, 0.20], published: 0.15, columns: [insol_annual, sun_max_elev]}
+  slope:             {paper_score: 9,  matchability: 1.0,  range: [0.08, 0.16], published: 0.11, columns: [slope_med, slope_p90]}
+  thermal_inertia:   {paper_score: 12, matchability: 0.6,  range: [0.06, 0.12], published: 0.09, columns: [ti_proxy, dust_index]}
+  roughness:         {paper_score: 7,  matchability: 0.9,  range: [0.05, 0.10], published: 0.08, columns: [rough_a, rough_b]}
+  relief:            {paper_score: 6,  matchability: 1.0,  range: [0.05, 0.11], published: 0.08, columns: [relief]}
+  elevation_density: {paper_score: 20, matchability: 0.15, range: [0.02, 0.05], published: 0.04, columns: [air_density]}
+  temperature:       {paper_score: 5,  matchability: 0.5,  range: [0.02, 0.05], published: 0.03, columns: [t_mean, t_coldest]}
+published_tolerance: 0.012
+# Run as checks: report top-1% overlap and Spearman rank correlation against the primary base score.
+alt_weight_sets:
+  moon:
+    liu2025:         {weights: {roughness: 0.39, slope: 0.26, cold_dry: 0.16, illumination: 0.11, composition: 0.08}}
+    no_illumination: {rule: "primary with illumination=0, renormalised"}
+    equal:           {rule: "all families equal"}
+  mars:
+    mashal2025:      {weights: {composition: 0.75, water: 0.125, sunlight: 0.125}}
+    equal:           {rule: "all families equal"}

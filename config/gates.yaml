@@ -1,0 +1,13 @@
+# A tile failing any gate is rejected; the reason is logged per tile. Order below is the reporting priority.
+tile_gates:
+  open_water_or_ice_frac_max: 0.50      # open water or permanent ice covers more than this share of the tile
+  ndvi_median_max: 0.2                  # tunable
+  built_or_crop_frac_max: 0.20
+  # landing_mobility extra gate: see purposes.yaml
+  # missing data for any feature the target's weights use: always on
+# D6: Mars target check. warn = still run, label outputs fails_own_gate: true. strict = skip the target.
+mars_target_check:
+  mode: warn
+  lat_abs_max_deg: 50
+  elevation_m_max: 2000
+  thermal_inertia_si_min: 100

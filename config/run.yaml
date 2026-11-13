@@ -1,0 +1,18 @@
+master_seed: 20261114        # D2
+runs: 2000                   # D2, overridable with --runs
+batch_runs: 50               # fixed batches by run_id, so results never depend on worker count
+tile_m: 6000                 # D1
+grid_crs: "EPSG:6933"
+top_fracs: [0.01, 0.05, 0.10]
+robust: {membership: top5, min_freq: 0.90}
+candidates: {top_frac: 0.03, max_candidates: 250000}
+convergence_checkpoints: [500, 1000, 1500, 2000]
+ram_fraction: 0.40           # cell chunk is sized to at most this share of free RAM
+site_match_radius_km: 20
+discovery: {min_distance_km: 100, top_n: 50}
+ml: {site_radius_km: 10, block_km: 100, n_negatives: 5000, min_sites_for_signal: 3, min_mean_auc: 0.6}
+# Cross-machine comparison tolerances (TODO: Anay and Vihaan confirm). Outputs are not bit-identical across BLAS/SIMD.
+compare: {score_abs: 1.0e-4, mc_abs: 1.0e-3, jaccard_min: 0.99}
+# Columns that cannot be built. Empty by default: an unavailable column rejects every tile and the run stops loudly.
+# Listing a column here is a deliberate, logged decision: it is dropped from its family and weights are renormalised.
+drop_columns: []

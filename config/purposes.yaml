@@ -1,0 +1,19 @@
+# Multiply base weights, then renormalise to sum 1. Families a body does not have are ignored.
+# base = no multipliers.
+profiles:
+  moon: [base, landing_mobility, power_night, ice_resources]      # D5: no Moon life-detection
+  mars: [base, landing_mobility, power_night, ice_resources, geology_life]
+purposes:
+  landing_mobility:
+    multipliers: {slope: 2, roughness: 2, relief: 2}
+    extra_gate: {moon: "slope_med <= 8", mars: "slope_p90 <= 30"}
+  power_night:
+    multipliers: {illumination: 2.5, sunlight: 2.5, temperature: 2}
+  ice_resources:
+    multipliers: {cold_dry: 2, water: 2, thermal_inertia: 2, temperature: 2}   # cold_dry is the Moon's water family
+  geology_life:
+    bodies: [mars]
+    multipliers: {composition: 2, water: 1.5}
+# D5: these Mars results are labelled low confidence.
+confidence_overrides:
+  mars: {landing_mobility: low, power_night: low}

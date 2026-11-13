@@ -1,0 +1,12 @@
+# "Shackleton ridge" means Connecting Ridge C1. Use that name everywhere. Do not use C2.
+# lon_e is degrees east, 0 to 360.
+moon:
+  connecting_ridge_c1: {lat: -89.45, lon_e: 222.84, source: "Glaser 2018", lit_surface_pct: 76.0, lit_2m_pct: 88.0, max_shadow_h_surface: 268, max_shadow_h_2m: 112, nearest_psr_m: 100, psr_slope_deg: 8.4}
+  shackleton_rim:      {lat: -89.78, lon_e: 203.97, source: "Glaser 2018", lit_surface_pct: 81.0, lit_2m_pct: 85.5, max_shadow_h_surface: 221, max_shadow_h_2m: 66, nearest_psr_m: 370}
+mars:
+  jezero:  {lat: 18.4386, lon_e: 77.5031, source: "Grant 2018"}
+  arcadia: {lat: null, lon_e: null, source: "centre to be taken from the SWIM ice map", status: unscored_no_target_data}
+target_window_km: 15        # features on 6 km tiles (stride 3 km) inside the window; value = median, spread = IQR/1.349
+receiver_height_m: 2        # illumination receiver height parameter
+# Moon pole illumination rule from the plan: Sun within about 1.5 deg of the horizon all year.
+moon_pole_illumination: {sun_max_elev: 1.5, sun_low_share: 1.0, evidence_grade: C}
