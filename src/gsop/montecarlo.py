@@ -69,16 +69,75 @@ class MCSpec:
         return config_hash(self.as_dict())
 
 
+DEBUG_ALLOC = bool(os.environ.get("GSOP_DEBUG"))
+MAX_PER_TILE_VECTORS = 8      # no array of more than this many tile-length vectors is ever allocated
+
+
+def alloc(shape: tuple[int, ...], dtype, n_tiles: int, fill: float = 0.0) -> np.ndarray:
+    """np.full with a guard: the engine never allocates anything near an (N tiles x runs) matrix. In debug mode
+    (GSOP_DEBUG=1) the guard raises, and every allocation is logged with its size."""
+    elems = int(np.prod(shape))
+    if DEBUG_ALLOC:
+        log.debug("alloc %s %s = %.1f MB (%.2f per-tile vectors)", shape, np.dtype(dtype), elems * np.dtype(dtype).itemsize / 2**20,
+                  elems / max(1, n_tiles))
+        assert elems <= MAX_PER_TILE_VECTORS * n_tiles, (
+            f"allocation {shape} is {elems / n_tiles:.1f} tile-length vectors: that looks like an N x runs matrix")
+    return np.full(shape, fill, dtype=dtype)
+
+
+@dataclass
+class MCStats:
+    """Online per-tile statistics over the runs seen so far. Never holds a per-run score.
+    mean and M2 (sum of squared deviations from the mean) in float64, min and max in float32, membership counts.
+    Two stats over disjoint sets of runs merge exactly (Chan et al.), in any grouping; `extend` does it in place."""
+    n_runs: int
+    mean: np.ndarray
+    m2: np.ndarray
+    minimum: np.ndarray
+    maximum: np.ndarray
+    counts: np.ndarray                      # (len(top_fracs), N) int32
+
+    def variance(self, ddof: int = 1) -> np.ndarray:
+        return self.m2 / max(1, self.n_runs - ddof)
+
+    def std(self, ddof: int = 1) -> np.ndarray:
+        return np.sqrt(self.variance(ddof))
+
+    def extend(self, other: "MCStats") -> "MCStats":
+        if other.n_runs == 0:
+            return self
+        if self.n_runs == 0:
+            self.n_runs, self.mean, self.m2 = other.n_runs, other.mean.copy(), other.m2.copy()
+            self.minimum, self.maximum, self.counts = other.minimum.copy(), other.maximum.copy(), other.counts.copy()
+            return self
+        n, nb = self.n_runs, other.n_runs
+        tot = n + nb
+        delta = other.mean - self.mean
+        self.mean = self.mean + delta * (nb / tot)
+        self.m2 = self.m2 + other.m2 + delta * delta * (n * nb / tot)
+        self.minimum = np.minimum(self.minimum, other.minimum)
+        self.maximum = np.maximum(self.maximum, other.maximum)
+        self.counts = self.counts + other.counts
+        self.n_runs = tot
+        return self
+
+    @classmethod
+    def empty(cls, n_tiles: int, n_fracs: int) -> "MCStats":
+        return cls(0, np.zeros(n_tiles), np.zeros(n_tiles), np.full(n_tiles, np.inf, np.float32),
+                   np.full(n_tiles, -np.inf, np.float32), np.zeros((n_fracs, n_tiles), np.int32))
+
+
 # --------------------------------------------------------------------------- memory plan
 
 def memory_plan(n_tiles: int, n_cols: int, workers: int, free_bytes: float, frac: float = 0.40) -> dict[str, Any]:
     """Cell chunk sized so all workers' temporaries stay within `frac` of free RAM.
-    Fixed per-worker arrays (scores, argpartition indices, counters, score sum, sorted copy) are counted separately.
+    Fixed per-worker arrays (scores, argpartition indices, counters, the online statistics: shift, sum, sum of squares, min,
+    max; the sorted copy; two boolean tie masks) are counted separately.
     X itself is memory-mapped by every worker. The pages are shared, so they count once, but they show up in each
     process's RSS, so the budget has to cover them (found on macOS: the old plan ignored them and the memory test
     failed by about 10 MB on an 8 GB Mac)."""
     budget = frac * free_bytes
-    fixed_per_worker = n_tiles * (4 + 8 + 3 * 2 + 8 + 4)
+    fixed_per_worker = n_tiles * (4 + 8 + 3 * 2 + 28 + 4 + 2)
     x_shared = n_tiles * n_cols * 4
     per_tile_temp = 4 * (n_cols + 6)
     avail = budget - workers * fixed_per_worker - x_shared
@@ -185,18 +244,32 @@ def pass1_batch(spec_d: dict, x_path: str, work: str, batch_id: int, n_runs: int
     spec, X = _ctx(spec_d, x_path, chunk)
     n = X.shape[1]
     ks = top_ks(n, spec.top_fracs)
-    cnt = np.zeros((len(ks), n), dtype=np.uint16)
-    ssum = np.zeros(n, dtype=np.float64)
+    cnt = alloc((len(ks), n), np.uint16, n)
     runs = _batch_runs(batch_id, spec, n_runs)
+    # online statistics of this batch, relative to the batch's first run (shifted sums keep float64 accurate):
+    # d = s - s0; mean = s0 + sum(d) / m; M2 = sum(d^2) - sum(d)^2 / m
+    s0 = alloc((n,), np.float32, n)
+    sd = alloc((n,), np.float64, n)
+    sdd = alloc((n,), np.float64, n)
+    smin = alloc((n,), np.float32, n, np.inf)
+    smax = alloc((n,), np.float32, n, -np.inf)
     wrec = np.zeros((len(runs), len(spec.families)))
     for i, r in enumerate(runs):
         w, t = draw_run(spec, r)
         s = score_tiles(X, spec, w, t, chunk)
-        ssum += s
+        if i == 0:
+            s0[:] = s
+        d = s - s0                                   # float32, exact enough: scores are in [0, 100]
+        sd += d
+        sdd += d.astype(np.float64) ** 2
+        np.minimum(smin, s, out=smin)
+        np.maximum(smax, s, out=smax)
         for j, idx in enumerate(_top_sets(s, ks)):
             cnt[j, idx] += 1
         wrec[i] = [w[f] for f in spec.families]
-    atomic_savez(Path(work) / "pass1" / f"batch_{batch_id:05d}.npz", cnt=cnt, ssum=ssum, weights=wrec)
+    m = len(runs)
+    atomic_savez(Path(work) / "pass1" / f"batch_{batch_id:05d}.npz", cnt=cnt, n=np.array(m), mean=s0 + sd / m,
+                 m2=sdd - sd * sd / m, smin=smin, smax=smax, weights=wrec)
     return batch_id
 
 
@@ -238,6 +311,7 @@ class MCResult:
     convergence: dict[str, Any]
     weight_stats: dict[str, dict[str, float]]
     robust_mask: np.ndarray                 # (N,) bool
+    stats: "MCStats | None" = None          # online per-tile mean, M2, min, max, counts over all runs; extendable
     timings_s: dict[str, float] = field(default_factory=dict)
 
 
@@ -281,25 +355,23 @@ def simulate(X: np.ndarray, spec: MCSpec, n_runs: int, work: Path | str, workers
     # merge in id order
     fr = list(spec.top_fracs)
     ks = top_ks(n, spec.top_fracs)
-    counts = np.zeros((len(fr), n), dtype=np.int32)
-    ssum = np.zeros(n, dtype=np.float64)
+    stats = MCStats.empty(n, len(fr))
     wrec = []
     snaps: dict[int, np.ndarray] = {}
     snaps_mean: dict[int, np.ndarray] = {}
     cps = {c for c in (checkpoints or []) if c <= n_runs and c % spec.batch_runs == 0}
-    done_runs = 0
     for b in range(n_batches):
         z = np.load(work / "pass1" / f"batch_{b:05d}.npz")
-        counts += z["cnt"]
-        ssum += z["ssum"]
+        stats.extend(MCStats(int(z["n"]), z["mean"].astype(np.float64), z["m2"], z["smin"], z["smax"],
+                             z["cnt"].astype(np.int32)))
         wrec.append(z["weights"])
-        done_runs += len(_batch_runs(b, spec, n_runs))
-        if done_runs in cps:
-            snaps[done_runs] = np.lexsort((-ssum, -counts[0]))[:ks[0]]
-            snaps_mean[done_runs] = np.argsort(-ssum, kind="stable")[:ks[0]]
+        if stats.n_runs in cps:
+            snaps[stats.n_runs] = np.lexsort((-stats.mean, -stats.counts[0]))[:ks[0]]
+            snaps_mean[stats.n_runs] = np.argsort(-stats.mean, kind="stable")[:ks[0]]
+    counts = stats.counts
     wrec = np.concatenate(wrec)
-    final_set = set(np.lexsort((-ssum, -counts[0]))[:ks[0]].tolist())
-    final_mean_set = set(np.argsort(-ssum, kind="stable")[:ks[0]].tolist())
+    final_set = set(np.lexsort((-stats.mean, -counts[0]))[:ks[0]].tolist())
+    final_mean_set = set(np.argsort(-stats.mean, kind="stable")[:ks[0]].tolist())
 
     def jac(a: set, b: set) -> float:
         return len(a & b) / len(a | b) if (a | b) else 1.0
@@ -319,7 +391,7 @@ def simulate(X: np.ndarray, spec: MCSpec, n_runs: int, work: Path | str, workers
     freq = counts / n_runs
     robust_mask = freq[j_rob] >= robust_cfg["min_freq"]
     kc = max(1, math.ceil(cand_cfg["top_frac"] * n))
-    mean_score = ssum / n_runs
+    mean_score = stats.mean
     by_mean = np.argsort(-mean_score, kind="stable")[:kc]
     by_freq = np.lexsort((-mean_score, -counts[j_rob]))[:kc]
     robust_idx = np.flatnonzero(robust_mask)
@@ -358,7 +430,8 @@ def simulate(X: np.ndarray, spec: MCSpec, n_runs: int, work: Path | str, workers
             cols[k].append(v)
         del s_blk, r_blk
     del sc, rk
-    df =pd.DataFrame({"row": cand.astype(np.int64), "mc_mean": mean_score[cand]})
+    df = pd.DataFrame({"row": cand.astype(np.int64), "mc_mean": mean_score[cand], "mc_std": stats.std()[cand],
+                       "mc_min": stats.minimum[cand], "mc_max": stats.maximum[cand]})
     for k, parts in cols.items():
         df[k] = np.concatenate(parts) if parts else np.array([])
     for j, f in enumerate(fr):
@@ -367,7 +440,7 @@ def simulate(X: np.ndarray, spec: MCSpec, n_runs: int, work: Path | str, workers
     convergence["candidates"] = int(nc)
     convergence["candidates_truncated"] = bool(truncated)
     res = MCResult(n_runs=n_runs, counts=counts, mean_score=mean_score, candidates=df, convergence=convergence,
-                   weight_stats=weight_stats, robust_mask=robust_mask,
+                   weight_stats=weight_stats, robust_mask=robust_mask, stats=stats,
                    timings_s=_timings(t0, t_p1, t1, t_p2))
     _CTX.clear()          # release the in-process memmap of X (Windows cannot delete an open file)
     gc.collect()
