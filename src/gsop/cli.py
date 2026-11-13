@@ -70,9 +70,20 @@ def _check_body(body: str) -> str:
 
 def _enable_stage_log() -> None:
     """Show every stage skip and rerun, with the reason, on stderr."""
-    lg = logging.getLogger("gsop.runner")
+    lg = logging.getLogger("gsop")            # parent of gsop.runner, .montecarlo, .pipeline, .tiles
     if not lg.handlers:
-        h = logging.StreamHandler(sys.stderr)
+        class _Stderr(logging.StreamHandler):          # follows sys.stderr, which test runners swap per call
+            def __init__(self) -> None:
+                super().__init__()
+
+            @property
+            def stream(self):
+                return sys.stderr
+
+            @stream.setter
+            def stream(self, _v) -> None:
+                pass
+        h = _Stderr()
         h.setFormatter(logging.Formatter("%(message)s"))
         lg.addHandler(h)
     lg.setLevel(logging.INFO)
@@ -151,13 +162,15 @@ def doctor() -> None:
 
 
 @s1.command("tiles")
-def s1_tiles(raster: Path = typer.Option(..., "--raster", help="6 km EPSG:6933 GeoTIFF with a land_frac band")) -> None:
-    """Grid + land mask -> data/interim/tiles.parquet."""
-    from .earth.local_loaders import build_earth_table
-    df = build_earth_table(raster, data_dir("interim") / "_tmp_full.parquet")
-    df[["tile_id", "ix", "iy", "lon", "lat"]].to_parquet(data_dir("interim") / "tiles.parquet", index=False)
-    (data_dir("interim") / "_tmp_full.parquet").unlink(missing_ok=True)
-    console.print(f"[PASS] {len(df):,} land tiles -> data/interim/tiles.parquet")
+def s1_tiles(raster: Path = typer.Option(..., "--raster", help="6 km EPSG:6933 GeoTIFF (or folder) with a land_frac band"),
+             plan: Optional[Path] = typer.Option(None, "--plan", help="the gee_export plan JSON, if bands are not named"),
+             force: bool = typer.Option(False, "--force", help="rerun even if tiles.parquet is up to date")) -> None:
+    """Land tiles of the 6 km grid -> data/interim/tiles.parquet. Prints the count against the plan's ~4 million."""
+    from . import tiles as TL
+    _enable_stage_log()
+    rep = TL.run_stage(raster, data_dir("interim"), load_all()["run"], force, plan)
+    tag = "WARN" if rep["far_off"] else "PASS"
+    console.print(f"[{tag}] {rep['message']} -> data/interim/tiles.parquet" + (" (skipped: up to date)" if rep["skipped"] else ""))
 
 
 @s2.command("earth")

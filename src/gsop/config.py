@@ -404,12 +404,22 @@ def _validate_run(c: _Check, r: dict) -> None:
     cp = c.require(f, "", r, "convergence_checkpoints", list)
     if cp is not None and not all(isinstance(x, int) and x > 0 for x in cp):
         c.err(f, "convergence_checkpoints", f"must be a list of positive integers, got {cp!r}")
+    tl = r.get("tiles")
+    if tl is not None and c.mapping(f, "tiles", tl):
+        for k in ("expected_land_tiles", "chunk_rows"):
+            v = c.require(f, "tiles", tl, k, int)
+            if v is not None and v <= 0:
+                c.err(f, f"tiles.{k}", f"must be > 0, got {v}")
+        ff = c.require(f, "tiles", tl, "far_off_frac", NUM)
+        if ff is not None and not 0 < ff < 1:
+            c.err(f, "tiles.far_off_frac", f"must be in (0, 1), got {ff}")
+        c.unknown(f, "tiles", tl, {"expected_land_tiles", "far_off_frac", "chunk_rows"})
     dc = r.get("drop_columns")
     if dc is not None and not (isinstance(dc, list) and all(isinstance(x, str) for x in dc)):
         c.err(f, "drop_columns", f"must be a list of column names, got {dc!r}")
     c.unknown(f, "", r, {"master_seed", "runs", "batch_runs", "tile_m", "grid_crs", "top_fracs", "robust", "candidates",
                          "convergence_checkpoints", "ram_fraction", "site_match_radius_km", "discovery", "ml",
-                         "compare", "drop_columns", "operator_check"})
+                         "compare", "drop_columns", "operator_check", "tiles"})
 
 
 def check(cfg: dict[str, Any]) -> tuple[list[str], list[str]]:

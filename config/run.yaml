@@ -18,3 +18,6 @@ compare: {score_abs: 1.0e-4, mc_abs: 1.0e-3, jaccard_min: 0.99}
 drop_columns: []
 # gsop check-operators (Earth Engine vs numpy terrain operator, issue #2). The threshold is not to be loosened.
 operator_check: {threshold: 0.10, n_tiles: 5, center_lonlat: [76.51, 19.98]}   # the working grid is features.yaml operator.work_cell_m
+# s1 tiles (gsop s1 tiles): the land-tile count the plan expects at 6 km ("about 4 million"; the figure is the plan's, not
+# measured by us). The stage reports the ratio and flags WARN when the count is further than far_off_frac from it.
+tiles: {expected_land_tiles: 4000000, far_off_frac: 0.30, chunk_rows: 200}
