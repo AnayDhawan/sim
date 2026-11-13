@@ -20,9 +20,7 @@ import gc
 import math
 import os
 import time
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict, dataclass, field
-from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +28,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+from .parallel import run_tasks
 from .provenance import atomic_savez, config_hash, read_json, sha256_file, write_json
 from .similarity import column_similarity
 from .weights import draw_weights
@@ -192,16 +191,9 @@ def pass2_batch(spec_d: dict, x_path: str, work: str, batch_id: int, n_runs: int
 
 
 def _run_batches(fn, args_list: list[tuple], workers: int, desc: str) -> None:
-    if not args_list:
-        return
-    if workers <= 1:
-        for a in tqdm(args_list, desc=desc, leave=False):
-            fn(*a)
-        return
-    with ProcessPoolExecutor(max_workers=workers, mp_context=get_context("spawn")) as ex:
-        futs = [ex.submit(fn, *a) for a in args_list]
-        for f in tqdm(futs, desc=desc, leave=False):
-            f.result()
+    """Batches are saved one file each as they finish, so an interrupt (Ctrl-C included) loses at most the running
+    batches and the next call resumes from the saved ones. `run_tasks` cancels pending batches and joins the pool."""
+    run_tasks(fn, args_list, workers=workers, desc=desc)
 
 
 # --------------------------------------------------------------------------- orchestration

@@ -21,6 +21,7 @@ from . import tools as T
 from .checks import Report, console
 from .config import data_dir, load_all, results_dir
 from .montecarlo import memory_plan
+from .parallel import default_workers
 from .provenance import ROOT, package_versions, read_json, sha256_file, write_json
 from .runner import STAGES, BodyRun, stage_name, stages_from
 
@@ -107,7 +108,7 @@ def _body_run(body: str, runs: Optional[int], workers: Optional[int], store: boo
     earth = pd.read_parquet(ep)
     return BodyRun(body, cfg, earth, P.load_target_profiles(tp_path), results_dir(body),
                    data_dir("interim") / "mc" / body, int(runs or cfg["run"]["runs"]),
-                   int(workers or os.cpu_count() or 1), float(psutil.virtual_memory().available), sha256_file(ep),
+                   default_workers(workers), float(psutil.virtual_memory().available), sha256_file(ep),
                    use_store=store)
 
 
