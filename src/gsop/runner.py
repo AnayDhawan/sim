@@ -286,11 +286,29 @@ class BodyRun:
                         by_profile.setdefault(t, {})[prof] = pd.read_parquet(f).set_index("tile_id")["score"]
             V.validate_body(self.body, self.cfg["known_sites"], float(self.cfg["run"]["site_match_radius_km"]),
                             self.earth, {t: gate for t in scores}, scores, path, mc, by_profile)
+            self._baselines(list(scores))
         up = {"gates": self._key_of("gates__base")}
         up.update({n: self._key_of(f"score__{n}", f"simulate__{n}") for n in names})
         up.update({f"{t}__{p}": self._key_of(f"score__{t}__{p}", f"simulate__{t}__{p}")
                    for t in self.targets for p in self.profiles if p != "base"})
-        self._stage("validate", "body", {}, go, [self.res_dir / "validation.json"], up)
+        self._stage("validate", "body", {}, go, [self.res_dir / "validation.json", self.res_dir / "baselines.json",
+                                                self.res_dir / "baselines.md"], up)
+
+    def _baselines(self, targets: list[str]) -> None:
+        """D07: single-variable, equal, Liu 2025 / Mashal 2025 and no_illumination baselines, base profile, per target."""
+        reps = {}
+        for t in targets:
+            job = self.job(t, "base")
+            rows = job.gated_rows
+            sets = {**W.alt_weight_sets(self.body, self.cfg["weights"]), **V.single_variable_sets(list(job.fam_cols))}
+            reps[t] = V.compute_baselines(
+                self.body, t, P.fam_arrays(job), job.profile_weights, sets, self.earth["lat"].to_numpy()[rows],
+                self.earth["lon"].to_numpy()[rows], self.cfg["known_sites"],
+                float(self.cfg["run"]["site_match_radius_km"]))
+        write_json(self.res_dir / "baselines.json", {"body": self.body, "provisional": True,
+                                                    "note": "Site coordinates are unconfirmed; see validation.json",
+                                                    "targets": reps})
+        atomic_write_text(self.res_dir / "baselines.md", "\n".join(V.baselines_markdown(r) for r in reps.values()))
 
     # ------------------------------------------------------------------ s9
     def s9_discover(self) -> None:

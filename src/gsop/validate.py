@@ -146,3 +146,110 @@ def validate_body(body: str, ks: dict[str, Any], radius_km: float, earth: pd.Dat
 def verify_preregistration(path: Path | str) -> bool:
     doc = read_json(path)
     return hashlib.sha256(canonical_json(doc["preregistered"]).encode()).hexdigest() == doc["preregistered_sha256"]
+
+
+# --------------------------------------------------------------------------- baselines (D07)
+
+COMPARABILITY = {
+    "equal": "apples-to-apples: our families and data, only the weights differ (all families equal)",
+    "no_illumination": "apples-to-apples: our families and data, illumination weight set to 0 (decision D4)",
+    "single_variable": "apples-to-apples: our data and target, one family alone with weight 1",
+    "liu2025": "NOT apples-to-apples: Liu 2025's weights on OUR features and Earth data, and for the five families it "
+               "names only (no temperature, relief or thermal inertia); the paper's own features and data differ",
+    "mashal2025": "NOT apples-to-apples: Mashal 2025's weights on OUR features and Earth data, and for the three families "
+                  "it names only; the paper's own features and data differ",
+}
+
+
+def baseline_kind(name: str) -> str:
+    return "single_variable" if name.startswith("only_") else name
+
+
+def single_variable_sets(family_names: list[str]) -> dict[str, dict[str, float]]:
+    return {f"only_{f}": {g: (1.0 if g == f else 0.0) for g in family_names} for f in family_names}
+
+
+def site_rank_pcts(score: np.ndarray, lat: np.ndarray, lon: np.ndarray, sites: dict[str, dict[str, Any]],
+                   radius_km: float) -> dict[str, float]:
+    """Rank percentile of the best tile within each site's radius, among the tiles of `score` (gated tiles).
+    A site with no tile in the radius gets 0 (rejected, not dropped)."""
+    out = {}
+    for n, s in sites.items():
+        near = haversine_km(s["lat"], s["lon"], lat, lon) <= float(s.get("radius_km", radius_km))
+        out[n] = float(100.0 * np.mean(score < score[near].max())) if near.any() else 0.0
+    return out
+
+
+def compute_baselines(body: str, target: str, fam: dict[str, np.ndarray], primary_weights: dict[str, float],
+                      weight_sets: dict[str, dict[str, float]], lat: np.ndarray, lon: np.ndarray, ks: dict[str, Any],
+                      radius_km: float) -> dict[str, Any]:
+    """Score every baseline once (no Monte Carlo) and compare it with the primary index on the same gated tiles:
+    top-1% Jaccard overlap, Spearman rank correlation, and the site-rank metrics of the validation (median rank percentile
+    over the body's primary sites, maximum over the negative controls). `fam`: per-family similarity of the gated tiles."""
+    from scipy.stats import spearmanr
+
+    from .pipeline import top_overlap
+    from .similarity import tile_score
+    prim_sites = {n: s for n, s in ks["primary"].items() if body in s["bodies"]}
+    controls = ks["negative_controls"]
+
+    def metrics(w: dict[str, float]) -> dict[str, Any]:
+        w = {f: v for f, v in w.items() if f in fam}
+        tot = sum(w.values())
+        if tot <= 0:
+            return {"error": "no active family has weight"}
+        w = {f: v / tot for f, v in w.items()}
+        s = tile_score(fam, w)
+        ps = site_rank_pcts(s, lat, lon, prim_sites, radius_km)
+        cs = site_rank_pcts(s, lat, lon, controls, radius_km)
+        return {"weights": w, "score": s, "primary_site_rank_pct": ps,
+                "primary_median_rank_pct": float(np.median(list(ps.values()))) if ps else float("nan"),
+                "negative_control_max_rank_pct": float(max(cs.values())) if cs else float("nan")}
+
+    prim = metrics(primary_weights)
+    ref = prim.pop("score")
+    out: dict[str, Any] = {"body": body, "target": target, "primary": prim, "baselines": {}, "beats_primary": []}
+    for name, w in weight_sets.items():
+        m = metrics(w)
+        if "error" in m:
+            out["baselines"][name] = m
+            continue
+        s = m.pop("score")
+        m["top1pct_overlap_jaccard"] = float(top_overlap(ref, s))
+        m["spearman_vs_primary"] = float(spearmanr(ref, s).statistic) if np.ptp(s) > 0 else float("nan")
+        m["comparability"] = COMPARABILITY.get(baseline_kind(name), "custom baseline: not classified")
+        m["delta_median_rank_pct_vs_primary"] = m["primary_median_rank_pct"] - prim["primary_median_rank_pct"]
+        m["beats_primary_on_site_ranks"] = bool(m["delta_median_rank_pct_vs_primary"] > 0)
+        m["worse_on_negative_controls"] = bool(m["negative_control_max_rank_pct"] > prim["negative_control_max_rank_pct"])
+        if m["beats_primary_on_site_ranks"]:
+            out["beats_primary"].append(name)
+        out["baselines"][name] = m
+    out["verdict"] = (
+        "No baseline has a higher median primary-site rank percentile than the primary index." if not out["beats_primary"]
+        else "BASELINES THAT BEAT THE PRIMARY INDEX on the median primary-site rank percentile: "
+             + ", ".join(out["beats_primary"]) + ". The weighted index is not doing better than a simpler rule there.")
+    return out
+
+
+def baselines_markdown(rep: dict[str, Any]) -> str:
+    p = rep["primary"]
+    lines = [f"# Baselines: {rep['body']} / {rep['target']}", "",
+             "Each baseline is scored once (no Monte Carlo) on the same gated tiles and compared with the primary index.",
+             "Site metrics use the best tile within the match radius of each primary site; 6 primary-site positives at most "
+             "(see docs/SPEC.md): treat differences of a few percentile points as noise.", "",
+             f"**{rep['verdict']}**", "",
+             "| baseline | top-1% overlap | Spearman | median site rank % | vs primary | max control rank % | comparable |",
+             "|---|---|---|---|---|---|---|",
+             f"| primary index | 1.000 | 1.000 | {p['primary_median_rank_pct']:.1f} | 0.0 | "
+             f"{p['negative_control_max_rank_pct']:.1f} | reference |"]
+    for name, m in rep["baselines"].items():
+        if "error" in m:
+            lines.append(f"| {name} | - | - | - | - | - | {m['error']} |")
+            continue
+        flag = " **(beats primary)**" if m["beats_primary_on_site_ranks"] else ""
+        kind = "yes" if m["comparability"].startswith("apples") else "no"
+        lines.append(f"| {name}{flag} | {m['top1pct_overlap_jaccard']:.3f} | {m['spearman_vs_primary']:.3f} | "
+                     f"{m['primary_median_rank_pct']:.1f} | {m['delta_median_rank_pct_vs_primary']:+.1f} | "
+                     f"{m['negative_control_max_rank_pct']:.1f} | {kind} |")
+    lines += ["", "Comparability: " + "; ".join(f"{k}: {v}" for k, v in COMPARABILITY.items())]
+    return "\n".join(lines) + "\n"
