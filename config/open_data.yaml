@@ -1,0 +1,23 @@
+# Spec for the open-data fallback (`gsop s2 open-data`, src/gsop/earth/open_data.py). Used only when Earth Engine is
+# not available. Nothing here is a verified file or dataset: fill in the local paths of rasters YOU downloaded, and record
+# each product in docs/PROVENANCE.md before use. A layer with `file: null` is left out of the raster, and the
+# missing-data gate then rejects tiles that need it (docs/SPEC.md section 7). Nothing is substituted.
+#
+# Every layer is resampled by area average onto the 6 km EPSG:6933 grid. NO temporal aggregation happens here: climatology
+# layers (t_mean, t_coldest, ti_proxy, ndvi_median, ...) must already be the right quantity per config/features.yaml.
+dem: null                 # a DEM with cells of at most 500 m, for slope_med, slope_p90, relief (rough_a, rough_b are never built here)
+layers:
+  land_frac:        {file: null, band: 1, method: average}   # required: 0/1 land mask, area-averaged into a share
+  water_ice_frac:   {file: null, band: 1, method: average}   # 0/1 open water or permanent ice
+  ndvi_median:      {file: null, band: 1, method: average}
+  built_crop_frac:  {file: null, band: 1, method: average}   # 0/1 built-up or cropland
+  t_mean:           {file: null, band: 1, method: average}
+  t_coldest:        {file: null, band: 1, method: average}
+  ti_proxy:         {file: null, band: 1, method: average}
+  silica_index:     {file: null, band: 1, method: average}
+  water_index:      {file: null, band: 1, method: average}
+  dust_index:       {file: null, band: 1, method: average}
+  sun_max_elev:     {file: null, band: 1, method: average}
+  sun_low_share:    {file: null, band: 1, method: average}
+  insol_annual:     {file: null, band: 1, method: average}
+  air_density:      {file: null, band: 1, method: average}

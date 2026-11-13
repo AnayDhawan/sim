@@ -1,0 +1,22 @@
+# Earth Engine sources for gsop.earth.gee_export. Every id below was found on its Earth Engine catalog page (and the
+# official STAC JSON) on 2026-11-13 by reading the page. NONE has been queried through an authenticated Earth Engine
+# session yet: run `uv run gsop s2 earth --source gee --verify` first (needs `earthengine authenticate` and the Cloud
+# project id from Anay) and fix anything it reports before exporting. See docs/PROVENANCE.md for versions and licences.
+climatology_years: [2015, 2024]          # inclusive; MODIS layers
+dem:
+  primary:   {id: NASA/NASADEM_HGT/001, band: elevation, note: "30 m, 56S to 60N (catalog bbox -56..60)"}
+  fallback:  {id: COPERNICUS/DEM/GLO30, band: DEM, note: "30 m surface model; its page says superseded by COPERNICUS/DEM/GLO30_2024_1. Used where NASADEM is masked (above 60N, below 56S)"}
+modis:
+  lst:       {id: MODIS/061/MOD11A2, bands: [LST_Day_1km, LST_Night_1km], scale: 0.02, unit: K, res_m: 1000}
+  ndvi:      {id: MODIS/061/MOD13A2, band: NDVI, qa_band: SummaryQA, qa_good: 0, scale: 0.0001, res_m: 1000}
+  landcover: {id: MODIS/061/MCD12Q1, band: LC_Type1, year: 2024, res_m: 500, classes: {cropland: 12, built: 13, snow_ice: 15, water: 17}}
+precip:      {id: IDAHO_EPSCOR/TERRACLIMATE, band: pr, res_m: 4638, note: "monthly; used only to find the three driest consecutive months for ti_proxy"}
+# Judgement calls a human should confirm (also listed in docs/UNVERIFIED.md):
+#  * built_crop_frac counts IGBP classes 12 (cropland) and 13 (urban and built-up); class 14 (cropland/natural mosaic) is not counted.
+#  * water_ice_frac counts classes 15 (permanent snow and ice) and 17 (water bodies, ocean included).
+#  * land_frac is the share of the tile that is not class 17.
+# NOT built here, so the export leaves them out and the missing-data gate says so (SPEC section 7):
+not_built:
+  water_index:  "no global permafrost probability raster exists in the Earth Engine catalog (only the basin-scale HydroATLAS prm_pc_sse); the northern-hemisphere PANGAEA map (Obu 2019) is not global. A definition decision is needed."
+  silica_index: "ASTER GED (NASA/ASTER_GED/AG100_003, emissivity_band10..14) is available, but the band-ratio formula is not specified anywhere in our documents. It also stops at lat -59..80."
+  dust_index:   "Mars profile only. MERRA-2 NASA/GSFC/MERRA/aer/2 DUEXTTAU exists, but 'how often and how thickly' has no formula in our documents."
