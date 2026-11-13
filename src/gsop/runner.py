@@ -276,10 +276,20 @@ class BodyRun:
             scores = {n.split("__")[0]: pd.read_parquet(self.res_dir / n / "base_scores.parquet").set_index("tile_id")["score"]
                       for n in names}
             gate = self.gate_table("base", self._columns())
+            mc = {n.split("__")[0]: pd.read_parquet(self.res_dir / n / "mc_summary.parquet").set_index("tile_id")
+                  for n in names if (self.res_dir / n / "mc_summary.parquet").exists()}
+            by_profile = {}
+            for t in scores:
+                for prof in self.profiles:
+                    f = self.res_dir / f"{t}__{prof}" / "base_scores.parquet"
+                    if f.exists():
+                        by_profile.setdefault(t, {})[prof] = pd.read_parquet(f).set_index("tile_id")["score"]
             V.validate_body(self.body, self.cfg["known_sites"], float(self.cfg["run"]["site_match_radius_km"]),
-                            self.earth, {t: gate for t in scores}, scores, path)
+                            self.earth, {t: gate for t in scores}, scores, path, mc, by_profile)
         up = {"gates": self._key_of("gates__base")}
         up.update({n: self._key_of(f"score__{n}", f"simulate__{n}") for n in names})
+        up.update({f"{t}__{p}": self._key_of(f"score__{t}__{p}", f"simulate__{t}__{p}")
+                   for t in self.targets for p in self.profiles if p != "base"})
         self._stage("validate", "body", {}, go, [self.res_dir / "validation.json"], up)
 
     # ------------------------------------------------------------------ s9

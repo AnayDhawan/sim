@@ -45,11 +45,20 @@ def rank_pct(scores: np.ndarray, value: float) -> float:
 NO_TILE_KM = 6.0     # a tile centre farther than this from a point means the point is not on a land tile (cell is 6 km)
 
 
+MC_COLS = ("mc_p05", "mc_median", "mc_p95", "rank_pct_p05", "rank_pct_p50", "rank_pct_p95", "freq_top5", "robust")
+
+
 def validate_body(body: str, ks: dict[str, Any], radius_km: float, earth: pd.DataFrame,
                   gate_by_target: dict[str, pd.DataFrame], scores_by_target: dict[str, pd.Series],
-                  out_path: Path | str) -> dict[str, Any]:
-    """earth: all tiles (tile_id, lat, lon). gate_by_target: per scored target, the base-profile gate table.
-    scores_by_target: per scored target, base score indexed by tile_id (gated tiles only)."""
+                  out_path: Path | str, mc_by_target: dict[str, pd.DataFrame] | None = None,
+                  profile_scores: dict[str, dict[str, pd.Series]] | None = None) -> dict[str, Any]:
+    """earth: all tiles (tile_id, lat, lon). gate_by_target: per scored target, the base-profile gate table (row i of
+    the table is row i of earth). scores_by_target: per scored target, base score indexed by tile_id (gated tiles only).
+    mc_by_target: optional per target, the Monte Carlo candidate table indexed by tile_id (the best tile's MC range is
+    reported when it is a candidate). profile_scores: optional {target: {profile: scores}}, for the rank percentile
+    of each site under every purpose profile (reported, never part of the pass criteria)."""
+    mc_by_target = mc_by_target or {}
+    profile_scores = profile_scores or {}
     doc = read_json(out_path) if Path(out_path).exists() else preregister(out_path, ks, body)
     crit = doc["preregistered"]["criteria"]
     tid = earth["tile_id"].to_numpy()
@@ -59,18 +68,39 @@ def validate_body(body: str, ks: dict[str, Any], radius_km: float, earth: pd.Dat
     def site_pcts(s: dict[str, Any]) -> dict[str, Any]:
         d = haversine_km(s["lat"], s["lon"], lat, lon)
         rad = float(s.get("radius_km", radius_km))
-        near = tid[d <= rad]
+        within = d <= rad
+        near = tid[within]
         per = {}
         for t in targets:
             sc = scores_by_target[t]
             cand = sc.reindex(near).dropna()
             if cand.empty:
-                per[t] = {"rank_pct": 0.0, "best_tile": None, "note": "no gated tile within the radius"}
+                reasons = gate_by_target[t]["reason"].to_numpy()[within]
+                why = pd.Series(reasons).value_counts().to_dict() if len(reasons) else {"no land tile in the radius": 0}
+                per[t] = {"rank_pct": 0.0, "best_tile": None, "status": "rejected", "gates_passed": False,
+                          "rejected_reasons": {str(k): int(v) for k, v in why.items()},
+                          "note": "no gated tile within the radius: every tile there was rejected by the gates"}
             else:
-                per[t] = {"rank_pct": rank_pct(sc.to_numpy(), float(cand.max())), "best_tile": int(cand.idxmax()),
-                          "best_score": float(cand.max())}
+                best = int(cand.idxmax())
+                row = {"rank_pct": rank_pct(sc.to_numpy(), float(cand.max())), "best_tile": best,
+                       "best_score": float(cand.max()), "status": "scored", "gates_passed": True,
+                       "n_gated_tiles_in_radius": int(cand.size), "n_tiles_in_radius": int(within.sum())}
+                mc = mc_by_target.get(t)
+                if mc is not None and best in mc.index:
+                    row["mc"] = {c: (bool(mc.at[best, c]) if c == "robust" else float(mc.at[best, c]))
+                                 for c in MC_COLS if c in mc.columns}
+                else:
+                    row["mc"] = None
+                by_prof = {}
+                for prof, ps in profile_scores.get(t, {}).items():
+                    pc = ps.reindex(near).dropna()
+                    by_prof[prof] = rank_pct(ps.to_numpy(), float(pc.max())) if not pc.empty else 0.0
+                if by_prof:
+                    row["rank_pct_by_profile"] = by_prof
+                per[t] = row
         pct = float(np.mean([v["rank_pct"] for v in per.values()])) if per else float("nan")
-        return {"rank_pct": pct, "per_target": per}
+        return {"rank_pct": pct, "per_target": per,
+                "status": "rejected" if per and all(v["status"] == "rejected" for v in per.values()) else "scored"}
 
     primary = {n: {**site_pcts(s), "lat": s["lat"], "lon": s["lon"], "confirmed": s.get("confirmed", False)}
                for n, s in ks["primary"].items() if body in s["bodies"]}
@@ -89,10 +119,15 @@ def validate_body(body: str, ks: dict[str, Any], radius_km: float, earth: pd.Dat
         g = gate.iloc[i]
         gate_tests[n] = {"rejected": not bool(g["passed"]), "reason": str(g["reason"]), "tile_id": int(tid[i]),
                          "distance_km": float(d[i])}
+    table = [{"group": grp, "site": n, "target": t, **{k: v.get(k) for k in (
+                 "best_tile", "best_score", "rank_pct", "status", "gates_passed", "rejected_reasons", "mc")}}
+             for grp, sites in (("primary", primary), ("negative_control", controls), ("secondary", secondary))
+             for n, site in sites.items() for t, v in site["per_target"].items()]
     prim_med = float(np.median([v["rank_pct"] for v in primary.values()])) if primary else float("nan")
     ctl_max = float(max(v["rank_pct"] for v in controls.values())) if controls else float("nan")
     results = {
         "primary": primary, "negative_controls": controls, "secondary": secondary, "gate_tests": gate_tests,
+        "site_table": table,
         "primary_median_rank_pct": prim_med, "negative_control_max_rank_pct": ctl_max,
         "pass": {
             "primary_median_ge_min": bool(prim_med >= crit["primary_median_rank_pct_min"]),
