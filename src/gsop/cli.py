@@ -131,13 +131,18 @@ def s2_earth(source: str = typer.Option("local", "--source", help="gee or local"
     if source == "gee":
         from .earth import gee_export
         from .earth import open_data as OD
-        try:
-            if verify:
+        if verify:
+            try:
                 rows = gee_export.verify(project)
-                bad = [r for r in rows if not r["reachable"] or r.get("bands_missing")]
-                for r in rows:
-                    console.print(f"[{'FAIL' if r in bad else 'PASS'}] {r['id']}: {r.get('error') or r.get('bands_missing') or 'ok'}")
-                raise typer.Exit(1 if bad else 0)
+            except RuntimeError as e:
+                console.print(f"[FAIL] {e}")
+                raise typer.Exit(1)
+            bad = [r for r in rows if not r["reachable"] or r.get("bands_missing")]
+            for r in rows:
+                console.print(f"[{'FAIL' if r in bad else 'PASS'}] {r['id']}: {r.get('error') or r.get('bands_missing') or 'ok'}")
+            # typer.Exit is a RuntimeError, so it must never be raised inside a try that catches RuntimeError
+            raise typer.Exit(1 if bad else 0)
+        try:
             box = tuple(float(v) for v in bbox.split(",")) if bbox else None
             tasks = gee_export.run(box, name, project=project, dry_run=dry_run)
         except RuntimeError as e:
@@ -273,13 +278,14 @@ def merge(results_moon: Path, results_mars: Path, out: Path = typer.Option(None,
 
 @app.command("check-operators")
 def check_operators(project: Optional[str] = typer.Option(None, "--project", help="Earth Engine Cloud project id"),
-                    lon: float = typer.Option(76.51, "--lon", help="window centre longitude (default: near Lonar)"),
-                    lat: float = typer.Option(19.98, "--lat", help="window centre latitude"),
-                    tiles: int = typer.Option(5, "--tiles", help="window edge in 6 km tiles")) -> None:
+                    lon: Optional[float] = typer.Option(None, "--lon", help="window centre longitude (default: config/run.yaml operator_check)"),
+                    lat: Optional[float] = typer.Option(None, "--lat", help="window centre latitude"),
+                    tiles: Optional[int] = typer.Option(None, "--tiles", help="window edge in 6 km tiles")) -> None:
     """Earth Engine vs numpy terrain operators on one small window; writes results/operator_check.json. Needs a login."""
     from .earth import check_operators as CO
     try:
-        rep = CO.run((lon, lat), tiles, project=project, out=results_dir() / "operator_check.json")
+        centre = (lon, lat) if lon is not None and lat is not None else None
+        rep = CO.run(centre, tiles, project=project, out=results_dir() / "operator_check.json")
     except RuntimeError as e:
         console.print(f"[FAIL] {e}")
         raise typer.Exit(1)

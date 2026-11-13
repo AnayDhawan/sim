@@ -3,7 +3,7 @@
 NOT RUN yet: needs an authenticated Earth Engine session (see gee_export.py). The numpy side is the same code every body
 uses (gsop.operators). Both sides start from the same bilinear-resampled 25 m EPSG:6933 surface: the Earth Engine side
 computes it, the numpy side downloads exactly that surface with computePixels. The result is a per-feature relative
-difference; any feature above the threshold (10 percent) fails the check, and the threshold is not to be loosened.
+difference; any checked feature above the configured threshold fails the check.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from . import open_data as OD
 
 FEATURES = ("slope_med", "relief", "rough_a")       # the issue's minimum; the others are reported too
 ALL = ("slope_med", "slope_p90", "relief", "rough_a", "rough_b")
-THRESHOLD = 0.10
+# threshold, work cell, window size and centre live in config/run.yaml `operator_check`; the threshold is not to be loosened.
 
 
 def relative_difference(a: np.ndarray, b: np.ndarray) -> dict[str, float]:
@@ -36,13 +36,20 @@ def relative_difference(a: np.ndarray, b: np.ndarray) -> dict[str, float]:
             "max_abs_diff": float(d.max())}
 
 
-def run(center_lonlat: tuple[float, float] = (76.51, 19.98), n_tiles: int = 5, work_cell_m: float = 25.0,
-        project: str | None = None, out: Path | str = "results/operator_check.json", op_cfg: dict[str, Any] | None = None
+def run(center_lonlat: tuple[float, float] | None = None, n_tiles: int | None = None, work_cell_m: float | None = None,
+        project: str | None = None, out: Path | str = "results/operator_check.json", cfg: dict[str, Any] | None = None
         ) -> dict[str, Any]:
+    """Defaults for the window, work cell and threshold come from config/run.yaml `operator_check`."""
+    from ..config import load_all
+    cfg = cfg or load_all()
+    chk = cfg["run"]["operator_check"]
+    center_lonlat = tuple(center_lonlat or chk["center_lonlat"])
+    n_tiles = int(n_tiles or chk["n_tiles"])
+    work_cell_m = float(work_cell_m or chk["work_cell_m"])
+    threshold = float(chk["threshold"])
+    op_cfg = cfg["features"]["operator"]
     ee = GX.init(project)
     grid = Grid()
-    from ..config import load_all
-    op_cfg = op_cfg or load_all()["features"]["operator"]
     if (op_cfg["rough_a_baseline_m"] / work_cell_m) % 1 or (op_cfg["rough_b_baseline_m"] / work_cell_m) % 1:
         raise ValueError(f"work cell {work_cell_m} m does not divide the roughness baselines")
     ix, iy = grid.cell_of_lonlat(np.array([center_lonlat[0]]), np.array([center_lonlat[1]]))
@@ -57,7 +64,7 @@ def run(center_lonlat: tuple[float, float] = (76.51, 19.98), n_tiles: int = 5, w
                              (op_cfg["rough_a_baseline_m"], op_cfg["rough_b_baseline_m"]))
     ee_arr = ee.data.computePixels({
         "expression": img, "fileFormat": "NUMPY_NDARRAY",
-        "grid": {"dimensions": {"width": n_tiles, "height": n_tiles}, "crsCode": grid.crs,
+        "grid": {"dimensions": {"width": n_tiles, "height": n_tiles}, "crsWkt": GO.ee_crs(),
                  "affineTransform": {"scaleX": grid.cell_m, "shearX": 0, "translateX": grid.x0 + ix0 * grid.cell_m,
                                      "shearY": 0, "scaleY": -grid.cell_m, "translateY": grid.y_top - iy0 * grid.cell_m}}})
     # numpy side: the same working surface plus one slope-baseline cell of margin
@@ -66,7 +73,7 @@ def run(center_lonlat: tuple[float, float] = (76.51, 19.98), n_tiles: int = 5, w
     size = int(round(n_tiles * grid.cell_m / work_cell_m)) + 2 * m
     z_arr = ee.data.computePixels({
         "expression": wdem.select("elevation"), "fileFormat": "NUMPY_NDARRAY",
-        "grid": {"dimensions": {"width": size, "height": size}, "crsCode": grid.crs,
+        "grid": {"dimensions": {"width": size, "height": size}, "crsWkt": GO.ee_crs(),
                  "affineTransform": {"scaleX": work_cell_m, "shearX": 0, "translateX": grid.x0 + ix0 * grid.cell_m - base,
                                      "shearY": 0, "scaleY": -work_cell_m, "translateY": grid.y_top - iy0 * grid.cell_m + base}}})
     z = np.asarray(z_arr["elevation"], dtype=np.float64)
@@ -76,10 +83,10 @@ def run(center_lonlat: tuple[float, float] = (76.51, 19.98), n_tiles: int = 5, w
     rows = {}
     for k in ALL:
         r = relative_difference(np.asarray(ee_arr[k], dtype=np.float64), np_feats[k])
-        r["ok"] = bool(r["n"] > 0 and r["rel_diff"] <= THRESHOLD)
+        r["ok"] = bool(r["n"] > 0 and r["rel_diff"] <= threshold)
         rows[k] = r
     ok_all = all(rows[k]["ok"] for k in FEATURES)
-    report = {"ok": ok_all, "threshold": THRESHOLD, "features": rows, "window_tiles": win, "center_lonlat": center_lonlat,
+    report = {"ok": ok_all, "threshold": threshold, "features": rows, "window_tiles": win, "center_lonlat": center_lonlat,
               "work_cell_m": work_cell_m, "dem": [layers["dem"]["primary"]["id"], layers["dem"]["fallback"]["id"]],
               "date": dt.date.today().isoformat(),
               "note": "mean abs difference over mean abs numpy value; checked features: " + ", ".join(FEATURES)}

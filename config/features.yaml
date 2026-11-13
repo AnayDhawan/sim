@@ -7,6 +7,16 @@ operator:
   tile_m: 6000
   stride_m: 3000                   # target windows only
 sun_low_threshold_deg: 5           # sun_low_share = share of daylight with the Sun under this elevation
+# Earth solar geometry (src/gsop/earth/solar.py): latitude and obliquity only, flat horizon, circular orbit. DEVIATION from
+# SPEC section 3, which also names slope and aspect. Sampling: n_days values of solar longitude, n_hours hour angles per day.
+solar: {obliquity_deg: 23.44, s0_w_m2: 1361.0, n_days: 365, n_hours: 288}
+# Earth standard atmosphere, troposphere (NASA Glenn metric model, https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html):
+#   T = t0_c - lapse_c_per_m * h; p = p0_kpa * ((T + kelvin) / t_ref_k) ** exponent; rho = p / (gas_const * (T + kelvin)).
+earth_atmosphere: {t0_c: 15.04, lapse_c_per_m: 0.00649, p0_kpa: 101.29, t_ref_k: 288.08, exponent: 5.256,
+                   gas_const: 0.2869, kelvin: 273.1, valid_to_m: 11000}
+# 0/1 flags exported next to the features. A flag is never a feature and never enters the score.
+flags:
+  ti_is_fallback: "1 where ti_proxy used the annual mean day-night swing because no precipitation-based dry season was available"
 columns:
   slope_med:  {unit: deg, what: "median slope over the tile at the shared 500 m baseline", earth: "NASADEM (SRTM) 56S to 60N; Copernicus DEM GLO-30 above 60N (lead)", moon: "LOLA", mars: "MOLA"}
   slope_p90:  {unit: deg, what: "90th percentile slope over the tile", earth: "as slope_med", moon: "LOLA", mars: "MOLA"}

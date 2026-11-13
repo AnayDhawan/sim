@@ -3,9 +3,10 @@
 # session yet: run `uv run gsop s2 earth --source gee --verify` first (needs `earthengine authenticate` and the Cloud
 # project id from Anay) and fix anything it reports before exporting. See docs/PROVENANCE.md for versions and licences.
 climatology_years: [2015, 2024]          # inclusive; MODIS layers
+export: {block_tiles: 200, fallback_flag_min_share: 0.5}   # block edge in tiles per export task (1,200 km); a tile's ti_is_fallback is 1 above this share of fallback pixels
 dem:
   primary:   {id: NASA/NASADEM_HGT/001, band: elevation, note: "30 m, 56S to 60N (catalog bbox -56..60)"}
-  fallback:  {id: COPERNICUS/DEM/GLO30, band: DEM, note: "30 m surface model; its page says superseded by COPERNICUS/DEM/GLO30_2024_1. Used where NASADEM is masked (above 60N, below 56S)"}
+  fallback:  {id: COPERNICUS/DEM/GLO30_2024_1, band: DEM, note: "30 m surface model. COPERNICUS/DEM/GLO30 is deprecated (its page says superseded; confirmed on a real Lonar run by Anay). Used where NASADEM is masked (above 60N, below 56S)"}
 modis:
   lst:       {id: MODIS/061/MOD11A2, bands: [LST_Day_1km, LST_Night_1km], scale: 0.02, unit: K, res_m: 1000}
   ndvi:      {id: MODIS/061/MOD13A2, band: NDVI, qa_band: SummaryQA, qa_good: 0, scale: 0.0001, res_m: 1000}

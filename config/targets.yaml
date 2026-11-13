@@ -6,7 +6,20 @@ moon:
 mars:
   jezero:  {lat: 18.4386, lon_e: 77.5031, source: "Grant 2018"}
   arcadia: {lat: null, lon_e: null, source: "centre to be taken from the SWIM ice map", status: unscored_no_target_data}
+read_margin_km: 1          # extra DEM read on every side of the target window, so slope is valid up to the window edge
 target_window_km: 15        # features on 6 km tiles (stride 3 km) inside the window; value = median, spread = IQR/1.349
 receiver_height_m: 2        # illumination receiver height parameter
 # Moon pole illumination rule from the plan: Sun within about 1.5 deg of the horizon all year.
 moon_pole_illumination: {sun_max_elev: 1.5, sun_low_share: 1.0, evidence_grade: C}
+# Mars atmosphere for air_density (targets/mars.py). DECISION PENDING (docs/DECISIONS.md E7): which source to use.
+# The plan's "610 Pa, 11.1 km" pair is in no source we found. `use` selects the entry; the other is kept for the record.
+#   glenn      NASA Glenn Mars model, lower atmosphere (surface to valid_to_m):
+#              T = t0_c - t_slope_c_per_m * h; p = p0_kpa * exp(-scale_per_m * h); rho = p / (gas_const * (T + kelvin)).
+#              https://www.grc.nasa.gov/www/k-12/airplane/atmosmrm.html . A curve fit, not Mars-GRAM.
+#   fact_sheet NASA Mars fact sheet, https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html : 6.36 mb, scale height 11.0 km.
+#              It has no temperature model, so it cannot give a density by itself; listed only to show the disagreement.
+mars_atmosphere:
+  use: glenn
+  glenn: {p0_kpa: 0.699, scale_per_m: 0.00009, t0_c: -31.0, t_slope_c_per_m: 0.000998, gas_const: 0.1921, kelvin: 273.1,
+          valid_to_m: 7000}
+  fact_sheet: {p0_kpa: 0.636, scale_height_m: 11000}

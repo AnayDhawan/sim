@@ -10,12 +10,19 @@ from gsop.targets import mars, moon
 CFG = load_all()
 
 
-def test_mars_air_density_matches_the_published_model():
-    assert mars.air_density_kg_m3(0.0) == pytest.approx(0.699 / (0.1921 * (273.1 - 31.0)), rel=1e-9)
-    assert 0.014 < mars.air_density_kg_m3(0.0) < 0.017                      # about 0.015 kg/m3 at the reference level
-    assert mars.air_density_kg_m3(-2500.0) > mars.air_density_kg_m3(0.0) > mars.air_density_kg_m3(2000.0)
+def test_mars_air_density_follows_the_configured_model():
+    atm = CFG["targets"]["mars_atmosphere"]
+    g = atm["glenn"]
+    assert mars.air_density_kg_m3(0.0, atm) == pytest.approx(g["p0_kpa"] / (g["gas_const"] * (g["kelvin"] + g["t0_c"])), rel=1e-9)
+    assert 0.014 < mars.air_density_kg_m3(0.0, atm) < 0.017                 # about 0.015 kg/m3 at the reference level
+    assert mars.air_density_kg_m3(-2500.0, atm) > mars.air_density_kg_m3(0.0, atm) > mars.air_density_kg_m3(2000.0, atm)
     with pytest.raises(ValueError):
-        mars.air_density_kg_m3(8000.0)
+        mars.air_density_kg_m3(g["valid_to_m"] + 1, atm)
+    with pytest.raises(ValueError, match="only 'glenn'"):
+        mars.air_density_kg_m3(0.0, {**atm, "use": "fact_sheet"})
+    # changing the config changes the answer: nothing is hard-coded
+    doubled = {**atm, "glenn": {**g, "p0_kpa": 2 * g["p0_kpa"]}}
+    assert mars.air_density_kg_m3(0.0, doubled) == pytest.approx(2 * mars.air_density_kg_m3(0.0, atm))
 
 
 def test_mask_share_median_and_spread():

@@ -28,6 +28,33 @@ Columns and sources: `config/features.yaml`. Families and their columns: `config
 - `water_index` and `silica_index` are cross-instrument proxies and are the two weakest comparisons in the project. Treat their similarity as indicative.
 - A feature that cannot be built is `unavailable`. See section 7.
 
+## 3b. Terrain on Earth: the Earth Engine route against the numpy operator (issue #2)
+
+The numpy operator (`operators.py`) is the definition. The Earth Engine implementation (`earth/gee_operators.py`) must give the same numbers; `gsop check-operators` compares them on one window (default: 5 x 5 tiles near Lonar, `config/run.yaml operator_check`) and fails if a checked feature differs by more than the configured threshold (10 percent: mean absolute difference over mean absolute numpy value). Step by step:
+
+| Step | numpy (`operators.py`) | Earth Engine (`gee_operators.py`) | Where they can differ |
+|---|---|---|---|
+| Working surface | the DEM on a square grid | `resample('bilinear').reproject` onto a 25 m EPSG:6933 grid aligned to the tiles; the check downloads this same surface for numpy | none in the check (same numbers); the 30 m NASADEM and the 25 m grid are not the same surface, which is why 25 m is used (100 / 30 is not a whole number) |
+| Slope baseline | block mean to `slope_baseline_m` | `reduceResolution(mean)` then `reproject` to a tile-aligned grid of that size | none expected |
+| Slope | Horn 3x3 (`slope_deg`) | `convolve` with the two Horn kernels (not `ee.Terrain.slope`, whose stencil is different) | none expected |
+| Ground scale | `kx = cos(lat) / cos(30 deg)`: a projected cell is `base * kx` m east-west and `base / kx` m north-south | `cos` of the `pixelLonLat` latitude | spherical `kx`, under 1 percent against the ellipsoid |
+| `slope_med`, `slope_p90` | numpy percentile, linear | `reduceResolution(percentile)` with `maxRaw` above the cell count, so it uses raw values | numpy interpolates; Earth Engine picks an order statistic |
+| `relief` | max minus min of the baseline cells | `reduceResolution(max)` minus `reduceResolution(min)` | none expected |
+| `rough_a`, `rough_b` | plane removal in b x b windows of the native DEM, RMS, tile median | window mean removed first, then the moments E[d^2], E[d xi], E[d yi] with `reduceResolution(mean)`; RMS = sqrt(E[d^2] - (E[d xi]^2 + E[d yi]^2) / S); tile median | same algebra (tested in numpy); removing the window mean first is needed in float32, where E[z^2] - E[z]^2 cancels to 0 on elevations |
+| Validity | tile is NaN below 90 percent valid cells | `reduceResolution(count)` below `MIN_VALID_FRAC` cells is masked | none expected |
+
+Earth Engine facts the code depends on (found on a real run, 2026-11-13): the CRS must be passed as a WKT1_GDAL string (`gee_operators.ee_crs`); images made by collection reducers need `setDefaultProjection` before `reduceResolution`; `.map()` drops `system:time_start`; `maxPixels` must cover the cell ratio; the unversioned `COPERNICUS/DEM/GLO30` is deprecated (`GLO30_2024_1` is used). These Earth Engine calls were corrected after that run but have not been run again.
+
+## 3c. Terrain from the open-data fallback (issue #8)
+
+When Earth Engine is not available, `gsop s2 open-data` builds the 6 km rasters from downloaded files (`earth/open_data.py`). Terrain is then **coarser and partial**, and nothing is substituted:
+
+- Slope and relief use the same operator at the same 500 m baseline, so the DEM needs cells of at most 500 m. A global relief grid of about 1.8 km (for example ETOPO 60 arcsec) **cannot** give a 500 m baseline slope, so `slope_med`, `slope_p90` and `relief` are left out and the reason is logged. A 15 arcsec grid (about 460 m) can give them, but at a baseline close to its own cell size.
+- `rough_a` and `rough_b` need native cells of at most 33 m and 333 m and are always left out by the fallback.
+- A left-out column is absent from the raster, so the missing-data gate (section 6) rejects every tile for a target that needs it and says why; scoring stops loudly (section 7) unless a person lists the column in `run.yaml drop_columns`.
+- Slope is corrected for the projection's ground scale (section 11).
+- Climate layers are only resampled; no temporal aggregation is done.
+
 ## 4. Similarity
 
 For a column k, tile value x, target value t:
