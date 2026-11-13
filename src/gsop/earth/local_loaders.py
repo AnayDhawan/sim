@@ -123,7 +123,6 @@ def build_earth_table(src: Path | str, out_path: Path | str, grid: Grid | None =
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(out_path, index=False)
-    write_json(out_path.parent / "grid.json", {"crs": grid.crs, "cell_m": grid.cell_m, "ncols": grid.ncols,
-                                               "nrows": grid.nrows, "x0": grid.x0, "y_top": grid.y_top,
-                                               "n_tiles": int(len(df)), "land_min_frac": LAND_MIN})
+    write_json(out_path.parent / "grid.json", {**grid.describe(), "n_tiles": int(len(df)),
+                                               "land_min_frac": LAND_MIN})
     return df
