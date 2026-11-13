@@ -1,27 +1,45 @@
-# ALL COORDINATES BELOW ARE APPROXIMATE, FROM MEMORY, AND UNCONFIRMED.
-# Shaurya must confirm them before any result is published. confirmed: false triggers a warning at the start of
-# every validation run and stamps provisional: true into validation.json.
+# Coordinates were checked on 2026-11-13 against opened sources (see the source comment on each line and
+# docs/UNVERIFIED.md). confirmed: true means an opened primary or authoritative source agrees within a few km.
+# confirmed: false stays where only Wikipedia or a search snippet was found, or where the site is an area, not a point.
+# confirmed: false triggers a warning at the start of every validation run and stamps provisional: true into
+# validation.json, so nothing from validation may be published until the remaining ones are confirmed by a person.
+# NOTE: the tile-match radius (run.yaml site_match_radius_km, 20 km) is much larger than the few-km differences found,
+# so small coordinate differences do not change validation; only gross errors (manicouagan, below) do.
 # Validation uses the best-scoring tile within site_match_radius_km (run.yaml) of each point,
 # so small coordinate errors do not matter.
 primary:      # the 10 Nov validation set
-  lonar:               {lat: 19.98,  lon: 76.51,   bodies: [mars, moon], confirmed: false}
-  haughton:            {lat: 75.37,  lon: -89.68,  bodies: [mars, moon], confirmed: false}
-  mcmurdo_dry_valleys: {lat: -77.5,  lon: 162.0,   bodies: [mars],       confirmed: false}
-  atacama_salars:      {lat: -23.5,  lon: -68.25,  bodies: [mars],       confirmed: false}   # salars, not Yungay
-  ladakh_puga:         {lat: 33.22,  lon: 78.32,   bodies: [mars],       confirmed: false}
-  mdrs_utah:           {lat: 38.41,  lon: -110.79, bodies: [mars],       confirmed: false}
+  lonar:               {lat: 19.98,  lon: 76.51,   bodies: [mars, moon], confirmed: true}   # USGS pubs.usgs.gov/publication/70010158 (Fredriksson 1973) bbox centre 19.978, 76.505; NASA EID 20.0N 76.5E
+  haughton:            {lat: 75.37,  lon: -89.68,  bodies: [mars, moon], confirmed: true}   # NASA EID table 75.4N 89.7W (0.1 deg resolution)
+  mcmurdo_dry_valleys: {lat: -77.5,  lon: 162.0,   bodies: [mars],       confirmed: false}   # an AREA of about 4,800 km2 (not a point); Wikipedia -77.47, 162.52. No primary point source
+  atacama_salars:      {lat: -23.5,  lon: -68.25,  bodies: [mars],       confirmed: false}   # salars, not Yungay. Salar de Atacama is about 100 km across; Wikipedia only
+  ladakh_puga:         {lat: 33.2276, lon: 78.3064, bodies: [mars],      confirmed: true}   # EPSC2024-212 (Sanchez-Garcia, Carrizo, Parro): 33d13'39.38"N 78d18'22.98"E
+  mdrs_utah:           {lat: 38.41,  lon: -110.79, bodies: [mars],       confirmed: false}   # Wikipedia 38.40646, -110.79190 only; the Mars Society handbook has no coordinates
 secondary:    # in the novelty exclusion list and sensitivity checks, not in the pass criterion
-  sf_volcanic_field:   {lat: 35.35,  lon: -111.5,  bodies: [moon], radius_km: 30, confirmed: false}
-  gosses_bluff:        {lat: -23.8,  lon: 132.3,   bodies: [moon, mars], confirmed: false}   # the source file flags this as uncertain
-  mauna_kea:           {lat: 19.82,  lon: -155.47, bodies: [moon], confirmed: false}
-  askja:               {lat: 65.03,  lon: -16.75,  bodies: [moon, mars], confirmed: false}
+  sf_volcanic_field:   {lat: 35.35,  lon: -111.5,  bodies: [moon], radius_km: 30, confirmed: false}   # field of about 4,700 km2; only a search snippet of a USGS page (35.37 N, 111.5 W)
+  gosses_bluff:        {lat: -23.8,  lon: 132.3,   bodies: [moon, mars], confirmed: true}   # NASA EID 23.8S 132.3E; Wikipedia -23.821, 132.308 (2.5 km away). The earlier uncertainty (24.1S 132.8E) was wrong
+  mauna_kea:           {lat: 19.82,  lon: -155.47, bodies: [moon], confirmed: false}   # USGS value seen only in a search snippet (19.82 N, 155.47 W)
+  askja:               {lat: 65.03,  lon: -16.75,  bodies: [moon, mars], confirmed: false}   # Wikipedia 65.033, -16.783 and a snippet of the Smithsonian GVP page
+  # The structure CENTRE (51.383, -68.700: craterexplorer.ca "N 51d23' W 68d42'", NASA EID 51.4N 68.7W). The gate test below
+  # is the annular RESERVOIR, 31.5 km south of this point. Both are listed so discovery excludes the whole structure.
+  manicouagan_centre:  {lat: 51.383, lon: -68.7,   bodies: [moon, mars], radius_km: 45, confirmed: true}   # craterexplorer.ca N 51d23' W 68d42'; NASA EID 51.4N 68.7W
 gate_tests:   # a correct pipeline must reject all three
-  manicouagan:         {lat: 51.1,   lon: -68.7,   expect: rejected, confirmed: false}      # coordinates as given in our files
-  tatacoa:             {lat: 3.23,   lon: -75.17,  expect: rejected, confirmed: false}      # as given in our files
-  samoylov:            {lat: 72.37,  lon: 126.48,  expect: rejected, confirmed: false}      # approximate
+  # manicouagan: this is the annular reservoir (Wikipedia 51.127, -68.747 is 4.5 km away), NOT the structure centre.
+  # ESA WorldCover 2021 (read on 2026-11-13): 6 km box here is 64.9% water, but 2 of 9 positions shifted by +-2 km fall
+  # below 50%. At the true centre it is 5.9% water and 90.9% trees, so only the NDVI gate could reject it. Decide whether
+  # the test means the reservoir (keep, relabel) or the structure (then expect NDVI rejection, not yet verified).
+  manicouagan:         {lat: 51.1,   lon: -68.7,   expect: rejected, confirmed: false}
+  # tatacoa: WorldCover: 65.9% grass, 18.7% bare, 14.3% trees, 0% water, 0.1% built. The water and built gates do not
+  # reject; only NDVI can, and a Sentinel-2 proxy (median 0.197) sits on the 0.2 threshold. NOT guaranteed to be rejected.
+  tatacoa:             {lat: 3.23,   lon: -75.17,  expect: rejected, confirmed: false}      # Wikipedia 3.2339, -75.1714 only
+  # samoylov: AWI (Gukov et al. 2007, epic.awi.de/18087) 72d22'N 126d30'E, 0.8 km from this point. WorldCover: 54% water and
+  # 40% herbaceous wetland; open water is 40-59% within +-2 km, so rejection is marginal unless wetland counts as water.
+  samoylov:            {lat: 72.37,  lon: 126.48,  expect: rejected, confirmed: true}   # AWI Gukov et al. 2007: 72d22'N 126d30'E (0.8 km away)
 negative_controls: # must score low
+  # amazon_basin is an arbitrary control point, but it is 13.5 km from central Manaus: a 6 km tile here may be 35-40%
+  # built-up (WorldCover), above the 20% built gate. A cleaner control (for example -2.9, -60.0: 91.5% trees) may be
+  # needed. NOT changed here: nobody should move a control after seeing results, so decide before the first real run.
   amazon_basin:        {lat: -3.0,   lon: -60.0,   confirmed: false}
-  congo_basin:         {lat: -0.5,   lon: 23.0,    confirmed: false}
+  congo_basin:         {lat: -0.5,   lon: 23.0,    confirmed: false}   # WorldCover: 99.8% tree cover near here
 # Pre-registered pass criteria. Written into validation.json before anything is computed. Do not tune weights to pass.
 criteria:
   primary_median_rank_pct_min: 90

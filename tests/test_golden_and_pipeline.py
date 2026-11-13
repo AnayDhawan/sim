@@ -145,5 +145,16 @@ def test_mars_target_failing_its_own_gate_still_runs_and_is_labelled(earth):
 
 def test_validation_gate_tests_and_unconfirmed_warning():
     ks = CFG["known_sites"]
-    assert len(V.unconfirmed_sites(ks)) == len(ks["primary"]) + len(ks["secondary"]) + len(ks["gate_tests"]) + len(
-        ks["negative_controls"])
+    want = sorted(f"{grp}/{n}" for grp in ("primary", "secondary", "gate_tests", "negative_controls")
+                  for n, s in ks[grp].items() if not s.get("confirmed", False))
+    assert sorted(V.unconfirmed_sites(ks)) == want
+    # a site flips to confirmed only with a source comment on its line in the yaml (issue #10)
+    text = open("config/known_sites.yaml", encoding="utf-8").read().splitlines()
+    for grp in ("primary", "secondary", "gate_tests"):
+        for n, s in ks[grp].items():
+            if s.get("confirmed"):
+                line = next(l for l in text if l.strip().startswith(f"{n}:"))
+                assert "#" in line, f"{n} is confirmed without a source comment"
+    unconfirmed = V.unconfirmed_sites({"primary": {"x": {"confirmed": False}}, "secondary": {}, "gate_tests": {},
+                                       "negative_controls": {}})
+    assert unconfirmed == ["primary/x"]
