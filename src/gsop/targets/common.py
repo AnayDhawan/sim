@@ -43,6 +43,28 @@ def read_dem_window(path: Path | str, lat: float, lon: float, size_km: float):
     return a, cell
 
 
+def mask_share_rows(target: str, col: str, mask: np.ndarray, res_m: float, source: str, grade: str, window_km: float,
+                    tile_m: float = 6000.0, stride_m: float = 3000.0, margin_km: float = 1.0) -> list[dict]:
+    """Share of each 6 km tile (stride 3 km) inside the target window whose mask cells are non-zero.
+    Value = median over the tiles, spread = IQR / 1.349 (same rule as the terrain columns). NaN cells count as 'not set'
+    for the share but a tile with fewer than 90 percent valid cells is dropped."""
+    n = int(round((window_km * 1000.0) / res_m))
+    cy, cx = mask.shape[0] // 2, mask.shape[1] // 2
+    sub = mask[cy - n // 2: cy - n // 2 + n, cx - n // 2: cx - n // 2 + n]
+    t, st = int(round(tile_m / res_m)), int(round(stride_m / res_m))
+    if sub.shape[0] < t or sub.shape[1] < t:
+        raise ValueError(f"mask window {sub.shape} is smaller than one {tile_m:g} m tile at {res_m:g} m cells")
+    v = O._tile_view(sub, t, st)
+    flat = v.reshape(v.shape[0], v.shape[1], -1)
+    valid = np.isfinite(flat).mean(axis=2)
+    share = np.where(valid >= O.MIN_VALID_FRAC, (np.nan_to_num(flat, nan=0.0) > 0).mean(axis=2), np.nan)
+    share = share[np.isfinite(share)]
+    if share.size == 0:
+        return [row(target, col, None, unavailable=True)]
+    return [row(target, col, float(np.median(share)), O.spread_from_iqr(share), source, grade,
+                f"{window_km:g} km, {share.size} tiles")]
+
+
 def terrain_rows(target: str, dem: np.ndarray, res_m: float, source: str, grade: str, window_km: float,
                  op_cfg: dict[str, Any]) -> list[dict]:
     prof = O.window_profile(dem, res_m, window_km, op_cfg["tile_m"], op_cfg["stride_m"],
