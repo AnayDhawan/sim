@@ -166,6 +166,20 @@ Single-process profile of one run at 4M tiles (an earlier, smaller script): scor
 
 Moon has 2 targets x 4 profiles = 8 jobs and Mars 2 x 5 = 10, so at most 8 x 4.4 = 35 min and 10 x 4.4 = 44 min on this machine if every job had 4M gated tiles (about 45 and 55 minutes at the slower first measurement). Real jobs have fewer tiles (the gates remove water, ice, vegetation and built-up land), and `landing_mobility` has fewer still, so this is an upper bound. Only the Moon base layout was timed; the other profiles and Mars were not measured separately. Nothing was measured on real data or on the Windows machine. No code change was made for speed; `numba` was not tried.
 
+### Baselines (issue D07)
+
+`gsop s7 validate` also writes `results/<body>/baselines.json` and `baselines.md`: every baseline is scored once (no Monte Carlo) on the same gated tiles for the base profile and compared with the primary index by top-1 percent Jaccard overlap, Spearman rank correlation, the median rank percentile of the primary sites (best tile within the match radius) and the highest rank percentile of the negative controls. A baseline that has a higher median primary-site rank percentile than the primary index is listed under `beats_primary` and the verdict says so in plain words.
+
+| Baseline | What it is | Apples-to-apples? |
+|---|---|---|
+| `only_<family>` | one family alone, weight 1 | yes: our features, data and target |
+| `equal` | all families of the body with equal weight | yes |
+| `no_illumination` | primary weights with illumination (sunlight on Mars) set to 0, renormalised (D4) | yes |
+| `liu2025` (Moon) | Liu 2025's weights for roughness, slope, cold_dry, illumination, composition; every other family 0 | no: their weights on our features and Earth data, five families only |
+| `mashal2025` (Mars) | Mashal 2025's weights for composition, water, sunlight; every other family 0 | no: their weights on our features and Earth data, three families only |
+
+With at most six primary sites, a difference of a few percentile points between a baseline and the primary index is noise.
+
 ## 9. Checks run beside the Monte Carlo
 
 - Alternative weight sets (no Monte Carlo): Moon `liu2025`, `no_illumination` (D4), `equal`; Mars `mashal2025`, `equal`. For each: top-1 percent overlap (Jaccard) and Spearman against the primary base score.

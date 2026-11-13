@@ -206,3 +206,11 @@ def test_marker_records_outputs_and_code_version(finished):
     m = read_json(finished / "res" / ".stages" / "simulate__t1__base.json")
     assert "t1__base/mc_summary.parquet" in m["outputs"]
     assert len(m["key"]["code_version"]) == 10
+
+
+def test_validate_stage_writes_the_baselines(finished):
+    b = read_json(finished / "res" / "baselines.json")
+    assert b["provisional"] is True and "t1" in b["targets"]
+    assert {"equal", "liu2025", "no_illumination", "only_slope"} <= set(b["targets"]["t1"]["baselines"])
+    assert "| primary index |" in (finished / "res" / "baselines.md").read_text(encoding="utf-8")
+    assert "baselines.json" in read_json(finished / "res" / ".stages" / "validate__body.json")["outputs"]
