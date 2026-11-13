@@ -211,11 +211,17 @@ def score_tiles(X: np.ndarray, spec: MCSpec, w: dict[str, float], t: dict[str, f
 
 
 def _top_sets(scores: np.ndarray, ks: list[int]) -> list[np.ndarray]:
+    """Row indices of the top-k tiles for each k in `ks` (ascending). The ranking is: higher score first, and among
+    equal scores the LOWER row index first. So the sets are nested (top 1% inside top 5% inside top 10%) and a tie at
+    the cut-off is resolved the same way on every machine and for every worker count; it never depends on how numpy
+    happens to partition. Cost: one partition and two passes over the scores, then a sort of the top kmax only."""
     n = scores.size
     kmax = ks[-1]
-    part = np.argpartition(scores, n - kmax)[n - kmax:]
-    order = np.argsort(scores[part], kind="stable")[::-1]
-    ranked = part[order]
+    thr = np.partition(scores, n - kmax)[n - kmax]              # the kmax-th largest score
+    above = np.flatnonzero(scores > thr)
+    tied = np.flatnonzero(scores == thr)                        # ascending row order
+    idx = np.concatenate([above, tied[: kmax - above.size]])
+    ranked = idx[np.lexsort((idx, -scores[idx]))]
     return [ranked[:k] for k in ks]
 
 
@@ -332,6 +338,9 @@ def simulate(X: np.ndarray, spec: MCSpec, n_runs: int, work: Path | str, workers
              robust_cfg: dict[str, Any] | None = None, checkpoints: list[int] | None = None,
              keep_work: bool = False) -> MCResult:
     """X is (n_cols, N) float32, columns in spec.columns order. Resumable through `work`."""
+    if spec.batch_runs > np.iinfo(np.uint16).max:
+        raise ValueError(f"batch_runs {spec.batch_runs} would overflow the uint16 membership counters "
+                         f"(max {np.iinfo(np.uint16).max} runs per batch)")
     work = Path(work)
     work.mkdir(parents=True, exist_ok=True)
     cand_cfg = cand_cfg or {"top_frac": 0.03, "max_candidates": 250_000}
