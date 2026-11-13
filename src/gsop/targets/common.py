@@ -25,12 +25,17 @@ def row(target: str, col: str, value, spread=None, source="", grade="", window="
             "window": window, "unavailable": bool(unavailable) or value is None or not np.isfinite(float(value))}
 
 
-def read_dem_window(path: Path | str, lat: float, lon: float, size_km: float):
-    """Windowed read of a projected DEM GeoTIFF centred on (lat, lon). Never reads the full planet.
-    Returns (array, cell_m). The raster's own CRS is used, so polar stereographic lunar DEMs work."""
+def read_window(path: Path | str, lat: float, lon: float, size_km: float, nodata_as: str = "nan"):
+    """Windowed read of a projected raster GeoTIFF centred on (lat, lon). Never reads the full planet.
+    Returns (array, cell_m). The raster's own CRS is used, so polar stereographic lunar rasters work.
+    Cells outside the raster are always NaN. Cells equal to the file's declared nodata value become NaN for a DEM
+    (`nodata_as="nan"`) but 0 for a 0/1 mask (`nodata_as="zero"`): a mask whose nodata is 0 (a common way to store a
+    mask) must not turn every non-set cell into NaN."""
     import rasterio
     from pyproj import CRS, Transformer
     from rasterio.windows import Window
+    if nodata_as not in ("nan", "zero"):
+        raise ValueError("nodata_as must be 'nan' or 'zero'")
     with rasterio.open(path) as ds:
         geog = CRS.from_user_input(ds.crs).geodetic_crs
         x, y = Transformer.from_crs(geog, ds.crs, always_xy=True).transform(lon, lat)
@@ -39,8 +44,22 @@ def read_dem_window(path: Path | str, lat: float, lon: float, size_km: float):
         n = int(round(size_km * 1000.0 / cell))
         a = ds.read(1, window=Window(c - n // 2, r - n // 2, n, n), boundless=True, fill_value=np.nan).astype(float)
         if ds.nodata is not None:
-            a[a == ds.nodata] = np.nan
+            a[a == ds.nodata] = np.nan if nodata_as == "nan" else 0.0
     return a, cell
+
+
+def read_dem_window(path: Path | str, lat: float, lon: float, size_km: float):
+    """A DEM window: declared nodata cells are NaN (see `read_window`)."""
+    return read_window(path, lat, lon, size_km, "nan")
+
+
+def central_crop(a: np.ndarray, res_m: float, window_km: float) -> np.ndarray:
+    """The central window_km x window_km part of a window that was read with a margin around it."""
+    n = int(round(window_km * 1000.0 / res_m))
+    if a.shape[0] < n or a.shape[1] < n:
+        raise ValueError(f"window {a.shape} is smaller than {window_km:g} km at {res_m:g} m cells")
+    cy, cx = a.shape[0] // 2, a.shape[1] // 2
+    return a[cy - n // 2: cy - n // 2 + n, cx - n // 2: cx - n // 2 + n]
 
 
 def mask_share_rows(target: str, col: str, mask: np.ndarray, res_m: float, source: str, grade: str, window_km: float,
@@ -48,9 +67,7 @@ def mask_share_rows(target: str, col: str, mask: np.ndarray, res_m: float, sourc
     """Share of each 6 km tile (stride 3 km) inside the target window whose mask cells are non-zero.
     Value = median over the tiles, spread = IQR / 1.349 (same rule as the terrain columns). NaN cells count as 'not set'
     for the share but a tile with fewer than 90 percent valid cells is dropped."""
-    n = int(round((window_km * 1000.0) / res_m))
-    cy, cx = mask.shape[0] // 2, mask.shape[1] // 2
-    sub = mask[cy - n // 2: cy - n // 2 + n, cx - n // 2: cx - n // 2 + n]
+    sub = central_crop(mask, res_m, window_km)
     t, st = int(round(tile_m / res_m)), int(round(stride_m / res_m))
     if sub.shape[0] < t or sub.shape[1] < t:
         raise ValueError(f"mask window {sub.shape} is smaller than one {tile_m:g} m tile at {res_m:g} m cells")

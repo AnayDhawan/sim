@@ -5,6 +5,7 @@ operator:
   rough_a_baseline_m: 100          # TODO confirm with Vihaan
   rough_b_baseline_m: 1000         # TODO confirm with Vihaan
   tile_m: 6000
+  work_cell_m: 25                  # working grid of the Earth Engine export and of `check-operators`: DEM resampled bilinearly to this cell, so 100 m and 1000 m divide it (100/30 does not)
   stride_m: 3000                   # target windows only
 sun_low_threshold_deg: 5           # sun_low_share = share of daylight with the Sun under this elevation
 # Earth solar geometry (src/gsop/earth/solar.py): latitude and obliquity only, flat horizon, circular orbit. DEVIATION from

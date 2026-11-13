@@ -49,11 +49,21 @@ Earth Engine facts the code depends on (found on a real run, 2026-11-13): the CR
 
 When Earth Engine is not available, `gsop s2 open-data` builds the 6 km rasters from downloaded files (`earth/open_data.py`). Terrain is then **coarser and partial**, and nothing is substituted:
 
-- Slope and relief use the same operator at the same 500 m baseline, so the DEM needs cells of at most 500 m. A global relief grid of about 1.8 km (for example ETOPO 60 arcsec) **cannot** give a 500 m baseline slope, so `slope_med`, `slope_p90` and `relief` are left out and the reason is logged. A 15 arcsec grid (about 460 m) can give them, but at a baseline close to its own cell size.
+- Slope and relief use the same operator with a 500 m baseline, measured in projected metres of the equal-area grid (see the anisotropy note below), so the DEM needs cells of at most 500 m. A global relief grid of about 1.8 km (for example ETOPO 60 arcsec) **cannot** give a 500 m baseline slope, so `slope_med`, `slope_p90` and `relief` are left out and the reason is logged. A 15 arcsec grid (about 460 m) can give them, but at a baseline close to its own cell size.
 - `rough_a` and `rough_b` need native cells of at most 33 m and 333 m and are always left out by the fallback.
 - A left-out column is absent from the raster, so the missing-data gate (section 6) rejects every tile for a target that needs it and says why; scoring stops loudly (section 7) unless a person lists the column in `run.yaml drop_columns`.
-- Slope is corrected for the projection's ground scale (section 11).
+- Only the slope gradient is corrected for the projection's ground scale (section 11). The 500 m slope cell, the roughness windows and the 6 km tile are still projected metres, so they are not square on the ground (see the anisotropy note below).
 - Climate layers are only resampled; no temporal aggregation is done.
+
+**Anisotropy note (Earth tiles against Moon and Mars windows).** EPSG:6933 is cylindrical equal-area. A projected distance `d` is `d * kx` ground metres east-west and `d / kx` ground metres north-south, with `kx = cos(lat) / cos(30 deg)`. `operators.slope_deg(kx=...)` uses this to correct the *gradient* (dz/dx and dz/dy), and nothing else. Everything that is a length is still in projected metres, so on Earth:
+
+| Latitude | 500 m slope cell on the ground (E-W x N-S) | 6 km tile on the ground | 100 m roughness window |
+|---|---|---|---|
+| 30 deg | 500 x 500 m | 6.0 x 6.0 km | 100 x 100 m |
+| 60 deg | 289 x 866 m | 3.5 x 10.4 km | 58 x 173 m |
+| 80 deg | 100 x 2,494 m | 1.2 x 29.9 km | 20 x 499 m |
+
+Moon and Mars targets use square ground cells (polar-stereographic and cylindrical rasters near their targets, windows of 6 km and 500 m on the ground). So a Moon slope at a 500 m baseline and an Earth slope at "500 m" away from 30 deg latitude are measured over different ground footprints, and Earth roughness at 100 m and 1000 m is taken over elongated windows. The gradient is right; the footprint is not the same. This is open (see `docs/UNVERIFIED.md`); it is not a bug in the arithmetic.
 
 ## 4. Similarity
 
@@ -68,7 +78,7 @@ Sigma rule:
     sigma_k = max(target_spread_k, measurement_uncertainty_k, 0.25 * IQR_k)
 
 - `target_spread_k` is IQR / 1.349 over the 6 km tiles (stride 3 km) inside the 15 km target window.
-- `measurement_uncertainty_k` comes from `features.yaml` with a source. A missing value counts as 0. Current values for the Moon (slope 2.0 deg, relief 0.4 m) are midpoints of the ranges in Barker 2021 chosen by the assistant. They are UNVERIFIED.
+- `measurement_uncertainty_k` comes from `features.yaml` with a source. A missing value counts as 0. Current values for the Moon (slope 2.0 deg, relief 0.4 m) are the midpoints of the ranges in Barker et al. 2021 (Planet. Space Sci. 203:105119: "typical RMS values of ~0.30-0.50 m and ~1.5-2.5 deg"; source opened, see `config/features.yaml`). The paper gives one range for four south-pole sites, so taking the midpoint is a choice (the upper ends would be the conservative alternative), and the figures are for 5 m pixels, not for the 500 m baseline this project uses; no source gives the error at that baseline.
 - `IQR_k` is the 75th minus the 25th percentile of column k over the Earth tiles that pass every gate for this target and profile, including the landing-mobility extra gate (so it is computed per target and profile view, and differs between `base` and `landing_mobility`). This term stops the score collapsing to zero everywhere for variables Earth cannot match, for example polar lighting.
 - A target spread that is 0 or NaN contributes 0 to the `max`. Sigma is computed once from the base target value and is not recomputed under Monte Carlo jitter.
 - All percentiles in this project use `numpy.percentile(..., method='linear')` (the numpy default). Other methods change golden scores by 0.04 to 0.07.
@@ -119,18 +129,29 @@ Mars target check (D6): target latitude within 50 deg, elevation below 2 km, the
 
 ## 8b. Measured run time (issue #6)
 
-Measured on a MacBook (Apple silicon, 8 logical cores, 8 GB RAM, about 1.3 GB free at the time), macOS, Python 3.11, numpy 2.4, synthetic data: 4,000,000 tiles, the 12 Moon columns in the 8 Moon families, base profile, 2,000 runs, 8 workers, `chunk_tiles` 200,000, default candidate settings (125,781 candidates). Script: a plain call of `montecarlo.simulate`; the numbers are from one run, not an average.
+Reproduce with the committed script (`scripts/bench_mc.py`):
 
-| Part | Time |
+    uv run python scripts/bench_mc.py --workers 8 --runs 2000 --chunk-tiles 200000 --out bench_mc.json
+
+Inputs: 4,000,000 rows of uniform float32 random numbers from `numpy.random.default_rng(0)`, one per column of the 8 Moon families in `config/weights.yaml` (12 columns); target 0.5 and sigma 0.2 for every column; no measurement or Earth uncertainty; base profile (no purpose multipliers); everything else (master seed, `batch_runs` 50, top fractions, candidates `top_frac` 0.03 and `max_candidates` 250,000, robust rule) from `config/run.yaml`, as `gsop s5 simulate` uses it. The script calls `montecarlo.simulate` directly and prints one JSON line.
+
+Measured on a MacBook with Apple silicon (8 logical cores, 8.0 GB RAM, **1.4 GB free at the start**), macOS, Python 3.11, numpy 2.4, 125,781 candidates:
+
+| Part of `simulate` | Time |
 |---|---|
-| Pass 1 (score all tiles, top-k counts) | 137 s |
-| Pass 2 (re-run seeds, candidate scores and ranks) | 162 s |
-| Total, one target x profile | 332 s (5.5 min) |
-| Peak memory, sum of resident sizes of all processes | 2.8 GB (this double-counts the pages of X that the workers share) |
+| Pass 1: score all tiles, top-k counters (2,000 runs) | 100.2 s |
+| Merge and select: merge the 40 batch files, convergence sets, candidate selection, create the two candidate memmaps | 4.4 s |
+| Pass 2: re-run the same seeds, candidate scores and ranks | 134.5 s |
+| Finalise: 5th, 50th and 95th percentile of every candidate over all runs (two 2,000 x 125,781 float32 memmaps), result table | 26.6 s |
+| **Total, one target x profile** | **265.6 s (4.4 min)** (wall clock 266.8 s) |
 
-Single-process profile of one run at 4M tiles: scoring 105 ms, `argpartition` for the top-k sets 77 ms, full `np.sort` for rank percentiles 80 ms, `searchsorted` 23 ms, counters and score sum under 5 ms. Pass 1 is about 190 ms per run and pass 2 about 210 ms, so 2,000 runs on one core is about 13 minutes of work, and eight workers cut it to 5.5 minutes (memory bandwidth, not cores, is the limit). Chunk size between 50,000 and 1,000,000 changes the scoring time by under 10 percent.
+Peak memory, summed over the process and its workers: 2.83 GB. This double-counts the pages of X that the workers share, so it overstates the real use.
 
-Moon has 2 targets x 4 profiles = 8 jobs and Mars 2 x 5 = 10, so at most 8 x 5.5 = 44 min and 10 x 5.5 = 55 min on this machine, if every job had 4M gated tiles. Real jobs have fewer (the gates remove water, ice, vegetation and built-up land) and `landing_mobility` has fewer still, so this is an upper bound. The real Earth file has not been built yet, so this is not measured on real data. Per the issue, no code change was made: the cheap wins were not needed, and `numba` was not tried.
+**Run-to-run variation is large on this machine.** The first measurement of the same configuration (the earlier, uncommitted script) took 331 s: pass 1 137 s, pass 2 162 s. With only 1.4 GB free on an 8 GB machine that was also running other things, 20 percent spread between two runs is normal; treat the figures as "about 4.5 to 5.5 minutes", not as a precise number. The 33 s that the first version of this section left unexplained is the merge/select and finalise parts above (4.4 + 26.6 = 31 s on this run), which were not timed separately before. `MCResult.timings_s` now reports all four parts, and `summary.json` carries them.
+
+Single-process profile of one run at 4M tiles (an earlier, smaller script): scoring 105 ms, `argpartition` for the top-k sets 77 ms, full `np.sort` for rank percentiles 80 ms, `searchsorted` 23 ms, counters and score sum under 5 ms. Chunk size between 50,000 and 1,000,000 changed the scoring time by under 10 percent.
+
+Moon has 2 targets x 4 profiles = 8 jobs and Mars 2 x 5 = 10, so at most 8 x 4.4 = 35 min and 10 x 4.4 = 44 min on this machine if every job had 4M gated tiles (about 45 and 55 minutes at the slower first measurement). Real jobs have fewer tiles (the gates remove water, ice, vegetation and built-up land), and `landing_mobility` has fewer still, so this is an upper bound. Only the Moon base layout was timed; the other profiles and Mars were not measured separately. Nothing was measured on real data or on the Windows machine. No code change was made for speed; `numba` was not tried.
 
 ## 9. Checks run beside the Monte Carlo
 
@@ -158,7 +179,7 @@ Moon has 2 targets x 4 profiles = 8 jobs and Mars 2 x 5 = 10, so at most 8 x 5.5
 ## 11. Deviations and assumptions
 
 - Grid extends to the poles (section 2).
-- Barker 2021 uncertainty midpoints (section 4), UNVERIFIED.
+- Barker 2021 uncertainty midpoints (section 4): the source was opened and the range is quoted exactly; the midpoint is a choice, and the 5 m-pixel figures are applied at a 500 m baseline without a source for that.
 - Roughness baselines 100 m and 1000 m, TODO.
 - Per-tile noise not applied (section 8).
 - Site score for validation averages over targets (section 10).
@@ -166,5 +187,5 @@ Moon has 2 targets x 4 profiles = 8 jobs and Mars 2 x 5 = 10, so at most 8 x 5.5
 - Cross-machine tolerances (`run.yaml: compare`) are a first guess.
 - Earth Engine route (`earth/gee_export.py`, `gee_operators.py`, `check_operators.py`) is written but has not been run (needs a login). Three Earth columns (`water_index`, `silica_index`, `dust_index`) are not built (see `config/earth_layers.yaml`).
 - Earth `sun_max_elev`, `sun_low_share`, `insol_annual` use latitude and obliquity only, not slope and aspect (`earth/solar.py`).
-- Terrain on the EPSG:6933 grid is corrected for the projection's ground scale in the open-data fallback and in the Earth Engine operator (`operators.slope_deg(kx=...)`); the default call is unchanged, so Moon, Mars and the golden slice are unaffected.
+- Only the slope GRADIENT on the EPSG:6933 grid is corrected for the projection's ground scale (open-data fallback and Earth Engine operator, `operators.slope_deg(kx=...)`). The 500 m slope cell, the 100 m and 1000 m roughness windows and the 6 km tile stay projected metres, so away from 30 deg latitude they are not square on the ground (anisotropy note, section 3c). The default call is unchanged, so Moon, Mars and the golden slice are unaffected.
 - Moon and Mars target profiles are only partly built (see `docs/UNVERIFIED.md`).

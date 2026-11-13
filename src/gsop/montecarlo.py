@@ -345,12 +345,23 @@ def simulate(X: np.ndarray, spec: MCSpec, n_runs: int, work: Path | str, workers
     convergence["candidates_truncated"] = bool(truncated)
     res = MCResult(n_runs=n_runs, counts=counts, mean_score=mean_score, candidates=df, convergence=convergence,
                    weight_stats=weight_stats, robust_mask=robust_mask,
-                   timings_s={"pass1": t_p1, "pass2": t_p2, "total": time.perf_counter() - t0})
+                   timings_s=_timings(t0, t_p1, t1, t_p2))
     _CTX.clear()          # release the in-process memmap of X (Windows cannot delete an open file)
     gc.collect()
     if not keep_work:
         _cleanup(work)
     return res
+
+
+def _timings(t0: float, t_p1: float, t1: float, t_p2: float) -> dict[str, float]:
+    """Wall-clock split of `simulate`, all measured from the start of pass 1.
+    pass1 / pass2: the two worker passes. merge_select: after pass 1 and before pass 2 (merging the per-batch counters,
+    the convergence sets, the candidate selection and creating the two candidate memmaps). finalise: after pass 2
+    (percentiles of every candidate over all runs, the result table). total = the four added together."""
+    total = time.perf_counter() - t0
+    merge_select = (t1 - t0) - t_p1
+    return {"pass1": t_p1, "merge_select": merge_select, "pass2": t_p2,
+            "finalise": total - t_p1 - merge_select - t_p2, "total": total}
 
 
 def _membership_frac(name: str) -> float:

@@ -46,11 +46,16 @@ def test_driest_triplets_wrap_the_year():
 
 
 def test_dry_run_prints_a_plan_and_needs_no_login(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
+    import gsop.cli as cli
+    import gsop.earth.gee_export as gx
+    monkeypatch.setattr(cli, "data_dir", lambda sub: tmp_path / sub)
+    monkeypatch.setattr(gx, "data_dir", lambda sub: tmp_path / sub)
     r = CliRunner().invoke(app, ["s2", "earth", "--source", "gee", "--bbox", "74,17,80,22", "--dry-run"])
     assert r.exit_code == 0, r.output
-    plan = json.loads((tmp_path / "data/raw/earth/gsop_earth_export_plan.json").read_text())
+    plan = json.loads((tmp_path / "raw/earth/gsop_earth_export_plan.json").read_text())
     assert plan["tasks"] and plan["band_order"][0] == "land_frac"
+    out = " ".join(r.output.split())
+    assert "--plan" in out and "same folder" in out and "export_plan.json" in out       # the CLI tells the user where the plan must be
 
 
 def test_a_missing_login_stops_loudly_and_is_not_worked_around(monkeypatch):
@@ -72,11 +77,10 @@ def _tif(path, names, with_desc, ix0=3000, iy0=1000, h=3, w=3, fill=None):
                 ds.set_band_description(i, n)
 
 
-def test_exporter_and_loader_agree_on_band_names(tmp_path, monkeypatch):
+def test_exporter_and_loader_agree_on_band_names(tmp_path):
     """Review item 3: the loader used to read a sidecar nobody wrote, and the exporter wrote a plan nobody read."""
-    monkeypatch.chdir(tmp_path)
-    tasks = GX.run((74.0, 17.0, 80.0, 22.0), "lonar_test", dry_run=True)
     folder = tmp_path / "data" / "raw" / "earth"
+    tasks = GX.run((74.0, 17.0, 80.0, 22.0), "lonar_test", dry_run=True, plan_dir=folder)
     desc = tasks[0]["description"]
     _tif(folder / f"{desc}.tif", GX.BAND_ORDER, with_desc=False)          # what a Drive download looks like: no descriptions
     df = build_earth_table(folder, tmp_path / "o" / "e.parquet")
@@ -139,3 +143,70 @@ def test_verify_exit_code_is_not_swallowed(monkeypatch):
 
 def test_dem_fallback_is_the_non_deprecated_collection():
     assert GX.load_layers()["dem"]["fallback"]["id"] == "COPERNICUS/DEM/GLO30_2024_1"
+
+
+def test_plan_in_another_folder_works_with_plan_option_and_fails_helpfully_without(tmp_path):
+    """Review: files downloaded to a folder without the plan used to fail with no way out."""
+    plan_dir, tif_dir = tmp_path / "plan", tmp_path / "drive"
+    tasks = GX.run((74.0, 17.0, 80.0, 22.0), "lonar_test", dry_run=True, plan_dir=plan_dir)
+    tif_dir.mkdir()
+    _tif(tif_dir / f"{tasks[0]['description']}.tif", GX.BAND_ORDER, with_desc=False)
+    with pytest.raises(ValueError, match="--plan"):
+        build_earth_table(tif_dir, tmp_path / "o1" / "e.parquet")
+    df = build_earth_table(tif_dir, tmp_path / "o2" / "e.parquet", plan=plan_dir / "lonar_test_export_plan.json")
+    assert "ti_is_fallback" in df.columns
+    r = CliRunner().invoke(app, ["s2", "earth", "--source", "local", "--src", str(tif_dir), "--plan",
+                                 str(plan_dir / "lonar_test_export_plan.json")])
+    assert "Traceback" not in r.output
+
+
+@pytest.mark.parametrize("bbox", ["1,2,3", "a,b,c,d", "10,20,5,30", "1,2,3,4,5"])
+def test_bad_bbox_is_a_usage_error_not_a_traceback(bbox):
+    for cmd in (["s2", "earth", "--source", "gee", "--dry-run", "--bbox", bbox], ["s2", "open-data", "--bbox", bbox]):
+        r = CliRunner().invoke(app, cmd)
+        assert r.exit_code == 2, (cmd, r.output)
+        assert "bbox" in " ".join(r.output.split()).lower()
+        assert not isinstance(r.exception, ValueError)
+
+
+def test_lon_without_lat_is_refused_not_ignored():
+    for args in (["--lon", "76.5"], ["--lat", "20.0"]):
+        r = CliRunner().invoke(app, ["check-operators", *args])
+        assert r.exit_code == 2 and "go together" in " ".join(r.output.split())
+
+
+def test_earth_engine_exceptions_become_fail_lines_not_tracebacks(monkeypatch, tmp_path):
+    """ee.EEException is not a RuntimeError, so computePixels errors used to escape as a traceback."""
+    from unittest.mock import MagicMock
+
+    import ee
+
+    from gsop.earth import check_operators as CO
+    fake = MagicMock()
+    fake.EEException = ee.EEException
+    fake.data.computePixels.side_effect = ee.EEException("Computation timed out.")
+    monkeypatch.setattr(GX, "init", lambda project=None: fake)
+    monkeypatch.setattr(GX, "dem_image", lambda e, layers: MagicMock())
+    from gsop.earth import gee_operators as GO
+    monkeypatch.setattr(GO, "ee_tile_terrain", lambda *a, **k: MagicMock())
+    with pytest.raises(RuntimeError, match="Computation timed out"):
+        CO.run(out=tmp_path / "o.json")
+    r = CliRunner().invoke(app, ["check-operators"])
+    assert r.exit_code == 1 and "[FAIL]" in r.output and "Traceback" not in r.output
+    # the export run translates it the same way
+    monkeypatch.setattr(GX, "export_image", lambda *a, **k: (_ for _ in ()).throw(ee.EEException("bad band")))
+    with pytest.raises(RuntimeError, match="bad band"):
+        GX.run((74.0, 17.0, 76.0, 19.0), "t", plan_dir=tmp_path)
+
+
+def test_work_cell_is_one_setting_in_features_read_by_export_and_check():
+    from gsop.config import load_all
+    cfg = load_all()
+    assert cfg["features"]["operator"]["work_cell_m"] == 25
+    assert "work_cell_m" not in cfg["run"]["operator_check"]
+    import inspect
+
+    from gsop.earth import check_operators as CO
+    assert "work_cell_m" not in inspect.signature(CO.run).parameters          # the check cannot test a different grid
+    assert 'op["work_cell_m"]' in inspect.getsource(GX.export_image)
+    assert 'op_cfg["work_cell_m"]' in inspect.getsource(CO.run)

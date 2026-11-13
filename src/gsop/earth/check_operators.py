@@ -36,18 +36,20 @@ def relative_difference(a: np.ndarray, b: np.ndarray) -> dict[str, float]:
             "max_abs_diff": float(d.max())}
 
 
-def run(center_lonlat: tuple[float, float] | None = None, n_tiles: int | None = None, work_cell_m: float | None = None,
+def run(center_lonlat: tuple[float, float] | None = None, n_tiles: int | None = None,
         project: str | None = None, out: Path | str = "results/operator_check.json", cfg: dict[str, Any] | None = None
         ) -> dict[str, Any]:
-    """Defaults for the window, work cell and threshold come from config/run.yaml `operator_check`."""
+    """Window, threshold: config/run.yaml `operator_check`. Working grid: config/features.yaml `operator.work_cell_m`, the same
+    setting the production export reads (it is deliberately not a parameter here, so the check cannot test a different grid).
+    Earth Engine errors (`ee.EEException`, which is not a RuntimeError) are re-raised as RuntimeError so the CLI prints [FAIL]."""
     from ..config import load_all
     cfg = cfg or load_all()
     chk = cfg["run"]["operator_check"]
     center_lonlat = tuple(center_lonlat or chk["center_lonlat"])
     n_tiles = int(n_tiles or chk["n_tiles"])
-    work_cell_m = float(work_cell_m or chk["work_cell_m"])
-    threshold = float(chk["threshold"])
     op_cfg = cfg["features"]["operator"]
+    work_cell_m = float(op_cfg["work_cell_m"])
+    threshold = float(chk["threshold"])
     ee = GX.init(project)
     grid = Grid()
     if (op_cfg["rough_a_baseline_m"] / work_cell_m) % 1 or (op_cfg["rough_b_baseline_m"] / work_cell_m) % 1:
@@ -59,23 +61,26 @@ def run(center_lonlat: tuple[float, float] | None = None, n_tiles: int | None = 
     layers = GX.load_layers()
     dem = GX.dem_image(ee, layers)
 
-    # Earth Engine side: the five features on the 6 km tile grid
-    img = GO.ee_tile_terrain(dem, grid, win, ee, work_cell_m, base,
-                             (op_cfg["rough_a_baseline_m"], op_cfg["rough_b_baseline_m"]))
-    ee_arr = ee.data.computePixels({
-        "expression": img, "fileFormat": "NUMPY_NDARRAY",
-        "grid": {"dimensions": {"width": n_tiles, "height": n_tiles}, "crsWkt": GO.ee_crs(),
-                 "affineTransform": {"scaleX": grid.cell_m, "shearX": 0, "translateX": grid.x0 + ix0 * grid.cell_m,
-                                     "shearY": 0, "scaleY": -grid.cell_m, "translateY": grid.y_top - iy0 * grid.cell_m}}})
-    # numpy side: the same working surface plus one slope-baseline cell of margin
-    wdem = GO.ee_work_dem(dem, grid, win, ee, work_cell_m)
-    m = int(round(base / work_cell_m))
-    size = int(round(n_tiles * grid.cell_m / work_cell_m)) + 2 * m
-    z_arr = ee.data.computePixels({
-        "expression": wdem.select("elevation"), "fileFormat": "NUMPY_NDARRAY",
-        "grid": {"dimensions": {"width": size, "height": size}, "crsWkt": GO.ee_crs(),
-                 "affineTransform": {"scaleX": work_cell_m, "shearX": 0, "translateX": grid.x0 + ix0 * grid.cell_m - base,
-                                     "shearY": 0, "scaleY": -work_cell_m, "translateY": grid.y_top - iy0 * grid.cell_m + base}}})
+    try:
+        # Earth Engine side: the five features on the 6 km tile grid
+        img = GO.ee_tile_terrain(dem, grid, win, ee, work_cell_m, base,
+                                 (op_cfg["rough_a_baseline_m"], op_cfg["rough_b_baseline_m"]))
+        ee_arr = ee.data.computePixels({
+            "expression": img, "fileFormat": "NUMPY_NDARRAY",
+            "grid": {"dimensions": {"width": n_tiles, "height": n_tiles}, "crsWkt": GO.ee_crs(),
+                     "affineTransform": {"scaleX": grid.cell_m, "shearX": 0, "translateX": grid.x0 + ix0 * grid.cell_m,
+                                         "shearY": 0, "scaleY": -grid.cell_m, "translateY": grid.y_top - iy0 * grid.cell_m}}})
+        # numpy side: the same working surface plus one slope-baseline cell of margin
+        wdem = GO.ee_work_dem(dem, grid, win, ee, work_cell_m)
+        m = int(round(base / work_cell_m))
+        size = int(round(n_tiles * grid.cell_m / work_cell_m)) + 2 * m
+        z_arr = ee.data.computePixels({
+            "expression": wdem.select("elevation"), "fileFormat": "NUMPY_NDARRAY",
+            "grid": {"dimensions": {"width": size, "height": size}, "crsWkt": GO.ee_crs(),
+                     "affineTransform": {"scaleX": work_cell_m, "shearX": 0, "translateX": grid.x0 + ix0 * grid.cell_m - base,
+                                         "shearY": 0, "scaleY": -work_cell_m, "translateY": grid.y_top - iy0 * grid.cell_m + base}}})
+    except ee.EEException as e:
+        raise RuntimeError(f"Earth Engine rejected the request: {e}") from e
     z = np.asarray(z_arr["elevation"], dtype=np.float64)
     kx = OD.ground_scale_rows(grid, iy0, iy0 + n_tiles, base)
     np_feats = O.tile_features(z, work_cell_m, grid.cell_m, grid.cell_m, base,
