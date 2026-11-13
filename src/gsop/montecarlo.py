@@ -246,7 +246,9 @@ def _batch_runs(batch_id: int, spec: MCSpec, n_runs: int) -> range:
     return range(batch_id * spec.batch_runs, min((batch_id + 1) * spec.batch_runs, n_runs))
 
 
-def pass1_batch(spec_d: dict, x_path: str, work: str, batch_id: int, n_runs: int, chunk: int) -> int:
+def pass1_batch(spec_d: dict, x_path: str, work: str, batch_id: int, n_runs: int, chunk: int) -> tuple[int, float]:
+    """Returns (batch_id, seconds)."""
+    t_start = time.perf_counter()
     spec, X = _ctx(spec_d, x_path, chunk)
     n = X.shape[1]
     ks = top_ks(n, spec.top_fracs)
@@ -276,10 +278,13 @@ def pass1_batch(spec_d: dict, x_path: str, work: str, batch_id: int, n_runs: int
     m = len(runs)
     atomic_savez(Path(work) / "pass1" / f"batch_{batch_id:05d}.npz", cnt=cnt, n=np.array(m), mean=s0 + sd / m,
                  m2=sdd - sd * sd / m, smin=smin, smax=smax, weights=wrec)
-    return batch_id
+    return batch_id, time.perf_counter() - t_start
 
 
-def pass2_batch(spec_d: dict, x_path: str, work: str, batch_id: int, n_runs: int, chunk: int, n_cand: int) -> int:
+def pass2_batch(spec_d: dict, x_path: str, work: str, batch_id: int, n_runs: int, chunk: int,
+                n_cand: int) -> tuple[int, float]:
+    """Returns (batch_id, seconds)."""
+    t_start = time.perf_counter()
     spec, X = _ctx(spec_d, x_path, chunk)
     n = X.shape[1]
     cand = np.load(Path(work) / "candidates.npy")
@@ -297,13 +302,27 @@ def pass2_batch(spec_d: dict, x_path: str, work: str, batch_id: int, n_runs: int
     del sc, rk
     (Path(work) / "pass2").mkdir(exist_ok=True)
     (Path(work) / "pass2" / f"batch_{batch_id:05d}.done").write_text("ok")
-    return batch_id
+    return batch_id, time.perf_counter() - t_start
 
 
 def _run_batches(fn, args_list: list[tuple], workers: int, desc: str) -> None:
     """Batches are saved one file each as they finish, so an interrupt (Ctrl-C included) loses at most the running
-    batches and the next call resumes from the saved ones. `run_tasks` cancels pending batches and joins the pool."""
-    run_tasks(fn, args_list, workers=workers, desc=desc)
+    batches and the next call resumes from the saved ones. `run_tasks` cancels pending batches and joins the pool.
+    Each finished batch is logged with its time."""
+    total = len(args_list)
+    done = [0]
+    t0 = time.perf_counter()
+
+    def report(r: tuple[int, float]) -> None:
+        done[0] += 1
+        log.info("%s: batch %d done in %.1f s (%d of %d this call, %.0f s elapsed)", desc, r[0], r[1], done[0], total,
+                 time.perf_counter() - t0)
+    try:
+        run_tasks(fn, args_list, workers=workers, desc=desc, on_result=report)
+    except KeyboardInterrupt:
+        log.warning("%s interrupted after %d of %d batches. Finished batches are saved; run the same command again "
+                    "to resume.", desc, done[0], total)
+        raise
 
 
 # --------------------------------------------------------------------------- orchestration
