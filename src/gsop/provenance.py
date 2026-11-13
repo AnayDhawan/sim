@@ -74,11 +74,11 @@ def read_json(path: Path | str) -> Any:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
-def atomic_savez(path: Path | str, **arrays: np.ndarray) -> Path:
+def atomic_savez(path: Path | str, compressed: bool = False, **arrays: np.ndarray) -> Path:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.stem + ".tmp.npz")
-    np.savez(tmp, **arrays)
+    (np.savez_compressed if compressed else np.savez)(tmp, **arrays)
     os.replace(tmp, path)
     return path
 
@@ -123,28 +123,94 @@ def run_meta(cfg_hash: str, seeds: dict, timings: dict, extra: dict | None = Non
     return meta
 
 
-class StageStore:
-    """Resumable stages. A stage is skipped when its marker exists with identical input hashes and config hash.
-    Markers live in <results dir>/.done/<stage>.json."""
+def code_version() -> str:
+    """First 10 hex chars of sha256 over every .py file of the gsop package (LF-normalised, path-sorted).
+    A change to the engine code invalidates finished stages; a docs or test change does not."""
+    pkg = Path(__file__).resolve().parent
+    h = hashlib.sha256()
+    for f in sorted(pkg.rglob("*.py")):
+        h.update(f.relative_to(pkg).as_posix().encode())
+        h.update(f.read_bytes().replace(b"\r\n", b"\n"))
+    return h.hexdigest()[:10]
 
-    def __init__(self, root: Path | str):
-        self.dir = Path(root) / ".done"
+
+class StageStore:
+    """Resumable stages. A stage is skipped when its marker exists, the marker's key (stage, config hash, input hashes,
+    code version) equals the current key, and every output it recorded still exists.
+    Markers live in <results dir>/.stages/<stage>.json. They are written only after the stage finished, and removed
+    before a rerun starts, so a crash never leaves a marker that vouches for a half-written stage."""
+
+    DIRNAME = ".stages"
+
+    def __init__(self, root: Path | str, code: str | None = None):
+        self.root = Path(root)
+        self.dir = self.root / self.DIRNAME
+        self.code = code if code is not None else code_version()
 
     def key(self, stage: str, config: str, inputs: dict[str, str]) -> dict:
-        return {"stage": stage, "config_hash": config, "inputs": inputs}
+        return {"stage": stage, "config_hash": config, "inputs": inputs, "code_version": self.code}
+
+    def _path(self, stage: str) -> Path:
+        return self.dir / f"{stage}.json"
+
+    def read(self, stage: str) -> dict | None:
+        p = self._path(stage)
+        if not p.exists():
+            return None
+        try:
+            return read_json(p)
+        except (json.JSONDecodeError, OSError):
+            return None
+
+    def key_hash(self, stage: str) -> str:
+        """Identity of a finished stage, for downstream stages to use as an input. 'missing' when not finished."""
+        m = self.read(stage)
+        return config_hash(m["key"]) if m else "missing"
+
+    def check(self, stage: str, config: str, inputs: dict[str, str]) -> tuple[bool, str]:
+        """(done, reason). reason says why a stage has to run, or 'up to date'."""
+        m = self.read(stage)
+        if m is None:
+            return False, "no finished marker"
+        have, want = m.get("key", {}), self.key(stage, config, inputs)
+        if have.get("code_version") != want["code_version"]:
+            return False, "code changed"
+        if have.get("config_hash") != want["config_hash"]:
+            return False, "config changed"
+        hi, wi = have.get("inputs", {}), want["inputs"]
+        changed = sorted(k for k in set(hi) | set(wi) if hi.get(k) != wi.get(k))
+        if changed:
+            return False, "input changed: " + ", ".join(changed)
+        missing = [o for o in m.get("outputs", []) if not (self.root / o).exists()]
+        if missing:
+            return False, "output missing: " + ", ".join(missing)
+        return True, "up to date"
 
     def is_done(self, stage: str, config: str, inputs: dict[str, str]) -> bool:
-        p = self.dir / f"{stage}.json"
-        if not p.exists():
-            return False
-        try:
-            return read_json(p).get("key") == self.key(stage, config, inputs)
-        except (json.JSONDecodeError, OSError):
-            return False
+        return self.check(stage, config, inputs)[0]
 
-    def mark(self, stage: str, config: str, inputs: dict[str, str], seconds: float) -> None:
-        write_json(self.dir / f"{stage}.json", {"key": self.key(stage, config, inputs), "seconds": seconds,
-                                                "finished": time.strftime("%Y-%m-%d %H:%M:%S%z")})
+    def invalidate(self, stage: str) -> None:
+        self._path(stage).unlink(missing_ok=True)
+
+    def mark(self, stage: str, config: str, inputs: dict[str, str], seconds: float,
+             outputs: list[Path | str] | None = None) -> None:
+        outs = sorted(Path(o).resolve().relative_to(self.root.resolve()).as_posix() for o in (outputs or []))
+        write_json(self._path(stage), {"key": self.key(stage, config, inputs), "seconds": seconds, "outputs": outs,
+                                       "finished": time.strftime("%Y-%m-%d %H:%M:%S%z")})
+
+
+def atomic_to_parquet(df: Any, path: Path | str, **kw: Any) -> Path:
+    """DataFrame.to_parquet through a temp file and os.replace, so a crash never leaves a half-written file."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        df.to_parquet(tmp, **kw)
+        os.replace(tmp, path)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
+    return path
 
 
 def write_manifest(directory: Path | str, files: list[Path | str], name: str = "MANIFEST.json") -> Path:

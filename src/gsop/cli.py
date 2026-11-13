@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import sys
 import time
@@ -21,7 +22,7 @@ from .checks import Report, console
 from .config import data_dir, load_all, results_dir
 from .montecarlo import memory_plan
 from .provenance import ROOT, package_versions, read_json, sha256_file, write_json
-from .runner import STAGES, BodyRun
+from .runner import STAGES, BodyRun, stage_name, stages_from
 
 app = typer.Typer(no_args_is_help=True, add_completion=False, help="GSOP simulation engine")
 
@@ -66,7 +67,32 @@ def _check_body(body: str) -> str:
     return body
 
 
+def _enable_stage_log() -> None:
+    """Show every stage skip and rerun, with the reason, on stderr."""
+    lg = logging.getLogger("gsop.runner")
+    if not lg.handlers:
+        h = logging.StreamHandler(sys.stderr)
+        h.setFormatter(logging.Formatter("%(message)s"))
+        lg.addHandler(h)
+    lg.setLevel(logging.INFO)
+    lg.propagate = False
+
+
+def _forced(force: Optional[str], from_stage: Optional[str]) -> list[str]:
+    """--force STAGE reruns that one stage; --from STAGE reruns it and every later stage."""
+    out: list[str] = []
+    try:
+        if force:
+            out.append(stage_name(force))
+        if from_stage:
+            out += list(stages_from(from_stage))
+    except ValueError as e:
+        raise typer.BadParameter(str(e))
+    return out
+
+
 def _body_run(body: str, runs: Optional[int], workers: Optional[int], store: bool = True) -> BodyRun:
+    _enable_stage_log()
     body = _check_body(body)
     cfg = load_all()
     ep = EARTH()
@@ -87,6 +113,8 @@ def _body_run(body: str, runs: Optional[int], workers: Optional[int], store: boo
 
 RunsOpt = typer.Option(None, "--runs", help="Monte Carlo runs (default from config/run.yaml)")
 WorkersOpt = typer.Option(None, "--workers", help="worker processes (default: all cores)")
+ForceOpt = typer.Option(None, "--force", help="rerun this one stage even if it is finished (simulate, or s5)")
+FromOpt = typer.Option(None, "--from", help="rerun this stage and every later one (s5 = simulate onward)")
 
 
 @app.command()
@@ -217,9 +245,10 @@ def s2_targets(body: str = BodyOpt, dem: Optional[Path] = typer.Option(None, "--
 
 def _stage_cmd(group: typer.Typer, cmd: str, stages: tuple[str, ...], doc: str) -> None:
     @group.command(cmd, help=doc)
-    def _run(body: str = BodyOpt, runs: Optional[int] = RunsOpt, workers: Optional[int] = WorkersOpt) -> None:
+    def _run(body: str = BodyOpt, runs: Optional[int] = RunsOpt, workers: Optional[int] = WorkersOpt,
+             force: bool = typer.Option(False, "--force", help="rerun this stage even if it is finished")) -> None:
         br = _body_run(body, runs, workers)
-        br.run(stages)
+        br.run(stages, force=[stages[-1]] if force else [])
         console.print(f"[PASS] {doc} done for {body}")
 
 
@@ -233,10 +262,13 @@ _stage_cmd(s9, "discover", ("discover",), "discovery: robust and novel candidate
 
 
 @app.command()
-def run(body: str = BodyOpt, runs: Optional[int] = RunsOpt, workers: Optional[int] = WorkersOpt) -> None:
-    """Runs s3..s7 (+s8, s9) in order, resumable. Writes results/<body>/run_meta.json."""
+def run(body: str = BodyOpt, runs: Optional[int] = RunsOpt, workers: Optional[int] = WorkersOpt,
+        force: Optional[str] = ForceOpt, from_stage: Optional[str] = FromOpt) -> None:
+    """Runs s3..s7 (+s8, s9) in order, resumable. Writes results/<body>/run_meta.json.
+    Finished stages are skipped when their inputs, config and code are unchanged; each skip and rerun is logged."""
+    forced = _forced(force, from_stage)
     br = _body_run(body, runs, workers)
-    br.run(STAGES)
+    br.run(STAGES, force=forced)
     if br.unscored:
         for k, v in br.unscored.items():
             console.print(f"[WARN] {k}: {v}")

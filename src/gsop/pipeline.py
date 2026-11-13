@@ -15,7 +15,7 @@ from . import gates as G
 from . import montecarlo as MC
 from . import similarity as S
 from . import weights as W
-from .provenance import write_json
+from .provenance import atomic_savez, atomic_to_parquet, write_json
 
 ILLUM_FAMILIES = ("illumination", "sunlight")
 
@@ -182,7 +182,7 @@ def run_job(job: Job, cfg: dict[str, Any], out_dir: Path | str, runs: int, worke
     cols = {"tile_id": tid, "score": score.astype(np.float32)}
     if illum is not None:
         cols["illum_match"] = illum.astype(np.float32)
-    pd.DataFrame(cols).to_parquet(out_dir / "base_scores.parquet", index=False)
+    atomic_to_parquet(pd.DataFrame(cols), out_dir / "base_scores.parquet", index=False)
     alt = alt_weight_checks(job, cfg["weights"], score, fam)
     write_json(out_dir / "alt_weight_checks.json", alt)
     summary: dict[str, Any] = {
@@ -207,9 +207,9 @@ def run_job(job: Job, cfg: dict[str, Any], out_dir: Path | str, runs: int, worke
         c.insert(2, "lon", job.earth["lon"].to_numpy()[rows])
         base_by_tile = pd.Series(score, index=tid)
         c["score_base"] = base_by_tile.reindex(c["tile_id"]).to_numpy()
-        c.to_parquet(out_dir / "mc_summary.parquet", index=False)
-        np.savez_compressed(out_dir / "mc_counts.npz", tile_id=tid, counts=res.counts.astype(np.uint16),
-                            mean_score=res.mean_score.astype(np.float32))
+        atomic_to_parquet(c, out_dir / "mc_summary.parquet", index=False)
+        atomic_savez(out_dir / "mc_counts.npz", compressed=True, tile_id=tid, counts=res.counts.astype(np.uint16),
+                     mean_score=res.mean_score.astype(np.float32))
         write_json(out_dir / "convergence.json", res.convergence)
         summary.update({"runs": runs, "mc_timings_s": res.timings_s, "weight_draw_stats": res.weight_stats,
                         "n_robust": int(res.robust_mask.sum())})

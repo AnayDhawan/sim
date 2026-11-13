@@ -28,7 +28,7 @@ def main() -> int:
     n = 0
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
         for p in sorted(src.rglob("*")):
-            if p.is_file() and ".done" not in p.parts and (full or p.name not in BIG):
+            if p.is_file() and ".done" not in p.parts and ".stages" not in p.parts and (full or p.name not in BIG):
                 z.write(p, f"{body}/{p.relative_to(src).as_posix()}")
                 n += 1
     print(f"{out}  ({n} files, {out.stat().st_size / 2**20:.1f} MB). Send it with run_meta.json (already inside).")
