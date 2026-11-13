@@ -42,9 +42,17 @@ def read_window(path: Path | str, lat: float, lon: float, size_km: float, nodata
         r, c = ds.index(x, y)
         cell = abs(ds.transform.a)
         n = int(round(size_km * 1000.0 / cell))
-        a = ds.read(1, window=Window(c - n // 2, r - n // 2, n, n), boundless=True, fill_value=np.nan).astype(float)
-        if ds.nodata is not None:
-            a[a == ds.nodata] = np.nan if nodata_as == "nan" else 0.0
+        # Read only the part inside the raster and leave the rest NaN. A boundless read with fill_value=NaN casts the
+        # fill to the file's dtype, so on an integer raster (uint8 mask, int16 DEM) off-raster cells came back as 0.
+        r_off, c_off = r - n // 2, c - n // 2
+        a = np.full((n, n), np.nan)
+        r0, c0 = max(r_off, 0), max(c_off, 0)
+        r1, c1 = min(r_off + n, ds.height), min(c_off + n, ds.width)
+        if r1 > r0 and c1 > c0:
+            part = ds.read(1, window=Window(c0, r0, c1 - c0, r1 - r0)).astype(float)
+            if ds.nodata is not None:
+                part[part == ds.nodata] = np.nan if nodata_as == "nan" else 0.0
+            a[r0 - r_off: r1 - r_off, c0 - c_off: c1 - c_off] = part
     return a, cell
 
 

@@ -111,6 +111,25 @@ def test_dem_nodata_is_still_nan_but_mask_nodata_is_zero(tmp_path):
         C.read_window(p, -89.9, 0.0, 5.0, "other")
 
 
+@pytest.mark.parametrize("dtype", ["uint8", "int16", "float32"])
+def test_cells_outside_the_raster_are_nan_for_every_dtype(tmp_path, dtype):
+    """A boundless read with fill_value=NaN cast the fill to the dtype: an integer raster got 0 outside its edge."""
+    p = tmp_path / f"edge_{dtype}.tif"
+    n, cell, half_km = 400, 100.0, 20
+    crs = "+proj=stere +lat_0=-90 +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=1737400 +b=1737400 +units=m +no_defs"
+    with rasterio.open(p, "w", driver="GTiff", height=n, width=n, count=1, dtype=dtype, crs=crs,
+                       transform=from_origin(-half_km * 1000.0, half_km * 1000.0, cell, cell)) as ds:
+        ds.write(np.ones((n, n), dtype=dtype), 1)
+    for mode in ("nan", "zero"):
+        a, _ = C.read_window(p, -89.35, 90.0, 17.0, mode)          # x about +19.7 km: half the window is past the edge
+        assert a.shape == (170, 170)
+        inside = np.isfinite(a)
+        assert 0 < inside.sum() < a.size and np.all(a[inside] == 1.0), (mode, np.unique(a[inside]))
+        assert np.isnan(a[:, -1]).all() and np.isfinite(a[:, 0]).all()
+    far, _ = C.read_window(p, -80.0, 0.0, 17.0)                    # no overlap at all
+    assert np.isnan(far).all()
+
+
 def test_central_crop_is_the_central_window():
     a = np.arange(170 * 170, dtype=float).reshape(170, 170)
     c = C.central_crop(a, 100.0, 15.0)
