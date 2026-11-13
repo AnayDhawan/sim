@@ -50,10 +50,13 @@ def profile_weights(body_cfg: dict[str, Any], purposes_cfg: dict[str, Any], prof
 
 
 def draw_weights(rng: np.random.Generator, ranges: dict[str, tuple[float, float]],
-                 mult: dict[str, float]) -> dict[str, float]:
-    """Draw each family weight uniformly within its range, renormalise, apply multipliers, renormalise."""
+                 mult: dict[str, float], return_raw: bool = False):
+    """Draw each family weight uniformly within its range (one scalar per family, in `ranges` order), renormalise to
+    sum 1, apply the purpose multipliers (a missing one is 1), renormalise again. `return_raw=True` also returns the
+    raw draws, before any renormalisation."""
     u = {k: float(rng.uniform(lo, hi)) for k, (lo, hi) in ranges.items()}
-    return apply_multipliers(normalise(u), mult)
+    w = apply_multipliers(normalise(u), mult)
+    return (w, u) if return_raw else w
 
 
 def alt_weight_sets(body: str, weights_cfg: dict[str, Any]) -> dict[str, dict[str, float]]:

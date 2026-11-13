@@ -91,6 +91,13 @@ def run_streams(master: int, run_id: int) -> list[np.random.Generator]:
     return [np.random.default_rng(c) for c in ss.spawn(3)]
 
 
+def weights_for_run(spec: MCSpec, run_id: int, return_raw: bool = False):
+    """The family weights of run `run_id`. Pure: it depends only on (master seed, run id, ranges, multipliers), not on
+    global state, call order, batch layout or worker count, so any worker can reproduce any run. Order: uniform draw
+    in each range, renormalise, purpose multipliers, renormalise (docs/SPEC.md section 8)."""
+    return draw_weights(run_streams(spec.master_seed, run_id)[0], spec.ranges, spec.multipliers, return_raw)
+
+
 def draw_run(spec: MCSpec, run_id: int) -> tuple[dict[str, float], dict[str, float]]:
     rw, rt, rb = run_streams(spec.master_seed, run_id)
     w = draw_weights(rw, spec.ranges, spec.multipliers)
