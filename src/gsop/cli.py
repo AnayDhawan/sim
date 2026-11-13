@@ -118,26 +118,73 @@ def s1_tiles(raster: Path = typer.Option(..., "--raster", help="6 km EPSG:6933 G
 
 @s2.command("earth")
 def s2_earth(source: str = typer.Option("local", "--source", help="gee or local"),
-             src: Optional[Path] = typer.Option(None, "--src", help="local: GeoTIFF or folder of 6 km rasters")) -> None:
+             src: Optional[Path] = typer.Option(None, "--src", help="local: GeoTIFF or folder of 6 km rasters"),
+             add_solar: bool = typer.Option(False, "--add-solar", help="local: add sun_max_elev, sun_low_share, insol_annual "
+                                            "computed from latitude only (earth/solar.py)"),
+             verify: bool = typer.Option(False, "--verify", help="gee: check every collection id in the live catalog and stop"),
+             bbox: Optional[str] = typer.Option(None, "--bbox", help="gee: lon_min,lat_min,lon_max,lat_max (default: global)"),
+             name: str = typer.Option("gsop_earth", "--name", help="gee: export task prefix"),
+             project: Optional[str] = typer.Option(None, "--project", help="gee: Cloud project id (or set GSOP_EE_PROJECT)"),
+             dry_run: bool = typer.Option(False, "--dry-run", help="gee: print the export plan, start nothing")) -> None:
     """Earth features -> data/processed/earth_features_6km.parquet (+ grid.json, MANIFEST sha256)."""
     out = EARTH()
     if source == "gee":
         from .earth import gee_export
-        gee_export.run()
+        from .earth import open_data as OD
+        try:
+            if verify:
+                rows = gee_export.verify(project)
+                bad = [r for r in rows if not r["reachable"] or r.get("bands_missing")]
+                for r in rows:
+                    console.print(f"[{'FAIL' if r in bad else 'PASS'}] {r['id']}: {r.get('error') or r.get('bands_missing') or 'ok'}")
+                raise typer.Exit(1 if bad else 0)
+            box = tuple(float(v) for v in bbox.split(",")) if bbox else None
+            tasks = gee_export.run(box, name, project=project, dry_run=dry_run)
+        except RuntimeError as e:
+            console.print(f"[FAIL] {e}")
+            raise typer.Exit(1)
+        console.print(f"[PASS] {len(tasks)} export task(s) {'planned' if dry_run else 'started'}; download the GeoTIFFs from "
+                      "Drive, then `gsop s2 earth --source local --src <folder> --add-solar`")
         return
     from .earth.local_loaders import build_earth_table
     s = src or data_dir("raw") / "earth"
-    df = build_earth_table(s, out)
+    df = build_earth_table(s, out, add_solar=add_solar)
     T.write_data_manifest(out.parent)
     console.print(f"[PASS] {len(df):,} tiles -> {out}; MANIFEST.json written (send it with the parquet and grid.json)")
 
 
+@s2.command("open-data")
+def s2_open_data(spec: Path = typer.Option(Path("config/open_data.yaml"), "--spec", help="YAML: dem and layers files"),
+                 out: Path = typer.Option(None, "--out", help="output GeoTIFF (default data/raw/earth/earth_6km.tif)"),
+                 bbox: Optional[str] = typer.Option(None, "--bbox", help="lon_min,lat_min,lon_max,lat_max (default: global)")) -> None:
+    """Open-data fallback: resample downloaded rasters onto the 6 km grid. Then run `gsop s2 earth --source local`."""
+    import yaml
+    from .earth import open_data as OD
+    cfg = load_all()
+    sp = yaml.safe_load(Path(spec).read_text(encoding="utf-8"))
+    box = tuple(float(v) for v in bbox.split(",")) if bbox else None
+    if box is not None and len(box) != 4:
+        raise typer.BadParameter("--bbox needs four numbers: lon_min,lat_min,lon_max,lat_max")
+    dst = out or data_dir("raw") / "earth" / "earth_6km.tif"
+    rep = OD.build_rasters(sp, cfg["features"]["operator"], dst, box)
+    console.print(f"[PASS] {dst} with bands {rep['bands']}")
+    for c, why in rep["left_out"].items():
+        console.print(f"[WARN] left out {c}: {why}")
+    console.print(f"Next: uv run gsop s2 earth --source local --src {dst}")
+
+
 @s2.command("targets")
-def s2_targets(body: str = BodyOpt, dem: Optional[Path] = typer.Option(None, "--dem", help="DEM GeoTIFF (LOLA or MOLA)")) -> None:
+def s2_targets(body: str = BodyOpt, dem: Optional[Path] = typer.Option(None, "--dem", help="DEM GeoTIFF (LOLA or MOLA)"),
+               psr: Optional[Path] = typer.Option(None, "--psr", help="moon: PSR raster (non-zero = permanently shadowed)")) -> None:
     """Target profiles -> data/processed/targets_{body}.parquet."""
     from .targets import common, mars, moon
     cfg = load_all()
-    rows = (moon if _check_body(body) == "moon" else mars).build(cfg, dem)
+    if _check_body(body) == "moon":
+        rows = moon.build(cfg, dem, psr)
+    else:
+        if psr:
+            raise typer.BadParameter("--psr is for the Moon only")
+        rows = mars.build(cfg, dem)
     df = common.write_profile(rows, data_dir("processed") / f"targets_{body}.parquet")
     un = df[df["unavailable"]].groupby("target")["col"].apply(list).to_dict()
     console.print(f"[PASS] {df['target'].nunique()} targets written")
@@ -225,17 +272,20 @@ def merge(results_moon: Path, results_mars: Path, out: Path = typer.Option(None,
 
 
 @app.command("check-operators")
-def check_operators() -> None:
-    """Earth Engine vs numpy terrain operators on one small window. Phase 2: needs an authenticated session."""
+def check_operators(project: Optional[str] = typer.Option(None, "--project", help="Earth Engine Cloud project id"),
+                    lon: float = typer.Option(76.51, "--lon", help="window centre longitude (default: near Lonar)"),
+                    lat: float = typer.Option(19.98, "--lat", help="window centre latitude"),
+                    tiles: int = typer.Option(5, "--tiles", help="window edge in 6 km tiles")) -> None:
+    """Earth Engine vs numpy terrain operators on one small window; writes results/operator_check.json. Needs a login."""
+    from .earth import check_operators as CO
     try:
-        import ee
-        ee.Initialize()
-    except Exception as e:  # noqa: BLE001
-        console.print(f"[FAIL] Earth Engine is not ready ({e}). Run `earthengine authenticate`, give the Cloud project "
-                      "id to Anay, then implement the Earth Engine side (issue #2).")
+        rep = CO.run((lon, lat), tiles, project=project, out=results_dir() / "operator_check.json")
+    except RuntimeError as e:
+        console.print(f"[FAIL] {e}")
         raise typer.Exit(1)
-    console.print("[PENDING] Earth Engine side of the operator is not implemented yet (issue #2)")
-    raise typer.Exit(2)
+    for k, r in rep["features"].items():
+        console.print(f"[{'PASS' if r['ok'] else 'FAIL'}] {k}: relative difference {r['rel_diff']:.3%} over {r['n']} tiles")
+    raise typer.Exit(0 if rep["ok"] else 1)
 
 
 if __name__ == "__main__":

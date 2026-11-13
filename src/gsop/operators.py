@@ -29,8 +29,12 @@ def block_mean(a: np.ndarray, f: int) -> np.ndarray:
     return b.mean(axis=(1, 3))
 
 
-def slope_deg(z: np.ndarray, cell_m: float) -> np.ndarray:
-    """Horn 3x3 slope in degrees. Border cells are NaN. NaN neighbours give NaN."""
+def slope_deg(z: np.ndarray, cell_m: float, kx: np.ndarray | None = None) -> np.ndarray:
+    """Horn 3x3 slope in degrees. Border cells are NaN. NaN neighbours give NaN.
+    kx (optional, shape (rows, 1) or (rows,)): ground metres per projected metre in x for each row. The grid is
+    EPSG:6933, a cylindrical equal-area projection, so a projected cell is cell_m * kx metres east-west and
+    cell_m / kx metres north-south on the ground; kx = cos(lat) / cos(30 deg). Without kx the cell is taken as square
+    ground metres (right for polar-stereographic Moon and Mars windows and for small windows near 30 deg latitude)."""
     z = np.asarray(z, dtype=np.float64)
     out = np.full(z.shape, np.nan)
     if z.shape[0] < 3 or z.shape[1] < 3:
@@ -38,8 +42,13 @@ def slope_deg(z: np.ndarray, cell_m: float) -> np.ndarray:
     a, b, c = z[:-2, :-2], z[:-2, 1:-1], z[:-2, 2:]
     d, f = z[1:-1, :-2], z[1:-1, 2:]
     g, h, i = z[2:, :-2], z[2:, 1:-1], z[2:, 2:]
-    dzdx = ((c + 2 * f + i) - (a + 2 * d + g)) / (8 * cell_m)
-    dzdy = ((g + 2 * h + i) - (a + 2 * b + c)) / (8 * cell_m)
+    if kx is None:
+        sx = sy = 8 * cell_m
+    else:
+        k = np.asarray(kx, dtype=np.float64).reshape(-1, 1)[1:-1]          # row of the centre cell
+        sx, sy = 8 * cell_m * k, 8 * cell_m / k
+    dzdx = ((c + 2 * f + i) - (a + 2 * d + g)) / sx
+    dzdy = ((g + 2 * h + i) - (a + 2 * b + c)) / sy
     out[1:-1, 1:-1] = np.degrees(np.arctan(np.hypot(dzdx, dzdy)))
     return out
 
@@ -82,9 +91,11 @@ def _nanstat(v: np.ndarray, fn) -> np.ndarray:
 
 
 def tile_features(dem: np.ndarray, res_m: float, tile_m: float = 6000.0, stride_m: float | None = None,
-                  slope_baseline_m: float = 500.0, rough_baselines_m: tuple[float, float] = (100.0, 1000.0),
-                  margin_m: float = 0.0) -> dict[str, np.ndarray]:
+                  slope_baseline_m: float = 500.0, rough_baselines_m: tuple[float, float] | None = (100.0, 1000.0),
+                  margin_m: float = 0.0, kx_rows: np.ndarray | None = None) -> dict[str, np.ndarray]:
     """Terrain features on a grid of tiles. stride_m defaults to tile_m (non-overlapping).
+    rough_baselines_m=None skips roughness (used when the DEM is too coarse for the baselines: the open-data fallback).
+    kx_rows: per-row ground scale for the block-meaned grid, see slope_deg (the open-data fallback on EPSG:6933).
     margin_m: the DEM extends this far beyond the tile area on every side (a multiple of the slope baseline).
     Slope needs one neighbouring cell, so a margin of one baseline gives valid slope up to the tile edge."""
     stride_m = tile_m if stride_m is None else stride_m
@@ -92,7 +103,9 @@ def tile_features(dem: np.ndarray, res_m: float, tile_m: float = 6000.0, stride_
     if abs(f - round(f)) > 1e-9 or f < 1:
         raise ValueError(f"slope baseline {slope_baseline_m} m is not a whole multiple of the DEM cell {res_m} m")
     z = block_mean(dem, int(round(f)))
-    s = slope_deg(z, slope_baseline_m)
+    if kx_rows is not None and len(kx_rows) != z.shape[0]:
+        raise ValueError(f"kx_rows has {len(kx_rows)} rows, the block-meaned DEM has {z.shape[0]}")
+    s = slope_deg(z, slope_baseline_m, kx_rows)
     mc = margin_m / slope_baseline_m
     if abs(mc - round(mc)) > 1e-9:
         raise ValueError("margin must be a whole multiple of the slope baseline")
@@ -111,7 +124,7 @@ def tile_features(dem: np.ndarray, res_m: float, tile_m: float = 6000.0, stride_
         "slope_p90": _nanstat(_tile_view(s, t_cells, st_cells), lambda a: np.nanpercentile(a, 90, axis=2)),
         "relief": _nanstat(_tile_view(z, t_cells, st_cells), lambda a: np.nanmax(a, axis=2) - np.nanmin(a, axis=2)),
     }
-    for name, b in zip(("rough_a", "rough_b"), rough_baselines_m):
+    for name, b in zip(("rough_a", "rough_b"), rough_baselines_m or ()):
         k = b / res_m
         if abs(k - round(k)) > 1e-9 or k < 3:
             raise ValueError(f"{name} baseline {b} m needs a DEM cell of at most {b / 3:.0f} m (got {res_m} m)")

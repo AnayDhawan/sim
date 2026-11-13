@@ -9,6 +9,7 @@ A band that is absent stays absent (NaN column): the missing-data gate then reje
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +19,16 @@ from ..grid import Grid
 from ..provenance import sha256_file, write_json
 
 LAND_MIN = 0.5
+
+
+def _sidecar_name(f: Path, i: int) -> str | None:
+    """Earth Engine GeoTIFFs may carry no band descriptions. gee_export writes `<name>_export_plan.json` with the band
+    order; a `<file>.bands.json` (a list of names) next to the raster is also accepted."""
+    side = f.with_name(f.name + ".bands.json")
+    if side.exists():
+        names = json.loads(side.read_text())
+        return names[i - 1] if i - 1 < len(names) else None
+    return None
 
 
 def _read_bands(src: Path) -> tuple[dict[str, np.ndarray], object, tuple[int, int]]:
@@ -39,7 +50,7 @@ def _read_bands(src: Path) -> tuple[dict[str, np.ndarray], object, tuple[int, in
             elif (ds.transform, ds.height, ds.width) != (tf, shape[0], shape[1]):
                 raise ValueError(f"{f}: raster is not aligned with the others")
             for i in range(1, ds.count + 1):
-                name = ds.descriptions[i - 1] or (f.stem if ds.count == 1 else None)
+                name = ds.descriptions[i - 1] or (f.stem if ds.count == 1 else None) or _sidecar_name(f, i)
                 if not name:
                     raise ValueError(f"{f}: band {i} has no description")
                 a = ds.read(i).astype(np.float64)
@@ -49,7 +60,8 @@ def _read_bands(src: Path) -> tuple[dict[str, np.ndarray], object, tuple[int, in
     return bands, tf, shape
 
 
-def build_earth_table(src: Path | str, out_path: Path | str, grid: Grid | None = None) -> pd.DataFrame:
+def build_earth_table(src: Path | str, out_path: Path | str, grid: Grid | None = None,
+                      add_solar: bool = False) -> pd.DataFrame:
     grid = grid or Grid()
     bands, tf, shape = _read_bands(Path(src))
     if "land_frac" not in bands:
@@ -64,6 +76,12 @@ def build_earth_table(src: Path | str, out_path: Path | str, grid: Grid | None =
     for name, a in bands.items():
         if name != "land_frac":
             df[name] = a[jj, ii].astype(np.float32)
+    if add_solar:
+        # computed from latitude only (earth/solar.py); a band that the raster already has is never overwritten
+        from .solar import sun_features
+        for k, v in sun_features(df["lat"].to_numpy()).items():
+            if k not in df.columns:
+                df[k] = v.astype(np.float32)
     df = df.sort_values("tile_id").reset_index(drop=True)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
