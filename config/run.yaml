@@ -21,3 +21,6 @@ operator_check: {threshold: 0.10, n_tiles: 5, center_lonlat: [76.51, 19.98]}   #
 # s1 tiles (gsop s1 tiles): the land-tile count the plan expects at 6 km ("about 4 million"; the figure is the plan's, not
 # measured by us). The stage reports the ratio and flags WARN when the count is further than far_off_frac from it.
 tiles: {expected_land_tiles: 4000000, far_off_frac: 0.30, chunk_rows: 200}
+# gsop sensitivity (D09): short Monte Carlo per variant. Ranges are scaled about their midpoint; the IQR multiplier of the sigma
+# rule is 0.25 in the primary index.
+sensitivity: {runs: 200, range_factors: [0.5, 1.5], iqr_factors: [0.15, 0.25, 0.35]}

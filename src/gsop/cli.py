@@ -290,6 +290,16 @@ def run(body: str = BodyOpt, runs: Optional[int] = RunsOpt, workers: Optional[in
 
 
 @app.command()
+def sensitivity(body: str = BodyOpt, workers: Optional[int] = WorkersOpt) -> None:
+    """Drop-one-family, weight-range and sigma-IQR sensitivity of the base profile (short Monte Carlo per variant,
+    run length from config/run.yaml sensitivity.runs)."""
+    br = _body_run(body, None, workers)
+    br.run(("gates",))
+    br.run_sensitivity()
+    console.print(f"[PASS] sensitivity.json written under results/{body}/<target>__base/")
+
+
+@app.command()
 def golden(regenerate_inputs: bool = typer.Option(False, "--regenerate-inputs", help="maintainers only"),
            out: Path = typer.Option(Path("golden.json"), "--out"), workers: int = typer.Option(1, "--workers"),
            check: bool = typer.Option(False, "--check", help="compare with tests/golden/golden_expected.json")) -> None:

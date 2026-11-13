@@ -414,12 +414,22 @@ def _validate_run(c: _Check, r: dict) -> None:
         if ff is not None and not 0 < ff < 1:
             c.err(f, "tiles.far_off_frac", f"must be in (0, 1), got {ff}")
         c.unknown(f, "tiles", tl, {"expected_land_tiles", "far_off_frac", "chunk_rows"})
+    sv = r.get("sensitivity")
+    if sv is not None and c.mapping(f, "sensitivity", sv):
+        v = c.require(f, "sensitivity", sv, "runs", int)
+        if v is not None and v <= 0:
+            c.err(f, "sensitivity.runs", f"must be > 0, got {v}")
+        for k in ("range_factors", "iqr_factors"):
+            lst = c.require(f, "sensitivity", sv, k, list)
+            if lst is not None and (not lst or not all(_is(x, NUM) and x > 0 for x in lst)):
+                c.err(f, f"sensitivity.{k}", f"must be a non-empty list of numbers > 0, got {lst!r}")
+        c.unknown(f, "sensitivity", sv, {"runs", "range_factors", "iqr_factors"})
     dc = r.get("drop_columns")
     if dc is not None and not (isinstance(dc, list) and all(isinstance(x, str) for x in dc)):
         c.err(f, "drop_columns", f"must be a list of column names, got {dc!r}")
     c.unknown(f, "", r, {"master_seed", "runs", "batch_runs", "tile_m", "grid_crs", "top_fracs", "robust", "candidates",
                          "convergence_checkpoints", "ram_fraction", "site_match_radius_km", "discovery", "ml",
-                         "compare", "drop_columns", "operator_check", "tiles"})
+                         "compare", "drop_columns", "operator_check", "tiles", "sensitivity"})
 
 
 def check(cfg: dict[str, Any]) -> tuple[list[str], list[str]]:

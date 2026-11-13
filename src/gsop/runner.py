@@ -99,6 +99,7 @@ class BodyRun:
                       "columns": {f: v["columns"] for f, v in c["weights"][b].items()}},
             "score": score,
             "simulate": {**score, "mc": mc},
+            "sensitivity": {**score, "mc": mc, "sensitivity": c["run"]["sensitivity"]},
             "ml": {"known_sites": c["known_sites"]["primary"], "ml": c["run"]["ml"], "master_seed": c["run"]["master_seed"]},
             "validate": {"known_sites": c["known_sites"], "site_match_radius_km": c["run"]["site_match_radius_km"]},
             "discover": {"known_sites": c["known_sites"], "discovery": c["run"]["discovery"], "gates": c["gates"]},
@@ -309,6 +310,23 @@ class BodyRun:
                                                     "note": "Site coordinates are unconfirmed; see validation.json",
                                                     "targets": reps})
         atomic_write_text(self.res_dir / "baselines.md", "\n".join(V.baselines_markdown(r) for r in reps.values()))
+
+    # ------------------------------------------------------------------ sensitivity (D09)
+    def run_sensitivity(self, profile: str = "base") -> None:
+        """Drop-one-family, weight-range and sigma-IQR sensitivity for every scored target; sensitivity.json and .md
+        per target. Not part of the default `run` (it adds six short Monte Carlo runs per target)."""
+        from . import sensitivity as SE
+        for t in self.targets:
+            name = f"{t}__{profile}"
+            d = self.res_dir / name
+
+            def go(t=t, d=d):
+                rep = SE.run_sensitivity(self.job(t, profile), self.cfg, self.work_dir / f"sens_{t}", None, self.workers,
+                                         self.free_bytes)
+                write_json(d / "sensitivity.json", rep)
+                atomic_write_text(d / "sensitivity.md", SE.markdown(rep))
+            self._stage("sensitivity", name, {"target": config_hash(self.tprofs[t]["cols"])}, go,
+                        [d / "sensitivity.json", d / "sensitivity.md"], {"gates": self._key_of(f"gates__{profile}")})
 
     # ------------------------------------------------------------------ s9
     def s9_discover(self) -> None:
