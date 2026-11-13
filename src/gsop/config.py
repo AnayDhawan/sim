@@ -237,6 +237,9 @@ def _validate_gates(c: _Check, g: dict) -> None:
             if v is not None and not -1 <= v <= 1:
                 c.err(f, f"tile_gates.{k}", f"must be in [-1, 1], got {v}")
         c.unknown(f, "tile_gates", tg, {"open_water_or_ice_frac_max", "ndvi_median_max", "built_or_crop_frac_max"})
+    nm = g.get("near_miss_frac", 0.10)
+    if not _is(nm, NUM) or not 0 <= nm < 1:
+        c.err(f, "near_miss_frac", f"must be a number in [0, 1), got {nm!r}")
     mc = c.require(f, "", g, "mars_target_check", dict)
     if mc is not None:
         mode = c.require(f, "mars_target_check", mc, "mode", str)
@@ -245,7 +248,7 @@ def _validate_gates(c: _Check, g: dict) -> None:
         for k in ("lat_abs_max_deg", "elevation_m_max", "thermal_inertia_si_min"):
             c.require(f, "mars_target_check", mc, k, NUM)
         c.unknown(f, "mars_target_check", mc, {"mode", "lat_abs_max_deg", "elevation_m_max", "thermal_inertia_si_min"})
-    c.unknown(f, "", g, {"tile_gates", "mars_target_check"})
+    c.unknown(f, "", g, {"tile_gates", "mars_target_check", "near_miss_frac"})
 
 
 def _lat_lon(c: _Check, f: str, p: str, s: dict, lon_key: str, allow_null: bool) -> None:

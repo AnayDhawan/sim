@@ -166,12 +166,21 @@ class BodyRun:
         for prof in self.profiles:
             def go(prof=prof):
                 g = self.gate_table(prof, cols)
-                atomic_to_parquet(g[["tile_id", "code"]], self.res_dir / f"gates__{prof}.parquet", index=False)
+                atomic_to_parquet(g[["tile_id", "code", "mask", "near"]], self.res_dir / f"gates__{prof}.parquet",
+                                  index=False)
+                c = G.reason_counts(g)
                 write_json(self.res_dir / f"gates__{prof}.json", {
-                    "profile": prof, "n_tiles": int(len(g)), "n_passed": int(g["passed"].sum()),
-                    "rejected_by_reason": {k: int(v) for k, v in g["reason"].value_counts().items() if k != "ok"}})
+                    "profile": prof, "n_tiles": c["n_tiles"], "n_passed": c["n_passed"],
+                    "rejected_by_reason": c["primary"], "rejected_by_any_reason": c["any"],
+                    "near_miss": c["near_miss"], "near_miss_frac": float(self.cfg["gates"].get("near_miss_frac", 0.10))})
             self._stage("gates", prof, {}, go, [self.res_dir / f"gates__{prof}.parquet",
                                                 self.res_dir / f"gates__{prof}.json"])
+            gj = self.res_dir / f"gates__{prof}.json"
+            if gj.exists():          # printed whether the stage ran or was skipped
+                j = read_json(gj)
+                log.info(G.format_counts({"n_tiles": j["n_tiles"], "n_passed": j["n_passed"],
+                                          "primary": j["rejected_by_reason"], "any": j.get("rejected_by_any_reason", {}),
+                                          "near_miss": j.get("near_miss", {})}, f"{self.body}/{prof}"))
 
     # ------------------------------------------------------------------ s4 / s5
     def job(self, target: str, profile: str) -> P.Job:

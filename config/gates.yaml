@@ -5,6 +5,8 @@ tile_gates:
   built_or_crop_frac_max: 0.20
   # landing_mobility extra gate: see purposes.yaml
   # missing data for any feature the target's weights use: always on
+# A tile that PASSES a gate but is within this share of its threshold is flagged near-miss (discovery cards). Not a gate.
+near_miss_frac: 0.10
 # D6: Mars target check. warn = still run, label outputs fails_own_gate: true. strict = skip the target.
 mars_target_check:
   mode: warn
