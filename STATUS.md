@@ -8,12 +8,19 @@
 - ML second opinion, validation with pre-registered criteria, discovery, export with sha256 manifest, compare, merge, golden slice.
 - CLI: `doctor`, `s1` to `s9`, `run`, `golden`, `verify-data`, `compare`, `merge`, `check-operators`.
 
-## Not done (all of this needs real data or a login)
-- Earth Engine export (`earth/gee_export.py` is a stub): needs Anay's `earthengine authenticate` and Cloud project ID. Issue #1.
-- `gsop check-operators` Earth Engine side. Issue #2.
-- Moon target profiles beyond terrain and the illumination rule: water_index, Diviner temperatures, silica, ti_proxy. Issue #3.
-- Mars target profiles and the Arcadia centre. Issue #4. Arcadia stays `unscored: no target data`.
-- No real run has happened: no real Earth file, no real target profile, so no real result and no measured run time.
+## Added after the first status (2026-11-13, branch fix/open-issues, issues #1 to #11)
+- CI workflow for Windows and macOS (`.github/workflows/ci.yml`): not run on GitHub yet. A macOS memory-budget test failure was fixed in `montecarlo.memory_plan`. 72 tests pass on an Apple-silicon Mac.
+- Measured 4M-tile Monte Carlo: 332 s per target x profile (SPEC 8b). No optimisation needed.
+- SPEC gaps found by an independent re-implementation are fixed in `docs/SPEC.md`. One agent did it, not a human: issue #7 stays open for a person.
+- Known-site coordinates checked against opened sources; six confirmed, the rest listed with reasons. Manicouagan gate-test point is the reservoir, not the structure (`docs/UNVERIFIED.md`).
+- Earth Engine export, operator check and open-data fallback written (`earth/`). Earth Engine parts are NOT RUN (login needed); the open-data fallback and all maths are tested on synthetic data only.
+- Moon `water_index` from a PSR raster; Mars elevation and air density from a MOLA window. Everything else in issues #3 and #4 is blocked on data or decisions listed in `docs/UNVERIFIED.md`.
+
+## Still not done (needs a login, real data, or a person's decision)
+- Earth Engine: `gsop s2 earth --source gee --verify`, `gsop check-operators`, a Lonar test export. Needs Anay's login (issues #1, #2).
+- Moon `t_mean`, `t_coldest`, `ti_proxy`, `silica_index`; Mars most columns; the Arcadia centre (issues #3, #4).
+- A real run: no real Earth file or target profile exists, so there is no real result.
+- Sign-off by people: ledger relevance matrix (#11), known-site list (#10), uncertainty choices (#9), a human read of SPEC (#7).
 
 ## UNVERIFIED (see `docs/UNVERIFIED.md`)
 - All known-site coordinates. Every validation result is stamped provisional.

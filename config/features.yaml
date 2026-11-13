@@ -31,8 +31,14 @@ gate_layers:
 # null = no sourced value, so the IQR term (and the target spread) alone applies. TODO marks a value a human must supply.
 measurement_uncertainty:
   moon:
-    slope_med: 2.0      # Barker 2021 gives 1.5 to 2.5 deg; MIDPOINT chosen by the assistant, UNVERIFIED
+    # Source (opened 2026-11-13): Barker et al. 2021, Planet. Space Sci. 203:105119, https://ntrs.nasa.gov/citations/20205009660 :
+    # "The LDEM surface height and slope uncertainties have typical RMS values of ~0.30-0.50 m and ~1.5-2.5 deg". The paper gives
+    # ONE range for the four south-pole sites (5 m/pixel LDEMs), not per-site values. The values below are the MIDPOINTS of those
+    # ranges, which is a choice (the upper ends 2.5 deg and 0.5 m would be the conservative alternative). They are also an
+    # extrapolation: the figures are for 5 m pixels, and no source gives the error at the 500 m baseline this project uses.
+    slope_med: 2.0      # midpoint of 1.5-2.5 deg (choice, see above)
     slope_p90: 2.0      # same
-    relief: 0.4         # Barker 2021 height error 0.3 to 0.5 m; MIDPOINT chosen by the assistant, UNVERIFIED
+    relief: 0.4         # midpoint of 0.3-0.5 m (choice, see above). Never binds: 0.25 * IQR is far larger
+    # Other bodies and columns have NO value on purpose. Sourced candidates, and why none was applied, are in docs/UNCERTAINTY_SOURCES.md.
   mars: {}
 earth_uncertainty: {}   # systematic Earth bias per column. Empty: none sourced yet (TODO)
