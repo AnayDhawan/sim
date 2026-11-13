@@ -86,7 +86,7 @@ def test_psr_water_index_survives_any_declared_nodata(tmp_path, nodata):
     cfg = {**CFG, "targets": {**CFG["targets"], "moon": {"c": {"lat": -89.9, "lon_e": 0.0, "source": "test"}}}}
     row = {r["col"]: r for r in moon.build(cfg, None, psr)}["water_index"]
     assert not row["unavailable"], f"nodata={nodata}: water_index was dropped"
-    assert 0.0 < row["value"] < 1.0 or row["value"] in (0.0, 1.0)
+    assert row["value"] == pytest.approx(0.5)                # left half shadowed: tile shares 1, .75, .25, 0, median .5
     assert row["evidence_grade"] == "B"                                       # encoding not confirmed: not A
     assert "CONFIRM the encoding" in row["source"]                           # PSR_NOTE is in the row
 
@@ -99,6 +99,35 @@ def test_psr_value_is_the_same_with_and_without_a_declared_nodata(tmp_path):
         cfg = {**CFG, "targets": {**CFG["targets"], "moon": {"c": {"lat": -89.9, "lon_e": 0.0, "source": "test"}}}}
         vals.append({r["col"]: r for r in moon.build(cfg, None, p)}["water_index"]["value"])
     assert vals[0] == pytest.approx(vals[1])
+
+
+def _psr_row(path):
+    cfg = {**CFG, "targets": {**CFG["targets"], "moon": {"c": {"lat": -89.9, "lon_e": 0.0, "source": "test"}}}}
+    return {r["col"]: r for r in moon.build(cfg, None, path)}["water_index"]
+
+
+@pytest.mark.parametrize("nodata", [None, 0.0])
+def test_psr_mask_with_no_shadow_gives_share_zero_not_unavailable(tmp_path, nodata):
+    p = tmp_path / "none.tif"
+    _mask_tif(p, nodata)
+    with rasterio.open(p, "r+") as ds:
+        ds.write(np.zeros((ds.height, ds.width), dtype="float32"), 1)
+    row = _psr_row(p)
+    assert not row["unavailable"] and row["value"] == 0.0
+
+
+@pytest.mark.parametrize("nodata", [-9999.0, 255.0])
+def test_psr_mask_nonzero_nodata_is_missing_not_unshadowed(tmp_path, nodata):
+    """A declared nodata other than 0 marks cells with no data. Reading them as 0 would count them as 'not shadowed'."""
+    p = tmp_path / "gap.tif"
+    _mask_tif(p, nodata)
+    with rasterio.open(p, "r+") as ds:
+        a = ds.read(1)
+        a[:, :] = nodata                                    # no data anywhere
+        ds.write(a, 1)
+    assert _psr_row(p)["unavailable"]
+    m, _ = C.read_window(p, -89.9, 0.0, 5.0, "zero")
+    assert np.isnan(m).all()
 
 
 def test_dem_nodata_is_still_nan_but_mask_nodata_is_zero(tmp_path):
