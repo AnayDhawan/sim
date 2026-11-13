@@ -47,6 +47,8 @@ def family_scores(X: Mapping[str, np.ndarray], target: Mapping[str, float], sigm
 
 
 def tile_score(fam: Mapping[str, np.ndarray], weights: Mapping[str, float]) -> np.ndarray:
+    """100 * sum_f w_f * S_f. A family with weight 0 is skipped, so NaN in an unused family does not poison the tile.
+    NaN in a used family gives a NaN score: the tile is missing, never scored as if the value were 0."""
     acc = None
     for f, s in fam.items():
         w = weights.get(f, 0.0)
@@ -56,3 +58,43 @@ def tile_score(fam: Mapping[str, np.ndarray], weights: Mapping[str, float]) -> n
     if acc is None:
         raise ValueError("all family weights are zero")
     return np.float32(100.0) * acc
+
+
+def score_block(X: np.ndarray, col_index: Mapping[str, int], fam_cols: Mapping[str, list[str]],
+                weights: Mapping[str, float], target: Mapping[str, float], sigma: Mapping[str, float],
+                return_families: bool = False):
+    """The one scoring function, for a single run and for the Monte Carlo inner loop.
+
+    X: (n_cols, n) array, row `col_index[c]` is column c (a slice of a chunk is fine). `weights` and `target` are
+    arguments, so the Monte Carlo passes the per-run draw and jittered target and a single run passes the derived
+    weights and the target profile. Returns float32 scores (n,), and with `return_families=True` also the dict of
+    per-family similarities (needed for "which features drive the match" and illumination_match).
+    NaN in any used column marks the tile missing (NaN score); `valid_mask` says which tiles are scored."""
+    fam = family_scores({c: X[col_index[c]] for cols in fam_cols.values() for c in cols}, target, sigma, fam_cols)
+    score = tile_score(fam, weights)
+    return (score, fam) if return_families else score
+
+
+def valid_mask(score: np.ndarray) -> np.ndarray:
+    """True where the tile has a score (no NaN in any used column)."""
+    return np.isfinite(score)
+
+
+def throughput(n_tiles: int = 1_000_000, n_cols: int = 15, seed: int = 0, repeats: int = 3) -> dict[str, float]:
+    """Tiles scored per second on one core (this process), best of `repeats`, on uniform random float32 data with the
+    columns split into families of two."""
+    import time
+    rng = np.random.default_rng(seed)
+    X = rng.random((n_cols, n_tiles), dtype=np.float32)
+    cols = [f"c{i}" for i in range(n_cols)]
+    idx = {c: i for i, c in enumerate(cols)}
+    fam_cols = {f"f{i // 2}": cols[i:i + 2] for i in range(0, n_cols, 2)}
+    w = {f: 1.0 / len(fam_cols) for f in fam_cols}
+    t = {c: 0.5 for c in cols}
+    sg = {c: 0.2 for c in cols}
+    best = float("inf")
+    for _ in range(repeats):
+        t0 = time.perf_counter()
+        score_block(X, idx, fam_cols, w, t, sg)
+        best = min(best, time.perf_counter() - t0)
+    return {"n_tiles": n_tiles, "n_cols": n_cols, "seconds": best, "tiles_per_second": n_tiles / best}

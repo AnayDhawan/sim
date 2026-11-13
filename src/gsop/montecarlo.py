@@ -30,7 +30,7 @@ from tqdm import tqdm
 
 from .parallel import run_tasks
 from .provenance import atomic_savez, config_hash, read_json, sha256_file, write_json
-from .similarity import column_similarity
+from .similarity import score_block
 from .weights import draw_weights
 
 
@@ -102,21 +102,14 @@ def draw_run(spec: MCSpec, run_id: int) -> tuple[dict[str, float], dict[str, flo
 
 
 def score_tiles(X: np.ndarray, spec: MCSpec, w: dict[str, float], t: dict[str, float], chunk: int) -> np.ndarray:
-    """X is (n_cols, N) float32 in spec.columns order. Returns (N,) float32 scores."""
+    """X is (n_cols, N) float32 in spec.columns order. Returns (N,) float32 scores, in chunks of `chunk` tiles.
+    The arithmetic is similarity.score_block, the same function a single run uses."""
     idx = {c: i for i, c in enumerate(spec.columns)}
     n = X.shape[1]
     out = np.empty(n, dtype=np.float32)
     for a in range(0, n, chunk):
         b = min(a + chunk, n)
-        acc = np.zeros(b - a, dtype=np.float32)
-        for fam, cols in spec.families.items():
-            wf = np.float32(w[fam])
-            fs = None
-            for c in cols:
-                s = column_similarity(X[idx[c], a:b], t[c], spec.sigma[c])
-                fs = s if fs is None else fs + s
-            acc += wf * (fs / np.float32(len(cols)))
-        out[a:b] = np.float32(100.0) * acc
+        out[a:b] = score_block(X[:, a:b], idx, spec.families, w, t, spec.sigma)
     return out
 
 
