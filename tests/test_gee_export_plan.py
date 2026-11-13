@@ -145,8 +145,11 @@ def test_dem_fallback_is_the_non_deprecated_collection():
     assert GX.load_layers()["dem"]["fallback"]["id"] == "COPERNICUS/DEM/GLO30_2024_1"
 
 
-def test_plan_in_another_folder_works_with_plan_option_and_fails_helpfully_without(tmp_path):
+def test_plan_in_another_folder_works_with_plan_option_and_fails_helpfully_without(tmp_path, monkeypatch):
     """Review: files downloaded to a folder without the plan used to fail with no way out."""
+    import gsop.cli as cli
+    out = tmp_path / "o3" / "earth_features_6km.parquet"
+    monkeypatch.setattr(cli, "EARTH", lambda: out)          # never write the repo's own data/processed
     plan_dir, tif_dir = tmp_path / "plan", tmp_path / "drive"
     tasks = GX.run((74.0, 17.0, 80.0, 22.0), "lonar_test", dry_run=True, plan_dir=plan_dir)
     tif_dir.mkdir()
@@ -157,7 +160,8 @@ def test_plan_in_another_folder_works_with_plan_option_and_fails_helpfully_witho
     assert "ti_is_fallback" in df.columns
     r = CliRunner().invoke(app, ["s2", "earth", "--source", "local", "--src", str(tif_dir), "--plan",
                                  str(plan_dir / "lonar_test_export_plan.json")])
-    assert "Traceback" not in r.output
+    assert r.exit_code == 0 and r.exception is None, r.output             # CliRunner never prints a traceback into output
+    assert "[PASS]" in r.output and out.exists()
 
 
 @pytest.mark.parametrize("bbox", ["1,2,3", "a,b,c,d", "10,20,5,30", "1,2,3,4,5"])

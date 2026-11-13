@@ -63,7 +63,7 @@ When Earth Engine is not available, `gsop s2 open-data` builds the 6 km rasters 
 | 60 deg | 289 x 866 m | 3.5 x 10.4 km | 58 x 173 m |
 | 80 deg | 100 x 2,494 m | 1.2 x 29.9 km | 20 x 499 m |
 
-Moon and Mars targets use square ground cells (polar-stereographic and cylindrical rasters near their targets, windows of 6 km and 500 m on the ground). So a Moon slope at a 500 m baseline and an Earth slope at "500 m" away from 30 deg latitude are measured over different ground footprints, and Earth roughness at 100 m and 1000 m is taken over elongated windows. The gradient is right; the footprint is not the same. This is open (see `docs/UNVERIFIED.md`); it is not a bug in the arithmetic.
+Moon targets use square ground cells (polar-stereographic rasters, scale factor about 1 near the pole, so windows of 6 km and 500 m on the ground). Mars windows are square in the DEM's own projected metres; on a simple-cylindrical MOLA raster with true scale at the equator, east-west is cos(lat) shorter on the ground (about 5 percent at Jezero, 18.4 deg), far less than the Earth figures above. So a Moon slope at a 500 m baseline and an Earth slope at "500 m" away from 30 deg latitude are measured over different ground footprints, and Earth roughness at 100 m and 1000 m is taken over elongated windows. The gradient is right; the footprint is not the same. This is open (see `docs/UNVERIFIED.md`); it is not a bug in the arithmetic.
 
 ## 4. Similarity
 
@@ -147,7 +147,7 @@ Measured on a MacBook with Apple silicon (8 logical cores, 8.0 GB RAM, **1.4 GB 
 
 Peak memory, summed over the process and its workers: 2.83 GB. This double-counts the pages of X that the workers share, so it overstates the real use.
 
-**Run-to-run variation is large on this machine.** The first measurement of the same configuration (the earlier, uncommitted script) took 331 s: pass 1 137 s, pass 2 162 s. With only 1.4 GB free on an 8 GB machine that was also running other things, 20 percent spread between two runs is normal; treat the figures as "about 4.5 to 5.5 minutes", not as a precise number. The 33 s that the first version of this section left unexplained is the merge/select and finalise parts above (4.4 + 26.6 = 31 s on this run), which were not timed separately before. `MCResult.timings_s` now reports all four parts, and `summary.json` carries them.
+**Run-to-run variation is large on this machine.** The first measurement of the same configuration (the earlier, uncommitted script) took 331 s: pass 1 137 s, pass 2 162 s. With only 1.4 GB free on an 8 GB machine that was also running other things, the two runs differed by 20 percent; with only two runs that spread is not characterised, so treat the figures as "about 4.5 to 5.5 minutes", not as a precise number. The first run's 33 s outside the two passes was not split at the time. On the second run the two parts that were not timed before (merge/select and finalise) took 4.4 + 26.6 = 31 s, which accounts for it; that is an inference from the second run, not a measurement of the first. `MCResult.timings_s` now reports all four parts, and `summary.json` carries them.
 
 Single-process profile of one run at 4M tiles (an earlier, smaller script): scoring 105 ms, `argpartition` for the top-k sets 77 ms, full `np.sort` for rank percentiles 80 ms, `searchsorted` 23 ms, counters and score sum under 5 ms. Chunk size between 50,000 and 1,000,000 changed the scoring time by under 10 percent.
 

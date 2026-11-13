@@ -41,7 +41,8 @@ def build(cfg: dict[str, Any], dem_path: Path | str | None, psr_path: Path | str
         else:
             rows += [C.row(name, c, None, unavailable=True) for c in ("slope_med", "slope_p90", "relief", "rough_a", "rough_b")]
         if psr_path:
-            # nodata cells are read as 0 (not NaN): a mask that declares nodata = 0 must not lose every non-PSR cell
+            # a declared nodata of 0 is read as 0 (not NaN), so a mask that declares nodata = 0 keeps its non-PSR cells;
+            # any other declared nodata (-9999, 255) is missing data, not 'not shadowed', and stays NaN
             mask, cell = C.read_window(psr_path, t["lat"], float(wrap_lon(t["lon_e"])),
                                        cfg["targets"]["target_window_km"] + 2 * cfg["targets"]["read_margin_km"], "zero")
             # grade B: the file's encoding is not confirmed (PROVENANCE.md). A becomes right only after someone opens the file
