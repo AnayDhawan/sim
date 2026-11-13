@@ -70,15 +70,19 @@ class MCSpec:
 
 def memory_plan(n_tiles: int, n_cols: int, workers: int, free_bytes: float, frac: float = 0.40) -> dict[str, Any]:
     """Cell chunk sized so all workers' temporaries stay within `frac` of free RAM.
-    Fixed per-worker arrays (scores, argpartition indices, counters, score sum, sorted copy) are counted separately."""
+    Fixed per-worker arrays (scores, argpartition indices, counters, score sum, sorted copy) are counted separately.
+    X itself is memory-mapped by every worker. The pages are shared, so they count once, but they show up in each
+    process's RSS, so the budget has to cover them (found on macOS: the old plan ignored them and the memory test
+    failed by about 10 MB on an 8 GB Mac)."""
     budget = frac * free_bytes
     fixed_per_worker = n_tiles * (4 + 8 + 3 * 2 + 8 + 4)
+    x_shared = n_tiles * n_cols * 4
     per_tile_temp = 4 * (n_cols + 6)
-    avail = budget - workers * fixed_per_worker
+    avail = budget - workers * fixed_per_worker - x_shared
     chunk = int(max(1_000, avail // max(1, workers * per_tile_temp))) if avail > 0 else 1_000
     chunk = min(chunk, n_tiles)
     return {"budget_bytes": int(budget), "fixed_per_worker_bytes": int(fixed_per_worker),
-            "chunk_tiles": chunk, "fits": avail > 0}
+            "x_shared_bytes": int(x_shared), "chunk_tiles": chunk, "fits": avail > 0}
 
 
 # --------------------------------------------------------------------------- one run

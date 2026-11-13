@@ -1,0 +1,85 @@
+name: ci
+
+# Runs the tests and the golden slice on both machines the team uses (Windows 11, macOS on Apple M1) and then
+# compares the two golden.json files with the cross-machine tolerances in config/run.yaml.
+# Outputs are not bit-identical across machines (BLAS and SIMD differ), so the compare is by tolerance, never by hash.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (${{ matrix.label }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: windows-latest, label: windows}
+          - {os: macos-14, label: macos-arm64}      # Apple silicon, same architecture as the Mars machine
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install (locked)
+        run: uv sync --locked
+
+      - name: Machine report
+        run: uv run gsop doctor
+
+      - name: Tests
+        run: uv run pytest -q
+
+      - name: Golden slice
+        # --check also compares with tests/golden/golden_expected.json, so a drift on either OS fails here.
+        run: uv run gsop golden --check --out golden-${{ matrix.label }}.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: golden-${{ matrix.label }}
+          path: golden-${{ matrix.label }}.json
+          if-no-files-found: error
+
+  compare:
+    name: compare golden (windows vs macos)
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install (locked)
+        run: uv sync --locked
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: golden-*
+          path: golden
+          merge-multiple: true
+
+      - name: Compare the two golden files
+        run: uv run gsop compare golden/golden-windows.json golden/golden-macos-arm64.json --report compare_report.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compare-report
+          path: compare_report.json
+          if-no-files-found: ignore
