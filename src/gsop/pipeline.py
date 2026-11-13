@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -9,6 +10,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+import psutil
 from scipy.stats import spearmanr
 
 from . import gates as G
@@ -17,6 +19,7 @@ from . import similarity as S
 from . import weights as W
 from .provenance import atomic_savez, atomic_to_parquet, write_json
 
+log = logging.getLogger("gsop.pipeline")
 ILLUM_FAMILIES = ("illumination", "sunlight")
 
 
@@ -78,6 +81,7 @@ class Job:
     target_aux: dict[str, Any] = field(default_factory=dict)
     mars_check: dict[str, Any] | None = None
     dropped_columns: list[str] = field(default_factory=list)
+    sigma_table: dict[str, Any] = field(default_factory=dict)
 
     @property
     def name(self) -> str:
@@ -113,6 +117,7 @@ def prepare_job(body: str, target: str, profile: str, cfg: dict[str, Any], earth
     unc = cfg["features"].get("measurement_uncertainty", {}).get(body, {}) or {}
     eunc = cfg["features"].get("earth_uncertainty", {}) or {}
     sigma = {c: S.sigma_rule(tprof["cols"][c]["spread"], unc.get(c), S.iqr(X[i])) for i, c in enumerate(columns)}
+    sigma_table = {c: S.sigma_terms(tprof["cols"][c]["spread"], unc.get(c), S.iqr(X[i])) for i, c in enumerate(columns)}
     mult = W.profile_multipliers(cfg["purposes"], profile, body)
     ranges = {f: tuple(v["range"]) for f, v in body_cfg.items()}
     run = cfg["run"]
@@ -125,7 +130,7 @@ def prepare_job(body: str, target: str, profile: str, cfg: dict[str, Any], earth
     return Job(body=body, target=target, profile=profile, confidence=conf, body_cfg=body_cfg, fam_cols=fam_cols,
                columns=columns, earth=earth, gate_df=gate_df, gated_rows=rows, X=X, target_vals=tv, sigma=sigma,
                spec=spec, profile_weights=W.profile_weights(body_cfg, cfg["purposes"], profile, body),
-               target_aux=tprof["aux"], mars_check=mars_check, dropped_columns=drop)
+               target_aux=tprof["aux"], mars_check=mars_check, dropped_columns=drop, sigma_table=sigma_table)
 
 
 # --------------------------------------------------------------------------- base score and checks
@@ -181,8 +186,15 @@ def run_job(job: Job, cfg: dict[str, Any], out_dir: Path | str, runs: int, worke
     tid = job.earth["tile_id"].to_numpy()[job.gated_rows]
     cols = {"tile_id": tid, "score": score.astype(np.float32)}
     if illum is not None:
-        cols["illum_match"] = illum.astype(np.float32)
+        cols["illum_match"] = illum.astype(np.float32)        # similarity of the illumination family alone
+    for f, a in fam.items():
+        cols[f"fam_{f}"] = a.astype(np.float32)               # per-family similarity 0-1: which families drive the match
     atomic_to_parquet(pd.DataFrame(cols), out_dir / "base_scores.parquet", index=False)
+    write_json(out_dir / "sigma_table.json", {"target": job.target, "rule": "max(target_spread, measurement_uncertainty, "
+               "0.25 * IQR of the column over all gated Earth tiles)", "columns": job.sigma_table})
+    write_json(out_dir / "weights_used.json", {"profile": job.profile, "weights": job.profile_weights,
+                                               "derived_base_weights": W.derive_weights(job.body_cfg),
+                                               "multipliers": W.profile_multipliers(cfg["purposes"], job.profile, job.body)})
     alt = alt_weight_checks(job, cfg["weights"], score, fam)
     write_json(out_dir / "alt_weight_checks.json", alt)
     summary: dict[str, Any] = {
@@ -216,5 +228,8 @@ def run_job(job: Job, cfg: dict[str, Any], out_dir: Path | str, runs: int, worke
         summary.update({"runs": runs, "mc_timings_s": res.timings_s, "weight_draw_stats": res.weight_stats,
                         "n_robust": int(res.robust_mask.sum())})
     summary["seconds"] = time.perf_counter() - t0
+    summary["rss_mb"] = psutil.Process().memory_info().rss / 2**20
     write_json(out_dir / "summary.json", summary)
+    log.info("%s: %d gated tiles scored in %.1f s, process memory %.0f MB", job.name, len(tid), summary["seconds"],
+             summary["rss_mb"])
     return summary

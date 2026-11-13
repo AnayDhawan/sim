@@ -204,7 +204,8 @@ class BodyRun:
                         return
                     self.summaries[name] = P.run_job(job, self.cfg, self.res_dir / name, self.runs, self.workers,
                                                      self.work_dir, self.free_bytes, with_mc=with_mc)
-                outs = [d / "unscored.json", d / "base_scores.parquet", d / "summary.json"]
+                outs = [d / "unscored.json", d / "base_scores.parquet", d / "summary.json", d / "sigma_table.json",
+                        d / "weights_used.json"]
                 if with_mc:
                     outs += [d / "mc_summary.parquet", d / "convergence.json"]
                 up = {"gates": self._key_of(f"gates__{prof}")}

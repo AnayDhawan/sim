@@ -27,6 +27,20 @@ def sigma_rule(target_spread: float | None, measurement_unc: float | None, iqr_e
     return max(max(vals), SIGMA_MIN)
 
 
+def sigma_terms(target_spread: float | None, measurement_unc: float | None, iqr_earth: float) -> dict[str, float | str]:
+    """The three terms of the sigma rule, the resulting sigma and which term binds (ties go to the first listed)."""
+    spread = float(target_spread) if target_spread is not None and np.isfinite(target_spread) else None
+    meas = float(measurement_unc) if measurement_unc is not None and np.isfinite(measurement_unc) else None
+    iq = IQR_FACTOR * iqr_earth
+    cand = {"target_spread": spread if spread is not None else 0.0, "measurement_uncertainty": meas if meas is not None else 0.0,
+            "iqr_floor": iq}
+    sigma = sigma_rule(target_spread, measurement_unc, iqr_earth)
+    binding = next((k for k, v in cand.items() if v == max(cand.values())), "iqr_floor") if max(cand.values()) > SIGMA_MIN \
+        else "minimum"
+    return {"target_spread": spread, "measurement_uncertainty": meas, "iqr_earth": float(iqr_earth),
+            "iqr_floor": float(iq), "sigma": float(sigma), "binding": binding}
+
+
 def column_similarity(x: np.ndarray, t: float, sigma: float) -> np.ndarray:
     x32 = np.asarray(x, dtype=np.float32)
     with np.errstate(over="ignore", invalid="ignore", under="ignore"):
@@ -57,7 +71,9 @@ def tile_score(fam: Mapping[str, np.ndarray], weights: Mapping[str, float]) -> n
         acc = s * np.float32(w) if acc is None else acc + s * np.float32(w)
     if acc is None:
         raise ValueError("all family weights are zero")
-    return np.float32(100.0) * acc
+    out = np.float32(100.0) * acc
+    np.minimum(out, np.float32(100.0), out=out)       # float32 rounding of weights that sum to 1 can give 100.00001
+    return out
 
 
 def score_block(X: np.ndarray, col_index: Mapping[str, int], fam_cols: Mapping[str, list[str]],
