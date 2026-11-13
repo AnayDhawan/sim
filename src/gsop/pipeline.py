@@ -197,6 +197,8 @@ def run_job(job: Job, cfg: dict[str, Any], out_dir: Path | str, runs: int, worke
     if with_mc:
         plan = MC.memory_plan(job.X.shape[1], job.X.shape[0], workers, free_bytes, float(cfg["run"]["ram_fraction"]))
         summary["memory_plan"] = plan
+        summary["jitter"] = MC.jitter_report(job.spec)
+        MC.log_unjittered_once(job.spec)
         res = MC.simulate(job.X, job.spec, runs, Path(work_dir) / job.name, workers=workers,
                           chunk_tiles=plan["chunk_tiles"], cand_cfg=cfg["run"]["candidates"],
                           robust_cfg=cfg["run"]["robust"], checkpoints=list(cfg["run"]["convergence_checkpoints"]))

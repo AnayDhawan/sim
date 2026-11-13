@@ -120,7 +120,18 @@ Mars target check (D6): target latitude within 50 deg, elevation below 2 km, the
   The weight vector of run r is the pure function `montecarlo.weights_for_run(spec, r)`: it uses only `w_rng` of run r, so it is the same on any machine, for any call order and any worker count.
   2. Effective target value `t_k = value_k + measurement_unc_k * z_k - earth_unc_k * y_k`, with `z` and `y` standard normals. A systematic Earth bias shifts every tile equally, which is the same as shifting the target the other way. `cols` is the ordered list of distinct columns used by the body's families: walk the families in `weights.yaml` order, then each family's `columns` in listed order, keeping the first occurrence of each. (This is NOT the order of `features.yaml`; using that order gives Moon medians off by up to 0.11.) For Moon `cols` is slope_med, slope_p90, sun_max_elev, sun_low_share, water_index, rough_a, rough_b, relief, t_mean, t_coldest, silica_index, ti_proxy. One normal per column in `cols` order is drawn from `j_rng`, and one from `b_rng`, even when that column's uncertainty is 0. The Earth-bias draw is not exercised by the golden test because `earth_uncertainty` is empty, so this part was not independently reproduced.
   3. Score all tiles.
-- Per-tile noise is NOT applied (it was optional in the plan).
+- Per-tile noise is NOT applied (it was optional in the plan; decision E4).
+- What is jittered, term by term (and what `summary.json` reports under `jitter`):
+
+  | Term | Distribution | Source of the scale | Not jittered when |
+  |---|---|---|---|
+  | family weights | uniform in the family's `range` | `config/weights.yaml` ranges (plan) | never |
+  | target value, column k | `N(value_k, measurement_unc_k)` | `config/features.yaml measurement_uncertainty` (Moon slope: Barker 2021 midpoints; everything else none) | `measurement_unc_k` is 0 or missing (logged once as TODO) |
+  | Earth systematic bias, column k | `N(0, earth_unc_k)`, applied as a shift of the target by `-bias` | `config/features.yaml earth_uncertainty` (empty today) | `earth_unc_k` is 0 or missing |
+  | per-tile noise | none | | always |
+  | sigma | none; computed once from the base target | | always |
+
+  With zero uncertainty for every column the effective target equals the configured target exactly (the jitter is the identity); the normals are still drawn, so adding an uncertainty to one column never changes the draws of another column or the weights.
 - Pass 1: per run, the top 1, 5 and 10 percent tiles are found with `argpartition` and counted in uint16 counters per batch. The score sum per tile is kept. Runs are grouped into fixed batches of 50 run ids, saved to disk and merged in id order.
 - Pass 2: candidate tiles are the union of the robust tiles, the top 3 percent by mean score and the top 3 percent by top-5 membership, capped at 250,000. Pass 2 re-runs the same seeds, keeps each candidate's score and its rank percentile among all tiles (`searchsorted` on the sorted run scores) in a disk memmap, and reads exact median, 5th and 95th percentiles.
 - Top-p percent sets have `k = ceil(p * n_gated)` tiles, where `n_gated` is the number of tiles passing the gates for that target and profile. Ties are broken by stable argsort; `top1pct_mc_mean` is ranked by the sum of the run scores. `robust` is top 5 percent (k5 = ceil(0.05 * n_gated)) in at least 90 percent of runs.

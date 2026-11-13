@@ -17,6 +17,7 @@ Batches are fixed blocks of run_ids and are merged in id order, so output is ide
 from __future__ import annotations
 
 import gc
+import logging
 import math
 import os
 import time
@@ -32,6 +33,9 @@ from .parallel import run_tasks
 from .provenance import atomic_savez, config_hash, read_json, sha256_file, write_json
 from .similarity import score_block
 from .weights import draw_weights
+
+
+log = logging.getLogger("gsop.montecarlo")
 
 
 @dataclass
@@ -96,6 +100,33 @@ def weights_for_run(spec: MCSpec, run_id: int, return_raw: bool = False):
     global state, call order, batch layout or worker count, so any worker can reproduce any run. Order: uniform draw
     in each range, renormalise, purpose multipliers, renormalise (docs/SPEC.md section 8)."""
     return draw_weights(run_streams(spec.master_seed, run_id)[0], spec.ranges, spec.multipliers, return_raw)
+
+
+def jitter_report(spec: MCSpec) -> dict[str, Any]:
+    """Exactly what the Monte Carlo jitters and what it does not, per column, for summary.json.
+    A column with neither a measurement nor an Earth uncertainty is not jittered (no sourced value: TODO)."""
+    cols = {}
+    for c in spec.columns:
+        m, e = float(spec.meas_unc.get(c, 0.0) or 0.0), float(spec.earth_unc.get(c, 0.0) or 0.0)
+        cols[c] = {"measurement_unc": m, "earth_unc": e, "jittered": bool(m > 0 or e > 0)}
+    return {"weights": "jittered: uniform in each family range, renormalised, multipliers, renormalised",
+            "target_value": "jittered by N(0, measurement_unc) where measurement_unc > 0",
+            "earth_bias": "per-column systematic shift ~ N(0, earth_unc) where earth_unc > 0",
+            "per_tile_noise": "not applied (decision E4)", "sigma": "fixed, not recomputed per run",
+            "columns": cols, "not_jittered": [c for c, v in cols.items() if not v["jittered"]]}
+
+
+_LOGGED_NO_JITTER: set[tuple[str, ...]] = set()
+
+
+def log_unjittered_once(spec: MCSpec) -> list[str]:
+    """Log, once per distinct column set per process, the columns that get no jitter. Returns them."""
+    cols = tuple(jitter_report(spec)["not_jittered"])
+    if cols and cols not in _LOGGED_NO_JITTER:
+        _LOGGED_NO_JITTER.add(cols)
+        log.info("Monte Carlo: no jitter on %s (no sourced uncertainty; TODO, see docs/UNCERTAINTY_SOURCES.md). "
+                 "Only the weights vary for these columns.", ", ".join(cols))
+    return list(cols)
 
 
 def draw_run(spec: MCSpec, run_id: int) -> tuple[dict[str, float], dict[str, float]]:
