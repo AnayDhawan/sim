@@ -17,4 +17,4 @@ compare: {score_abs: 1.0e-4, mc_abs: 1.0e-3, jaccard_min: 0.99}
 # Listing a column here is a deliberate, logged decision: it is dropped from its family and weights are renormalised.
 drop_columns: []
 # gsop check-operators (Earth Engine vs numpy terrain operator, issue #2). The threshold is not to be loosened.
-operator_check: {threshold: 0.10, work_cell_m: 25.0, n_tiles: 5, center_lonlat: [76.51, 19.98]}
+operator_check: {threshold: 0.10, n_tiles: 5, center_lonlat: [76.51, 19.98]}   # the working grid is features.yaml operator.work_cell_m

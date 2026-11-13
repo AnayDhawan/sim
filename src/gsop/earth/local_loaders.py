@@ -4,7 +4,8 @@ Input: a GeoTIFF or a folder of GeoTIFFs in EPSG:6933 with 6000 m cells. Band na
   1. the band description inside the file (the open-data fallback writes these);
   2. for a single-band file named `<id>.<band>.tif` (Earth Engine's per-band download), the `<band>` part of the name;
   3. for a multiband file with no descriptions (an Earth Engine Drive export), the `band_order` of the
-     `<name>_export_plan.json` that `gee_export` wrote, matched by the file's name (the plan lists each task's file name);
+     `<name>_export_plan.json` that `gee_export` wrote, matched by the file's name (the plan lists each task's file name). The
+     plan is looked for in the file's own folder, or is given explicitly (`plan=`, CLI `--plan`);
   4. for a single-band file, its stem (`land_frac.tif`).
 Anything else is an error: a band is never guessed.
 Files that share one grid are merged (one file per column, or one multiband file). Files on different grids are separate
@@ -28,9 +29,10 @@ from ..provenance import write_json
 LAND_MIN = 0.5
 
 
-def plan_band_order(f: Path) -> list[str] | None:
-    """band_order of the gee_export plan in the file's folder that lists this file (matched by task description)."""
-    for plan in sorted(f.parent.glob("*_export_plan.json")):
+def plan_band_order(f: Path, plan_path: Path | None = None) -> list[str] | None:
+    """band_order of the gee_export plan that lists this file (matched by task description). The plan is `plan_path` if
+    given, otherwise any `*_export_plan.json` in the file's own folder."""
+    for plan in ([Path(plan_path)] if plan_path else sorted(f.parent.glob("*_export_plan.json"))):
         try:
             p = json.loads(plan.read_text(encoding="utf-8"))
         except (OSError, ValueError):
@@ -40,7 +42,7 @@ def plan_band_order(f: Path) -> list[str] | None:
     return None
 
 
-def _band_names(f: Path, ds) -> list[str]:
+def _band_names(f: Path, ds, plan_path: Path | None = None) -> list[str]:
     names = []
     plan = None
     for i in range(1, ds.count + 1):
@@ -48,18 +50,18 @@ def _band_names(f: Path, ds) -> list[str]:
         if not name and ds.count == 1 and "." in f.stem:
             name = f.stem.rsplit(".", 1)[1]                       # <id>.<band>.tif
         if not name and ds.count > 1:
-            plan = plan if plan is not None else (plan_band_order(f) or [])
+            plan = plan if plan is not None else (plan_band_order(f, plan_path) or [])
             name = plan[i - 1] if len(plan) == ds.count else None
         if not name and ds.count == 1:
             name = f.stem
         if not name:
             raise ValueError(f"{f}: band {i} has no description, is not named <id>.<band>.tif, and no export plan lists "
-                             "this file; refusing to guess its name")
+                             "this file (put the plan JSON in the same folder or pass --plan); refusing to guess its name")
         names.append(name)
     return names
 
 
-def _read_groups(src: Path) -> list[tuple[dict[str, np.ndarray], object, tuple[int, int]]]:
+def _read_groups(src: Path, plan_path: Path | None = None) -> list[tuple[dict[str, np.ndarray], object, tuple[int, int]]]:
     """One (bands, transform, shape) per grid. Files on the same grid are merged."""
     import rasterio
     files = [src] if src.is_file() else sorted(src.glob("*.tif"))
@@ -74,7 +76,7 @@ def _read_groups(src: Path) -> list[tuple[dict[str, np.ndarray], object, tuple[i
                 raise ValueError(f"{f}: expected 6000 m cells, got {ds.transform.a} x {ds.transform.e}")
             key = (tuple(ds.transform)[:6], ds.height, ds.width)
             bands, _, _ = groups.setdefault(key, ({}, ds.transform, (ds.height, ds.width)))
-            for i, name in enumerate(_band_names(f, ds), 1):
+            for i, name in enumerate(_band_names(f, ds, plan_path), 1):
                 if name in bands:
                     raise ValueError(f"{f}: band {name!r} appears twice on the same grid")
                 a = ds.read(i).astype(np.float64)
@@ -101,9 +103,9 @@ def _block_table(bands: dict[str, np.ndarray], tf, grid: Grid) -> pd.DataFrame:
 
 
 def build_earth_table(src: Path | str, out_path: Path | str, grid: Grid | None = None,
-                      add_solar: bool = False, solar_cfg: dict | None = None) -> pd.DataFrame:
+                      add_solar: bool = False, solar_cfg: dict | None = None, plan: Path | str | None = None) -> pd.DataFrame:
     grid = grid or Grid()
-    blocks = [_block_table(b, tf, grid) for b, tf, _ in _read_groups(Path(src))]
+    blocks = [_block_table(b, tf, grid) for b, tf, _ in _read_groups(Path(src), Path(plan) if plan else None)]
     cols = [set(b.columns) for b in blocks]
     if any(c != cols[0] for c in cols[1:]):
         raise ValueError("blocks of one export must have the same columns; found "

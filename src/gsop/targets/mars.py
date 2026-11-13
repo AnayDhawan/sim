@@ -49,7 +49,7 @@ def build(cfg: dict[str, Any], dem_path: Path | str | None) -> list[dict]:
                                          cfg["targets"]["target_window_km"] + 2 * cfg["targets"]["read_margin_km"])
             rows += C.terrain_rows(name, dem, cell, f"MOLA ({Path(dem_path).name})", "A",
                                    cfg["targets"]["target_window_km"], cfg["features"]["operator"])
-            elev = float(np.nanmedian(dem))
+            elev = float(np.nanmedian(C.central_crop(dem, cell, cfg["targets"]["target_window_km"])))   # the 15 km window, not the 17 km read
             rows.append(C.row(name, "aux_elevation_m", elev, source=f"MOLA ({Path(dem_path).name}), median of the window, "
                               "metres above the areoid", grade="A", window=f"{cfg['targets']['target_window_km']:g} km"))
             atm = cfg["targets"]["mars_atmosphere"]

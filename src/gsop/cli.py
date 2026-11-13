@@ -45,6 +45,21 @@ BodyOpt = typer.Option(..., "--body", help="moon or mars")
 EARTH = lambda: data_dir("processed") / "earth_features_6km.parquet"  # noqa: E731
 
 
+def _parse_bbox(bbox: Optional[str]) -> Optional[tuple[float, float, float, float]]:
+    """--bbox lon_min,lat_min,lon_max,lat_max, or None. Anything else is a usage error, not a traceback."""
+    if bbox is None:
+        return None
+    try:
+        box = tuple(float(v) for v in bbox.split(","))
+    except ValueError:
+        raise typer.BadParameter("--bbox needs four numbers: lon_min,lat_min,lon_max,lat_max")
+    if len(box) != 4:
+        raise typer.BadParameter("--bbox needs four numbers: lon_min,lat_min,lon_max,lat_max")
+    if not (box[0] < box[2] and box[1] < box[3]):
+        raise typer.BadParameter("--bbox needs lon_min < lon_max and lat_min < lat_max")
+    return box
+
+
 def _check_body(body: str) -> str:
     if body not in ("moon", "mars"):
         raise typer.BadParameter("body must be moon or mars")
@@ -119,6 +134,8 @@ def s1_tiles(raster: Path = typer.Option(..., "--raster", help="6 km EPSG:6933 G
 @s2.command("earth")
 def s2_earth(source: str = typer.Option("local", "--source", help="gee or local"),
              src: Optional[Path] = typer.Option(None, "--src", help="local: GeoTIFF or folder of 6 km rasters"),
+             plan: Optional[Path] = typer.Option(None, "--plan", help="local: the gee_export `<name>_export_plan.json` that lists "
+                                                 "the GeoTIFFs, if it is not in the --src folder"),
              add_solar: bool = typer.Option(False, "--add-solar", help="local: add sun_max_elev, sun_low_share, insol_annual "
                                             "computed from latitude only (earth/solar.py)"),
              verify: bool = typer.Option(False, "--verify", help="gee: check every collection id in the live catalog and stop"),
@@ -142,18 +159,21 @@ def s2_earth(source: str = typer.Option("local", "--source", help="gee or local"
                 console.print(f"[{'FAIL' if r in bad else 'PASS'}] {r['id']}: {r.get('error') or r.get('bands_missing') or 'ok'}")
             # typer.Exit is a RuntimeError, so it must never be raised inside a try that catches RuntimeError
             raise typer.Exit(1 if bad else 0)
+        box = _parse_bbox(bbox)
         try:
-            box = tuple(float(v) for v in bbox.split(",")) if bbox else None
             tasks = gee_export.run(box, name, project=project, dry_run=dry_run)
         except RuntimeError as e:
             console.print(f"[FAIL] {e}")
             raise typer.Exit(1)
-        console.print(f"[PASS] {len(tasks)} export task(s) {'planned' if dry_run else 'started'}; download the GeoTIFFs from "
-                      "Drive, then `gsop s2 earth --source local --src <folder> --add-solar`")
+        plan_file = data_dir("raw") / "earth" / f"{name}_export_plan.json"
+        console.print(f"[PASS] {len(tasks)} export task(s) {'planned' if dry_run else 'started'}. Plan: {plan_file}")
+        console.print("Download the GeoTIFFs from Drive. The loader names their bands from this plan, so either copy the plan "
+                      "JSON into the same folder as the GeoTIFFs, or pass it with --plan:")
+        console.print("  uv run gsop s2 earth --source local --src <folder> --plan <plan json> --add-solar")
         return
     from .earth.local_loaders import build_earth_table
     s = src or data_dir("raw") / "earth"
-    df = build_earth_table(s, out, add_solar=add_solar)
+    df = build_earth_table(s, out, add_solar=add_solar, plan=plan)
     T.write_data_manifest(out.parent)
     console.print(f"[PASS] {len(df):,} tiles -> {out}; MANIFEST.json written (send it with the parquet and grid.json)")
 
@@ -167,9 +187,7 @@ def s2_open_data(spec: Path = typer.Option(Path("config/open_data.yaml"), "--spe
     from .earth import open_data as OD
     cfg = load_all()
     sp = yaml.safe_load(Path(spec).read_text(encoding="utf-8"))
-    box = tuple(float(v) for v in bbox.split(",")) if bbox else None
-    if box is not None and len(box) != 4:
-        raise typer.BadParameter("--bbox needs four numbers: lon_min,lat_min,lon_max,lat_max")
+    box = _parse_bbox(bbox)
     dst = out or data_dir("raw") / "earth" / "earth_6km.tif"
     rep = OD.build_rasters(sp, cfg["features"]["operator"], dst, box)
     console.print(f"[PASS] {dst} with bands {rep['bands']}")
@@ -283,8 +301,10 @@ def check_operators(project: Optional[str] = typer.Option(None, "--project", hel
                     tiles: Optional[int] = typer.Option(None, "--tiles", help="window edge in 6 km tiles")) -> None:
     """Earth Engine vs numpy terrain operators on one small window; writes results/operator_check.json. Needs a login."""
     from .earth import check_operators as CO
+    if (lon is None) != (lat is None):
+        raise typer.BadParameter("--lon and --lat go together: give both or neither")
+    centre = (lon, lat) if lon is not None else None
     try:
-        centre = (lon, lat) if lon is not None and lat is not None else None
         rep = CO.run(centre, tiles, project=project, out=results_dir() / "operator_check.json")
     except RuntimeError as e:
         console.print(f"[FAIL] {e}")

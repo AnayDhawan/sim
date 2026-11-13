@@ -32,7 +32,7 @@ import yaml
 
 from ..grid import Grid
 from ..provenance import ROOT
-from ..config import load_all
+from ..config import data_dir, load_all
 from . import gee_operators as GO
 from . import open_data as OD
 
@@ -200,7 +200,7 @@ def export_image(ee, window: tuple[int, int, int, int], grid: Grid | None = None
     op = cfg["features"]["operator"]
     ix0, iy0, _, _ = window
     dem = dem_image(ee, layers)
-    terrain = GO.ee_tile_terrain(dem, grid, window, ee, float(cfg["run"]["operator_check"]["work_cell_m"]),
+    terrain = GO.ee_tile_terrain(dem, grid, window, ee, float(op["work_cell_m"]),
                                  float(op["slope_baseline_m"]), (op["rough_a_baseline_m"], op["rough_b_baseline_m"]))
     return ee.Image.cat([gate_bands(ee, layers, grid, ix0, iy0), terrain, climate_bands(ee, layers, grid, ix0, iy0),
                          air_density_band(ee, dem, grid, ix0, iy0, cfg["features"]["earth_atmosphere"])]).toFloat()
@@ -211,8 +211,10 @@ BAND_ORDER = ["land_frac", "water_ice_frac", "built_crop_frac", "ndvi_median", "
 
 
 def run(source_bbox: tuple[float, float, float, float] | None = None, name: str = "gsop_earth", folder: str = "gsop_earth",
-        project: str | None = None, dry_run: bool = False) -> list[dict[str, Any]]:
-    """Start one Drive export task per block. dry_run only prints the plan. Returns the task list."""
+        project: str | None = None, dry_run: bool = False, plan_dir: Path | None = None) -> list[dict[str, Any]]:
+    """Start one Drive export task per block. dry_run only plans. The plan JSON is written to `plan_dir` (default
+    data/raw/earth under the project root, `config.data_dir`), and the loader needs it next to the downloaded GeoTIFFs or
+    via `--plan`. Earth Engine errors (`ee.EEException`) are re-raised as RuntimeError."""
     grid = Grid()
     win = OD.tile_window(grid, source_bbox)
     layers = load_layers()
@@ -225,17 +227,20 @@ def run(source_bbox: tuple[float, float, float, float] | None = None, name: str 
         desc = f"{name}_{k:04d}_x{ix0}_y{iy0}"
         rec = {"description": desc, "window": w, "tiles": (ix1 - ix0) * (iy1 - iy0)}
         if not dry_run:
-            img = export_image(ee, w, grid, cfg=cfg)
-            region = ee.Geometry.Rectangle(
-                [grid.x0 + ix0 * grid.cell_m, grid.y_top - iy1 * grid.cell_m,
-                 grid.x0 + ix1 * grid.cell_m, grid.y_top - iy0 * grid.cell_m], proj=GO.ee_crs(), geodesic=False)
-            task = ee.batch.Export.image.toDrive(image=img, description=desc, folder=folder, fileNamePrefix=desc,
-                                                 region=region, crs=GO.ee_crs(), crsTransform=_tf(grid, ix0, iy0, grid.cell_m),
-                                                 maxPixels=int(1e10), fileFormat="GeoTIFF")
-            task.start()
-            rec["task_id"] = task.id
+            try:
+                img = export_image(ee, w, grid, cfg=cfg)
+                region = ee.Geometry.Rectangle(
+                    [grid.x0 + ix0 * grid.cell_m, grid.y_top - iy1 * grid.cell_m,
+                     grid.x0 + ix1 * grid.cell_m, grid.y_top - iy0 * grid.cell_m], proj=GO.ee_crs(), geodesic=False)
+                task = ee.batch.Export.image.toDrive(image=img, description=desc, folder=folder, fileNamePrefix=desc,
+                                                     region=region, crs=GO.ee_crs(), crsTransform=_tf(grid, ix0, iy0, grid.cell_m),
+                                                     maxPixels=int(1e10), fileFormat="GeoTIFF")
+                task.start()
+                rec["task_id"] = task.id
+            except ee.EEException as e:
+                raise RuntimeError(f"Earth Engine rejected export task {desc}: {e}") from e
         tasks.append(rec)
-    out = Path("data") / "raw" / "earth"
+    out = Path(plan_dir) if plan_dir else data_dir("raw") / "earth"
     out.mkdir(parents=True, exist_ok=True)
     (out / f"{name}_export_plan.json").write_text(json.dumps({"band_order": BAND_ORDER, "tasks": tasks}, indent=2))
     return tasks

@@ -41,9 +41,12 @@ def build(cfg: dict[str, Any], dem_path: Path | str | None, psr_path: Path | str
         else:
             rows += [C.row(name, c, None, unavailable=True) for c in ("slope_med", "slope_p90", "relief", "rough_a", "rough_b")]
         if psr_path:
-            mask, cell = C.read_dem_window(psr_path, t["lat"], float(wrap_lon(t["lon_e"])),
-                                         cfg["targets"]["target_window_km"] + 2 * cfg["targets"]["read_margin_km"])
-            rows += C.mask_share_rows(name, "water_index", mask, cell, f"PSR share of the tile ({Path(psr_path).name})", "A",
+            # nodata cells are read as 0 (not NaN): a mask that declares nodata = 0 must not lose every non-PSR cell
+            mask, cell = C.read_window(psr_path, t["lat"], float(wrap_lon(t["lon_e"])),
+                                       cfg["targets"]["target_window_km"] + 2 * cfg["targets"]["read_margin_km"], "zero")
+            # grade B: the file's encoding is not confirmed (PROVENANCE.md). A becomes right only after someone opens the file
+            rows += C.mask_share_rows(name, "water_index", mask, cell,
+                                      f"PSR share of the tile ({Path(psr_path).name}). {PSR_NOTE}", "B",
                                       cfg["targets"]["target_window_km"])
         else:
             rows.append(C.row(name, "water_index", None, unavailable=True))
