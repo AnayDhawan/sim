@@ -1,7 +1,10 @@
 import numpy as np
 import pytest
 
-from gsop.earth.solar import S0, sun_features
+from gsop.config import load_all
+from gsop.earth.solar import sun_features
+
+S0 = load_all()["features"]["solar"]["s0_w_m2"]
 
 
 def test_equator_and_tropic_and_pole():
@@ -24,3 +27,13 @@ def test_symmetric_in_latitude_and_shape_is_kept():
     f = sun_features(lat)
     assert f["sun_max_elev"].shape == lat.shape
     assert f["insol_annual"][0, 0] == pytest.approx(f["insol_annual"][0, 1], rel=1e-6)
+
+
+def test_parameters_come_from_config_not_code():
+    cfg = load_all()["features"]
+    base = sun_features([60.0], cfg)["sun_max_elev"][0]
+    tilted = {**cfg, "solar": {**cfg["solar"], "obliquity_deg": 10.0}}
+    assert sun_features([60.0], tilted)["sun_max_elev"][0] == pytest.approx(90 - 60 + 10.0, abs=0.4)
+    assert base == pytest.approx(90 - 60 + 23.44, abs=0.4)
+    wide = {**cfg, "sun_low_threshold_deg": 30.0}
+    assert sun_features([60.0], wide)["sun_low_share"][0] > sun_features([60.0], cfg)["sun_low_share"][0]

@@ -23,7 +23,8 @@ def test_layers_config_has_every_source_and_flags_what_is_not_built():
 
 def test_exported_bands_are_real_feature_columns():
     from gsop.config import load_all
-    cols = set(load_all()["features"]["columns"]) | set(load_all()["features"]["gate_layers"]) | {"land_frac"}
+    f = load_all()["features"]
+    cols = set(f["columns"]) | set(f["gate_layers"]) | set(f["flags"]) | {"land_frac"}
     assert set(GX.BAND_ORDER) <= cols
     assert not {"water_index", "silica_index", "dust_index"} & set(GX.BAND_ORDER)
 
@@ -61,21 +62,55 @@ def test_a_missing_login_stops_loudly_and_is_not_worked_around(monkeypatch):
     assert r.exit_code == 1 and "Not working around this" in " ".join(r.output.split())
 
 
-def _tif(path, names, with_desc):
+def _tif(path, names, with_desc, ix0=3000, iy0=1000, h=3, w=3, fill=None):
     g = Grid()
-    with rasterio.open(path, "w", driver="GTiff", height=3, width=3, count=len(names), dtype="float32", crs="EPSG:6933",
-                       transform=Affine(6000, 0, g.x0 + 3000 * 6000, 0, -6000, g.y_top - 1000 * 6000)) as ds:
+    with rasterio.open(path, "w", driver="GTiff", height=h, width=w, count=len(names), dtype="float32", crs="EPSG:6933",
+                       transform=Affine(6000, 0, g.x0 + ix0 * 6000, 0, -6000, g.y_top - iy0 * 6000)) as ds:
         for i, n in enumerate(names, 1):
-            ds.write(np.full((3, 3), float(i), dtype="float32"), i)
+            ds.write(np.full((h, w), float(i) if fill is None else fill, dtype="float32"), i)
             if with_desc:
                 ds.set_band_description(i, n)
 
 
-def test_loader_reads_band_names_from_a_sidecar_when_the_tiff_has_none(tmp_path):
-    _tif(tmp_path / "x.tif", ["land_frac", "slope_med"], with_desc=False)
-    (tmp_path / "x.tif.bands.json").write_text(json.dumps(["land_frac", "slope_med"]))
-    df = build_earth_table(tmp_path / "x.tif", tmp_path / "o" / "e.parquet")
-    assert "slope_med" in df.columns and (df["slope_med"] == 2.0).all()
+def test_exporter_and_loader_agree_on_band_names(tmp_path, monkeypatch):
+    """Review item 3: the loader used to read a sidecar nobody wrote, and the exporter wrote a plan nobody read."""
+    monkeypatch.chdir(tmp_path)
+    tasks = GX.run((74.0, 17.0, 80.0, 22.0), "lonar_test", dry_run=True)
+    folder = tmp_path / "data" / "raw" / "earth"
+    desc = tasks[0]["description"]
+    _tif(folder / f"{desc}.tif", GX.BAND_ORDER, with_desc=False)          # what a Drive download looks like: no descriptions
+    df = build_earth_table(folder, tmp_path / "o" / "e.parquet")
+    assert set(GX.BAND_ORDER) - {"land_frac"} <= set(df.columns)
+    assert (df["slope_med"] == GX.BAND_ORDER.index("slope_med") + 1).all()   # band 5 landed in slope_med
+    assert "ti_is_fallback" in df.columns
+    _tif(folder / "stranger.tif", GX.BAND_ORDER, with_desc=False)         # not in any plan: refuse to guess
+    (folder / f"{desc}.tif").rename(tmp_path / "moved.tif")
+    with pytest.raises(ValueError, match="refusing to guess"):
+        build_earth_table(folder, tmp_path / "o2" / "e.parquet")
+
+
+def test_per_band_download_names_give_the_band(tmp_path):
+    _tif(tmp_path / "abc123.land_frac.tif", ["x"], with_desc=False)
+    _tif(tmp_path / "abc123.slope_med.tif", ["x"], with_desc=False, fill=7.0)
+    df = build_earth_table(tmp_path, tmp_path / "o" / "e.parquet")
+    assert (df["slope_med"] == 7.0).all() and len(df) == 9
+
+
+def test_blocks_of_a_chunked_export_are_concatenated_and_overlaps_are_refused(tmp_path):
+    _tif(tmp_path / "a.tif", ["land_frac", "slope_med"], True, ix0=3000, iy0=1000)
+    _tif(tmp_path / "b.tif", ["land_frac", "slope_med"], True, ix0=3003, iy0=1000)
+    df = build_earth_table(tmp_path, tmp_path / "o" / "e.parquet")
+    assert len(df) == 18 and df["tile_id"].is_unique
+    _tif(tmp_path / "c.tif", ["land_frac", "slope_med"], True, ix0=3001, iy0=1000)
+    with pytest.raises(ValueError, match="overlap"):
+        build_earth_table(tmp_path, tmp_path / "o2" / "e.parquet")
+
+
+def test_blocks_with_different_columns_are_refused(tmp_path):
+    _tif(tmp_path / "a.tif", ["land_frac", "slope_med"], True, ix0=3000)
+    _tif(tmp_path / "b.tif", ["land_frac", "relief"], True, ix0=3010)
+    with pytest.raises(ValueError, match="same columns"):
+        build_earth_table(tmp_path, tmp_path / "o" / "e.parquet")
 
 
 def test_add_solar_adds_columns_but_never_overwrites(tmp_path):
@@ -85,3 +120,22 @@ def test_add_solar_adds_columns_but_never_overwrites(tmp_path):
     assert {"sun_low_share", "insol_annual"} <= set(df.columns)
     plain = build_earth_table(tmp_path / "y.tif", tmp_path / "o2" / "e.parquet")
     assert "sun_low_share" not in plain.columns                   # nothing is added unless asked
+
+
+def test_verify_exit_code_is_not_swallowed(monkeypatch):
+    """Review item 2: typer.Exit is a RuntimeError, so raising it inside `except RuntimeError` turned PASS into exit 1."""
+    ok = [{"id": "A/B", "reachable": True, "bands_missing": []}, {"id": "C/D", "reachable": True, "bands_missing": []}]
+    monkeypatch.setattr(GX, "verify", lambda project=None: ok)
+    r = CliRunner().invoke(app, ["s2", "earth", "--source", "gee", "--verify"])
+    assert r.exit_code == 0 and "[FAIL]" not in r.output and "PASS" in r.output
+    bad = ok + [{"id": "E/F", "reachable": True, "bands_missing": ["DEM"]}]
+    monkeypatch.setattr(GX, "verify", lambda project=None: bad)
+    r = CliRunner().invoke(app, ["s2", "earth", "--source", "gee", "--verify"])
+    assert r.exit_code == 1 and "E/F" in r.output
+    monkeypatch.setattr(GX, "verify", lambda project=None: (_ for _ in ()).throw(RuntimeError("no login")))
+    r = CliRunner().invoke(app, ["s2", "earth", "--source", "gee", "--verify"])
+    assert r.exit_code == 1 and "no login" in r.output
+
+
+def test_dem_fallback_is_the_non_deprecated_collection():
+    assert GX.load_layers()["dem"]["fallback"]["id"] == "COPERNICUS/DEM/GLO30_2024_1"

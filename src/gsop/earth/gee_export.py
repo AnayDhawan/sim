@@ -1,6 +1,6 @@
 """Google Earth Engine route (issue #1): export the 6 km Earth feature raster, one band per feature.
 
-STATUS: written but NOT RUN. Earth Engine needs `earthengine authenticate` and the Cloud project id from Anay; this module
+STATUS: written without a login, then corrected against Anay's real-run errors (PR 13 review); NOT RE-RUN since. Earth Engine needs `earthengine authenticate` and the Cloud project id from Anay; this module
 never works around a failed login (it stops with the error). Run in this order, and fix what each step reports:
   1. uv run gsop s2 earth --source gee --verify                       every collection id in config/earth_layers.yaml
   2. uv run gsop check-operators                                      Earth Engine vs numpy terrain operators (issue #2)
@@ -9,12 +9,14 @@ never works around a failed login (it stops with the error). Run in this order, 
 Then download the GeoTIFFs from Drive and run `uv run gsop s2 earth --source local --src <folder> --add-solar`.
 
 Bands exported (names are the column names of config/features.yaml): land_frac, water_ice_frac, built_crop_frac,
-ndvi_median, slope_med, slope_p90, relief, rough_a, rough_b, t_mean, t_coldest, ti_proxy, air_density.
+ndvi_median, slope_med, slope_p90, relief, rough_a, rough_b, t_mean, t_coldest, ti_proxy, ti_is_fallback, air_density.
+ti_is_fallback is a 0/1 flag per tile: 1 where more than half of the tile's pixels used the annual mean swing because no
+precipitation-based dry season existed. It is a flag, not a feature, and never enters the score.
 Computed locally instead (latitude only, see solar.py): sun_max_elev, sun_low_share, insol_annual (`--add-solar`).
 NOT built, so left out of the export and rejected by the missing-data gate with a reason: water_index, silica_index,
 dust_index (see `not_built` in config/earth_layers.yaml). Nothing is substituted.
 
-Tile alignment: every export uses crs EPSG:6933 and a crsTransform whose origin is the tile grid's own corner, so a
+Tile alignment: every export uses EPSG:6933 (passed as a WKT1_GDAL string, the only form Earth Engine accepts) and a crsTransform whose origin is the tile grid's own corner, so a
 regional export and the global export give the same tile ids.
 """
 
@@ -30,11 +32,11 @@ import yaml
 
 from ..grid import Grid
 from ..provenance import ROOT
+from ..config import load_all
 from . import gee_operators as GO
 from . import open_data as OD
 
 LAYERS_PATH = ROOT / "config" / "earth_layers.yaml"
-ELEMENTS_PER_TASK_TILES = 200          # block edge in tiles for the global export (1,200 km)
 
 
 # --------------------------------------------------------------------------- config and planning (tested offline)
@@ -51,7 +53,7 @@ def collection_ids(layers: dict[str, Any]) -> dict[str, str]:
     return out
 
 
-def plan_windows(grid: Grid, window: tuple[int, int, int, int], block: int = ELEMENTS_PER_TASK_TILES
+def plan_windows(grid: Grid, window: tuple[int, int, int, int], block: int
                  ) -> list[tuple[int, int, int, int]]:
     """Split a tile window (ix0, iy0, ix1, iy1) into blocks of at most block x block tiles."""
     ix0, iy0, ix1, iy1 = window
@@ -99,67 +101,62 @@ def verify(project: str | None = None) -> list[dict[str, Any]]:
     return rows
 
 
-# --------------------------------------------------------------------------- Earth Engine expressions (not run yet)
+# --------------------------------------------------------------------------- Earth Engine expressions (not re-run since the review)
 
 def _tf(grid: Grid, ix0: int, iy0: int, cell_m: float) -> list[float]:
     return GO.tile_transform(grid, ix0, iy0, cell_m)
 
 
-def _to_tile_grid(img, reducer, grid: Grid, ix0: int, iy0: int, max_pixels: int = 65536):
-    return img.reduceResolution(reducer=reducer, bestEffort=False, maxPixels=max_pixels).reproject(
-        crs=grid.crs, crsTransform=_tf(grid, ix0, iy0, grid.cell_m))
-
-
 def dem_image(ee, layers: dict[str, Any]):
-    """NASADEM where it exists, Copernicus GLO-30 elsewhere (above 60N, below 56S)."""
+    """NASADEM where it exists, Copernicus GLO-30 (2024_1; the unversioned collection is deprecated) elsewhere."""
     p, f = layers["dem"]["primary"], layers["dem"]["fallback"]
     nasa = ee.Image(p["id"]).select(p["band"])
-    cop = ee.ImageCollection(f["id"]).select(f["band"]).mosaic().setDefaultProjection(
-        ee.ImageCollection(f["id"]).first().select(f["band"]).projection())
+    col = ee.ImageCollection(f["id"]).select(f["band"])
+    cop = col.mosaic().setDefaultProjection(col.first().projection())        # a mosaic has no projection until set
     return nasa.unmask(cop).rename("elevation")
 
 
+def _monthly(c, band, ee):
+    return [c.filter(ee.Filter.calendarRange(m, m, "month")).mean().select(band) for m in range(1, 13)]
+
+
 def climate_bands(ee, layers: dict[str, Any], grid: Grid, ix0: int, iy0: int):
-    """t_mean, t_coldest, ti_proxy on the tile grid from the MODIS 8-day LST climatology.
+    """t_mean, t_coldest, ti_proxy, ti_is_fallback on the tile grid from the MODIS 8-day LST climatology.
     t_mean     = mean over the years of (day + night) / 2.
     t_coldest  = coldest calendar month of the climatological monthly mean of (day + night) / 2.
-    ti_proxy   = mean (day - night) swing over the three driest consecutive calendar months (TerraClimate pr climatology)."""
+    ti_proxy   = mean (day - night) swing over the three driest consecutive calendar months (TerraClimate pr climatology);
+                 where precipitation is missing it is the annual mean swing and ti_is_fallback is 1."""
     y0, y1 = layers["climatology_years"]
     lst, pr = layers["modis"]["lst"], layers["precip"]
-    col = (ee.ImageCollection(lst["id"]).filterDate(f"{y0}-01-01", f"{y1 + 1}-01-01")
-           .select(lst["bands"]))
     sc = lst["scale"]
-    both = col.map(lambda im: im.multiply(sc).rename(["day", "night"]).copyProperties(im, ["system:time_start"]))
-    mean_dn = both.map(lambda im: im.select("day").add(im.select("night")).divide(2).rename("t")
-                       .copyProperties(im, ["system:time_start"]))
-    swing = both.map(lambda im: im.select("day").subtract(im.select("night")).rename("swing")
-                     .copyProperties(im, ["system:time_start"]))
-
-    def monthly(c, band):
-        return [c.filter(ee.Filter.calendarRange(m, m, "month")).mean().select(band) for m in range(1, 13)]
-
-    t_m = monthly(mean_dn, "t")
-    sw_m = monthly(swing, "swing")
-    pr_col = (ee.ImageCollection(pr["id"]).filterDate(f"{y0}-01-01", f"{y1 + 1}-01-01").select(pr["band"]))
-    pr_m = monthly(pr_col, pr["band"])
+    col = ee.ImageCollection(lst["id"]).filterDate(f"{y0}-01-01", f"{y1 + 1}-01-01").select(lst["bands"])
+    lst_proj = col.first().select(0).projection()
+    keep = ["system:time_start"]                                              # .map() drops it; calendarRange needs it
+    both = col.map(lambda im: im.multiply(sc).rename(["day", "night"]).copyProperties(im, keep))
+    mean_dn = both.map(lambda im: im.select("day").add(im.select("night")).divide(2).rename("t").copyProperties(im, keep))
+    swing = both.map(lambda im: im.select("day").subtract(im.select("night")).rename("swing").copyProperties(im, keep))
+    t_m, sw_m = _monthly(mean_dn, "t", ee), _monthly(swing, "swing", ee)
+    pr_col = ee.ImageCollection(pr["id"]).filterDate(f"{y0}-01-01", f"{y1 + 1}-01-01").select(pr["band"])
+    pr_m = _monthly(pr_col, pr["band"], ee)
     t_mean = mean_dn.mean().rename("t_mean")
     t_cold = ee.ImageCollection.fromImages(t_m).min().rename("t_coldest")
-    # three driest consecutive months: the triplet with the smallest summed precipitation, then its mean swing
     best_sum, best_swing = None, None
-    for a, b, c in month_triplets():
-        s = pr_m[a - 1].add(pr_m[b - 1]).add(pr_m[c - 1])
+    for a, b, c in month_triplets():                                          # driest three consecutive months
+        tot = pr_m[a - 1].add(pr_m[b - 1]).add(pr_m[c - 1])
         w = sw_m[a - 1].add(sw_m[b - 1]).add(sw_m[c - 1]).divide(3)
         if best_sum is None:
-            best_sum, best_swing = s, w
+            best_sum, best_swing = tot, w
         else:
-            drier = s.lt(best_sum)
-            best_sum, best_swing = best_sum.where(drier, s), best_swing.where(drier, w)
-    # where precipitation is missing (TerraClimate has gaps over ice), fall back to the annual mean swing and flag it
-    annual_swing = swing.mean()
-    ti = best_swing.unmask(annual_swing).rename("ti_proxy")
+            drier = tot.lt(best_sum)
+            best_sum, best_swing = best_sum.where(drier, tot), best_swing.where(drier, w)
+    valid = best_sum.mask().unmask(0)                                         # 1 where precipitation exists
+    annual = swing.mean()
+    ti = best_swing.updateMask(valid).unmask(annual).rename("ti_proxy")
+    fallback = valid.Not().rename("ti_is_fallback")
     mean = ee.Reducer.mean()
-    return ee.Image.cat([_to_tile_grid(t_mean, mean, grid, ix0, iy0), _to_tile_grid(t_cold, mean, grid, ix0, iy0),
-                         _to_tile_grid(ti, mean, grid, ix0, iy0)])
+    red = lambda im, r: GO.reduce_to(im, r, grid, ix0, iy0, ref_proj=lst_proj)   # noqa: E731
+    flag = red(fallback, mean).gt(layers["export"]["fallback_flag_min_share"]).rename("ti_is_fallback")
+    return ee.Image.cat([red(t_mean, mean), red(t_cold, mean), red(ti, mean), flag])
 
 
 def gate_bands(ee, layers: dict[str, Any], grid: Grid, ix0: int, iy0: int):
@@ -174,37 +171,43 @@ def gate_bands(ee, layers: dict[str, Any], grid: Grid, ix0: int, iy0: int):
     bc = img.eq(cls["cropland"]).Or(img.eq(cls["built"])).rename("built_crop_frac")
     nd = layers["modis"]["ndvi"]
     y0, y1 = layers["climatology_years"]
-    ndvi_col = (ee.ImageCollection(nd["id"]).filterDate(f"{y0}-01-01", f"{y1 + 1}-01-01")
-                .map(lambda im: im.select(nd["band"]).multiply(nd["scale"]).updateMask(
-                    im.select(nd["qa_band"]).eq(nd["qa_good"]))))
-    ndvi = ndvi_col.median().rename("ndvi_median")             # per-pixel temporal median, then the tile median below
-    parts = [_to_tile_grid(x, mean, grid, ix0, iy0) for x in (land, wi, bc)]
-    parts.append(_to_tile_grid(ndvi, ee.Reducer.median(), grid, ix0, iy0))
+    raw = ee.ImageCollection(nd["id"]).filterDate(f"{y0}-01-01", f"{y1 + 1}-01-01")
+    nd_proj = raw.first().select(nd["band"]).projection()
+    ndvi_col = raw.map(lambda im: im.select(nd["band"]).multiply(nd["scale"])
+                       .updateMask(im.select(nd["qa_band"]).eq(nd["qa_good"])).copyProperties(im, ["system:time_start"]))
+    ndvi = ndvi_col.median().rename("ndvi_median")                           # per-pixel temporal median, then the tile median
+    parts = [GO.reduce_to(x, mean, grid, ix0, iy0) for x in (land, wi, bc)]
+    parts.append(GO.reduce_to(ndvi, ee.Reducer.median(), grid, ix0, iy0, ref_proj=nd_proj))
     return ee.Image.cat(parts)
 
 
-def air_density_band(ee, dem, grid: Grid, ix0: int, iy0: int):
-    """Earth standard atmosphere from the tile-mean elevation (NASA Glenn model, troposphere):
-    T = 15.04 - 0.00649 h (C); p = 101.29 ((T + 273.1) / 288.08)^5.256 (kPa); rho = p / (0.2869 (T + 273.1)). Valid to 11 km."""
-    h = _to_tile_grid(dem, ee.Reducer.mean(), grid, ix0, iy0).max(0).rename("h")
-    t = h.multiply(-0.00649).add(15.04)
-    p = t.add(273.1).divide(288.08).pow(5.256).multiply(101.29)
-    return p.divide(t.add(273.1).multiply(0.2869)).rename("air_density")
+def air_density_band(ee, dem, grid: Grid, ix0: int, iy0: int, atm: dict[str, Any]):
+    """Earth standard atmosphere from the tile-mean elevation, constants from config/features.yaml `earth_atmosphere`
+    (NASA Glenn model, troposphere): T = t0 - lapse h; p = p0 ((T + K) / t_ref) ** exponent; rho = p / (R (T + K))."""
+    h = GO.reduce_to(dem, ee.Reducer.mean(), grid, ix0, iy0).max(0).rename("h")
+    t = h.multiply(-atm["lapse_c_per_m"]).add(atm["t0_c"])
+    tk = t.add(atm["kelvin"])
+    p = tk.divide(atm["t_ref_k"]).pow(atm["exponent"]).multiply(atm["p0_kpa"])
+    return p.divide(tk.multiply(atm["gas_const"])).rename("air_density")
 
 
-def export_image(ee, window: tuple[int, int, int, int], grid: Grid | None = None, layers: dict[str, Any] | None = None):
+def export_image(ee, window: tuple[int, int, int, int], grid: Grid | None = None, layers: dict[str, Any] | None = None,
+                 cfg: dict[str, Any] | None = None):
     """All exported bands for one tile window, on the 6 km tile grid."""
     grid = grid or Grid()
     layers = layers or load_layers()
+    cfg = cfg or load_all()
+    op = cfg["features"]["operator"]
     ix0, iy0, _, _ = window
     dem = dem_image(ee, layers)
-    terrain = GO.ee_tile_terrain(dem, grid, window, ee)
+    terrain = GO.ee_tile_terrain(dem, grid, window, ee, float(cfg["run"]["operator_check"]["work_cell_m"]),
+                                 float(op["slope_baseline_m"]), (op["rough_a_baseline_m"], op["rough_b_baseline_m"]))
     return ee.Image.cat([gate_bands(ee, layers, grid, ix0, iy0), terrain, climate_bands(ee, layers, grid, ix0, iy0),
-                         air_density_band(ee, dem, grid, ix0, iy0)]).toFloat()
+                         air_density_band(ee, dem, grid, ix0, iy0, cfg["features"]["earth_atmosphere"])]).toFloat()
 
 
 BAND_ORDER = ["land_frac", "water_ice_frac", "built_crop_frac", "ndvi_median", "slope_med", "slope_p90", "relief",
-              "rough_a", "rough_b", "t_mean", "t_coldest", "ti_proxy", "air_density"]
+              "rough_a", "rough_b", "t_mean", "t_coldest", "ti_proxy", "ti_is_fallback", "air_density"]
 
 
 def run(source_bbox: tuple[float, float, float, float] | None = None, name: str = "gsop_earth", folder: str = "gsop_earth",
@@ -212,20 +215,22 @@ def run(source_bbox: tuple[float, float, float, float] | None = None, name: str 
     """Start one Drive export task per block. dry_run only prints the plan. Returns the task list."""
     grid = Grid()
     win = OD.tile_window(grid, source_bbox)
-    blocks = plan_windows(grid, win)
+    layers = load_layers()
+    blocks = plan_windows(grid, win, int(layers["export"]["block_tiles"]))
     tasks = []
     ee = None if dry_run else init(project)
+    cfg = None if dry_run else load_all()
     for k, w in enumerate(blocks):
         ix0, iy0, ix1, iy1 = w
         desc = f"{name}_{k:04d}_x{ix0}_y{iy0}"
         rec = {"description": desc, "window": w, "tiles": (ix1 - ix0) * (iy1 - iy0)}
         if not dry_run:
-            img = export_image(ee, w, grid)
+            img = export_image(ee, w, grid, cfg=cfg)
             region = ee.Geometry.Rectangle(
                 [grid.x0 + ix0 * grid.cell_m, grid.y_top - iy1 * grid.cell_m,
-                 grid.x0 + ix1 * grid.cell_m, grid.y_top - iy0 * grid.cell_m], proj=grid.crs, geodesic=False)
+                 grid.x0 + ix1 * grid.cell_m, grid.y_top - iy0 * grid.cell_m], proj=GO.ee_crs(), geodesic=False)
             task = ee.batch.Export.image.toDrive(image=img, description=desc, folder=folder, fileNamePrefix=desc,
-                                                 region=region, crs=grid.crs, crsTransform=_tf(grid, ix0, iy0, grid.cell_m),
+                                                 region=region, crs=GO.ee_crs(), crsTransform=_tf(grid, ix0, iy0, grid.cell_m),
                                                  maxPixels=int(1e10), fileFormat="GeoTIFF")
             task.start()
             rec["task_id"] = task.id

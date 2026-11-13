@@ -19,3 +19,5 @@
 - E4. Per-tile noise is not applied in the Monte Carlo.
 - E5. Candidate tiles for pass 2 are the robust tiles plus the top 3 percent by mean score and by top-5 membership, capped at 250,000.
 - E6. `docs/source/` (the combined plan document) is gitignored because it holds competition strategy and the repo is public.
+- E7. Mars air density uses the NASA Glenn lower-atmosphere model (699 Pa, scale 11.1 km) via `config/targets.yaml mars_atmosphere.use`. PENDING a human decision: the plan's "610 Pa, 11.1 km" is in no source found, and NASA's fact sheet gives 636 Pa and 11.0 km (no temperature model). Every Mars `air_density` row names the model in its `source` text.
+- E8. Earth sun_max_elev, sun_low_share and insol_annual are computed from latitude and obliquity only (parameters in `config/features.yaml solar`). SPEC section 3 also names slope and aspect. PENDING.

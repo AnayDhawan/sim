@@ -22,16 +22,20 @@ UNBUILT = ["silica_index", "water_index", "insol_annual", "sun_max_elev", "ti_pr
            "t_mean", "t_coldest", "aux_thermal_inertia_si"]
 
 
-def air_density_kg_m3(h_m: float) -> float:
-    """NASA Glenn Mars atmosphere model, lower atmosphere (surface to 7,000 m), https://www.grc.nasa.gov/www/k-12/airplane/atmosmrm.html:
-    T = -31 - 0.000998 h (C); p = 0.699 exp(-0.00009 h) (kPa); rho = p / (0.1921 (T + 273.1)). A curve fit, not Mars-GRAM.
-    The pair 610 Pa / 11.1 km that the plan assumed is in no source we found; NASA's fact sheet gives 636 Pa / 11.0 km.
-    Which source to use is a human decision (docs/UNVERIFIED.md)."""
-    if h_m > 7000.0:
-        raise ValueError("the lower-atmosphere fit is only valid below 7,000 m")
-    t = -31.0 - 0.000998 * h_m
-    p = 0.699 * math.exp(-0.00009 * h_m)
-    return p / (0.1921 * (t + 273.1))
+def air_density_kg_m3(h_m: float, atm: dict[str, Any]) -> float:
+    """Mars air density from elevation. `atm` is `mars_atmosphere` in config/targets.yaml; `use` picks the model.
+    Only the `glenn` model (NASA Glenn, lower atmosphere) can give a density. The choice of source is a pending decision
+    (docs/DECISIONS.md E7): the plan's 610 Pa / 11.1 km pair is in no source we found, and NASA's fact sheet (636 Pa, 11.0 km)
+    disagrees with Glenn (699 Pa)."""
+    use = atm["use"]
+    if use != "glenn":
+        raise ValueError(f"mars_atmosphere.use = {use!r}: only 'glenn' has a temperature model and can give a density")
+    g = atm["glenn"]
+    if h_m > g["valid_to_m"]:
+        raise ValueError(f"the lower-atmosphere fit is only valid below {g['valid_to_m']} m")
+    t = g["t0_c"] - g["t_slope_c_per_m"] * h_m
+    p = g["p0_kpa"] * math.exp(-g["scale_per_m"] * h_m)
+    return p / (g["gas_const"] * (t + g["kelvin"]))
 
 
 def build(cfg: dict[str, Any], dem_path: Path | str | None) -> list[dict]:
@@ -41,14 +45,17 @@ def build(cfg: dict[str, Any], dem_path: Path | str | None) -> list[dict]:
             continue                                       # D10: no coordinates, no profile
         rows.append(C.row(name, "aux_lat", t["lat"], source=t["source"], grade="A"))
         if dem_path:
-            dem, cell = C.read_dem_window(dem_path, t["lat"], float(wrap_lon(t["lon_e"])), 17.0)
+            dem, cell = C.read_dem_window(dem_path, t["lat"], float(wrap_lon(t["lon_e"])),
+                                         cfg["targets"]["target_window_km"] + 2 * cfg["targets"]["read_margin_km"])
             rows += C.terrain_rows(name, dem, cell, f"MOLA ({Path(dem_path).name})", "A",
                                    cfg["targets"]["target_window_km"], cfg["features"]["operator"])
             elev = float(np.nanmedian(dem))
             rows.append(C.row(name, "aux_elevation_m", elev, source=f"MOLA ({Path(dem_path).name}), median of the window, "
                               "metres above the areoid", grade="A", window=f"{cfg['targets']['target_window_km']:g} km"))
-            rows.append(C.row(name, "air_density", air_density_kg_m3(elev), 0.0, "NASA Glenn Mars atmosphere model "
-                              "(lower atmosphere) applied to the MOLA elevation", "C", "from aux_elevation_m"))
+            atm = cfg["targets"]["mars_atmosphere"]
+            rows.append(C.row(name, "air_density", air_density_kg_m3(elev, atm), 0.0,
+                              f"Mars atmosphere model '{atm['use']}' (config/targets.yaml mars_atmosphere; source choice pending, "
+                              "docs/DECISIONS.md E7) applied to the MOLA elevation", "C", "from aux_elevation_m"))
         else:
             rows += [C.row(name, c, None, unavailable=True) for c in
                      ("slope_med", "slope_p90", "relief", "rough_a", "rough_b", "aux_elevation_m", "air_density")]

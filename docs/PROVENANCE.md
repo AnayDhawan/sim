@@ -2,14 +2,14 @@
 
 Every dataset used must have a verified row here: id or product, version, date range, resolution, licence, how it was checked and on what date.
 
-**How "verified" is used here.** All rows below were checked on 2026-11-13 by opening the catalog or archive page (and, for Earth Engine, the official STAC JSON) and reading the id, bands, extent and licence text. **No row has been queried through an authenticated Earth Engine session**, because that login belongs to Anay. Run `uv run gsop s2 earth --source gee --verify` before the first export and correct any row it contradicts. Licences are quoted as the pages state them; where a page names none, that is said.
+**How "verified" is used here.** All rows below were checked on 2026-11-13 by opening the catalog or archive page (and, for Earth Engine, the official STAC JSON) and reading the id, bands, extent and licence text. Rows were read from catalog pages; the DEM id was then corrected from a real Earth Engine run by Anay (2026-11-13), and no other row has been queried through an authenticated session by this branch. Run `uv run gsop s2 earth --source gee --verify` before the first export and correct any row it contradicts. Licences are quoted as the pages state them; where a page names none, that is said.
 
 ## Earth Engine (issue #1) - `config/earth_layers.yaml`
 
 | Layer | Source id | Bands used | Version | Date range | Resolution | Licence (as stated) |
 |---|---|---|---|---|---|---|
 | Elevation | `NASA/NASADEM_HGT/001` | `elevation` | V001 | 2000-02-11 to 2000-02-22 | 30 m, catalog bbox -56..60 lat | NASA data, "may be used for any purpose" |
-| Elevation (fallback above 60N, below 56S) | `COPERNICUS/DEM/GLO30` | `DEM` (surface model) | page says superseded by `COPERNICUS/DEM/GLO30_2024_1` | 2010-12-01 to 2015-01-31 | 30 m | free licence worldwide except Armenia and Azerbaijan; DLR/Airbus attribution |
+| Elevation (fallback above 60N, below 56S) | `COPERNICUS/DEM/GLO30_2024_1` (the unversioned `COPERNICUS/DEM/GLO30` is deprecated; confirmed on a real run by Anay, 2026-11-13) | `DEM` (surface model) | 2024_1 | 2010-12-01 to 2020-11-13 | 30 m | free licence worldwide except Armenia and Azerbaijan; DLR/Airbus attribution |
 | Land surface temperature | `MODIS/061/MOD11A2` | `LST_Day_1km`, `LST_Night_1km` (scale 0.02 K) | V6.1 | 2000-02-18 to present | 1 km, 8-day | LP DAAC: no restrictions on use, sale or redistribution |
 | NDVI | `MODIS/061/MOD13A2` | `NDVI` (scale 0.0001), `SummaryQA` | V6.1 | 2000-02-18 to present | 1 km, 16-day | LP DAAC terms |
 | Land cover | `MODIS/061/MCD12Q1` | `LC_Type1` (12 cropland, 13 built-up, 15 snow and ice, 17 water) | 6.1 | 2001 to 2025, year 2024 used | 500 m | LP DAAC terms |

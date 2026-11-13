@@ -34,13 +34,15 @@ def build(cfg: dict[str, Any], dem_path: Path | str | None, psr_path: Path | str
             rows.append(C.row(name, col, ill[col], 0.0, "pole illumination rule (config/targets.yaml)",
                               ill["evidence_grade"], "n/a"))
         if dem_path:
-            dem, cell = C.read_dem_window(dem_path, t["lat"], float(wrap_lon(t["lon_e"])), 17.0)
+            dem, cell = C.read_dem_window(dem_path, t["lat"], float(wrap_lon(t["lon_e"])),
+                                         cfg["targets"]["target_window_km"] + 2 * cfg["targets"]["read_margin_km"])
             rows += C.terrain_rows(name, dem, cell, f"LOLA ({Path(dem_path).name})", "A",
                                    cfg["targets"]["target_window_km"], cfg["features"]["operator"])
         else:
             rows += [C.row(name, c, None, unavailable=True) for c in ("slope_med", "slope_p90", "relief", "rough_a", "rough_b")]
         if psr_path:
-            mask, cell = C.read_dem_window(psr_path, t["lat"], float(wrap_lon(t["lon_e"])), 17.0)
+            mask, cell = C.read_dem_window(psr_path, t["lat"], float(wrap_lon(t["lon_e"])),
+                                         cfg["targets"]["target_window_km"] + 2 * cfg["targets"]["read_margin_km"])
             rows += C.mask_share_rows(name, "water_index", mask, cell, f"PSR share of the tile ({Path(psr_path).name})", "A",
                                       cfg["targets"]["target_window_km"])
         else:
