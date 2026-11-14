@@ -325,6 +325,7 @@ def tes_rows(site, meta):
         n_in = int(sel.sum())
         add("n_pixels_in_R", n_in, "count")
         add("n_nonpositive_excluded", int((sel & ~pos).sum()), "count")
+        add("n_value_4999_in_R", int((sel & (ti == 4999)).sum()), "count")  # whole-map max is 4999, possible cap (deviation 9)
         add("n_interpolated", int((sel & interp).sum()), "count")
         fi = float((sel & interp).sum() / max(n_in, 1))
         add("frac_interpolated", fi, "fraction")

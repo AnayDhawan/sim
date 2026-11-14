@@ -12,3 +12,8 @@
 6. TES masks. The mask labels say `SAMPLE_BITS = 8` and `RECORD_BYTES = 7200` (one byte per pixel). Value 0 means interpolated, from each mask's own label. `datainfo.txt` names `global_ti_day_2007.img` in the night-mask text; that is the copy error the brief mentions and is ignored.
 7. PRP label. `version_id` 1.0, `lro:product_version_id` 2, Moon radius 1737.4 km, `-999` is the declared invalid constant for `ice_depth`. Data table starts at byte offset 210 (one header record), fields 1-based: `tri_clon` at 127 (15 wide), `tri_clat` at 144 (15), `tri_calt` at 161 (15), `temp_avg` at 178 (8), `temp_max` at 188 (8), `ice_depth` at 198 (11). Bundle version 5.0 is taken from the brief; the PRP label does not state it.
 8. Line endings. Git here converts LF to CRLF on checkout (`core.autocrlf`). The sha256 in `prereg_b.sha256` is of the LF file as written; a Windows checkout may hash differently.
+
+## 2026-11-15 01:25 IST, after smoke test, before full run
+
+9. TES value range. The day map spans 0 to 4999 over the whole map (smoke test). 4999 may be a cap and 0 an empty pixel. The label does not say. Exclusion rule from item 5 stands (value <= 0 excluded and counted). An extra count row `n_value_4999_in_R` is written; 4999 values are not removed. Jezero day pixels in the smoke test ranged 255 to 417, so this is expected to be moot at Jezero.
+10. Smoke test used the first 100,000 PRP records (a byte-range read, kept out of the committed outputs). PRP `tri_clon` is in -180 to 180 in the data; the label says east longitude. Distances use 3D unit vectors, so this does not matter.
