@@ -21,3 +21,10 @@
 ## 2026-11-15 01:35 IST (clock approximate), after the first full run
 
 11. Undocumented ice_depth value. In the south PRP file 100,319 of 2,880,000 records hold `ice_depth = -1.0`. The label defines only 0 (ice stable to sublimation at the surface) and -999.0 (deeper than 2.8738 m). No definition of -1.0 was found in the label. The pre-registered primary rows (everything except -999 counts as valid) are kept unchanged and still include -1.0 in `p5_valid`. Supplemental rows `n_minus1_undocumented`, `frac_minus1_undocumented` and `*_valid_excl_minus1` are added. `ice_depth` is reference context only and not scored, so no score depends on this choice. No other pre-registered quantity changed. The first run took about 2.5 minutes in total because the files are small; the 17:00 IST stop and the 10-minute status interval were not tested by a long run.
+
+## 2026-11-15, B2 follow-ups (after commit fbf6dfa)
+
+12. Arcadia: the follow-up brief carried the placeholder `<LAT, LON>` instead of coordinates. No amendment was written and no Arcadia rows were extracted; Arcadia stays "not covered".
+13. Line endings: `.gitattributes` with `runs/v2/*.md text eol=lf` added. `git add --renormalize runs/v2/` changed nothing, because the stored blob was already LF. The sha256 of PREREG_B.md is unchanged (2751d789...). The git blob id is recorded in `prereg_b.sha256`.
+14. Cross-count of `ice_depth = -1.0` against `temp_max` below 110 K at `shackleton_rim` (script `scripts/b_followup_ice_minus1.py`, rows with layer `prp_ice_depth_x_cold_trap`). Counts only.
+15. 110 K sources re-checked; the outcome (Paige 2010 and Williams 2019 not opened) is in `docs/refs_limits.md`.
