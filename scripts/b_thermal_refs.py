@@ -290,6 +290,14 @@ def prp_rows(site, arr, r_km, suffix, meta):
     add("prp_ice_depth", "n_valid", int(val.size), "count")
     for st, q in (("median_valid", 50), ("p5_valid", 5), ("p95_valid", 95)):
         add("prp_ice_depth", st, pct(val, q), "m")
+    # deviation 11: the file also holds -1.0 in 100,319 records; the label does not define it. Primary rows above are
+    # unchanged (as pre-registered); these supplemental rows report it separately.
+    m1 = val == -1.0
+    val2 = val[~m1]
+    add("prp_ice_depth", "n_minus1_undocumented", int(m1.sum()), "count")
+    add("prp_ice_depth", "frac_minus1_undocumented", float(m1.sum() / n), "fraction")
+    for st, q in (("median_valid_excl_minus1", 50), ("p5_valid_excl_minus1", 5), ("p95_valid_excl_minus1", 95)):
+        add("prp_ice_depth", st, pct(val2, q), "m")
     return rows
 
 

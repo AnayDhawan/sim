@@ -1,0 +1,6 @@
+file,url,bytes,sha256,date_pulled_ist,doi
+dlre_prp_south.tab,https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_prp/dlre_prp_south.tab,604800210,393deaa5d8925d45bb2ed608f937a824f5eae029c2558aad1d2da8206b83a62d,2026-11-15T01:21:47+05:30,10.17189/wj0s-w188
+global_ti_day_2007.img,https://pds-geosciences.wustl.edu/mgs/mgs-m-tes-5-timap-v1/mgst_9001/data/global_ti_day_2007.img,51840000,d8b1ac57c5f2c6d4f43d7e5331591fae0254f48af7629bd0d230c2603da48f9a,2026-11-15T01:18:50+05:30,10.17189/1519489
+global_ti_night_2007.img,https://pds-geosciences.wustl.edu/mgs/mgs-m-tes-5-timap-v1/mgst_9001/data/global_ti_night_2007.img,51840000,faee32838da40045ee7ebd21bed156cc649620312c01165b556d77a2128258f4,2026-11-15T01:19:48+05:30,10.17189/1519489
+global_ti_msk_day_2007.img,https://pds-geosciences.wustl.edu/mgs/mgs-m-tes-5-timap-v1/mgst_9001/data/global_ti_msk_day_2007.img,25920000,23bab175ab99e5aa7b68a4b664f3d616f08c92fcc410188c116d5083103d16cb,2026-11-15T01:19:01+05:30,10.17189/1519489
+global_ti_msk_night_2007.img,https://pds-geosciences.wustl.edu/mgs/mgs-m-tes-5-timap-v1/mgst_9001/data/global_ti_msk_night_2007.img,25920000,fca7ec6fab8b3e81226e1d14dbb3a22509ad111bda4e03bf2b64f050bd550d0b,2026-11-15T01:20:01+05:30,10.17189/1519489

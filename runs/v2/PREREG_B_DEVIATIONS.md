@@ -13,7 +13,11 @@
 7. PRP label. `version_id` 1.0, `lro:product_version_id` 2, Moon radius 1737.4 km, `-999` is the declared invalid constant for `ice_depth`. Data table starts at byte offset 210 (one header record), fields 1-based: `tri_clon` at 127 (15 wide), `tri_clat` at 144 (15), `tri_calt` at 161 (15), `temp_avg` at 178 (8), `temp_max` at 188 (8), `ice_depth` at 198 (11). Bundle version 5.0 is taken from the brief; the PRP label does not state it.
 8. Line endings. Git here converts LF to CRLF on checkout (`core.autocrlf`). The sha256 in `prereg_b.sha256` is of the LF file as written; a Windows checkout may hash differently.
 
-## 2026-11-15 01:25 IST, after smoke test, before full run
+## 2026-11-15 01:20 IST (clock time approximate), after smoke test, before full run
 
 9. TES value range. The day map spans 0 to 4999 over the whole map (smoke test). 4999 may be a cap and 0 an empty pixel. The label does not say. Exclusion rule from item 5 stands (value <= 0 excluded and counted). An extra count row `n_value_4999_in_R` is written; 4999 values are not removed. Jezero day pixels in the smoke test ranged 255 to 417, so this is expected to be moot at Jezero.
 10. Smoke test used the first 100,000 PRP records (a byte-range read, kept out of the committed outputs). PRP `tri_clon` is in -180 to 180 in the data; the label says east longitude. Distances use 3D unit vectors, so this does not matter.
+
+## 2026-11-15 01:35 IST (clock approximate), after the first full run
+
+11. Undocumented ice_depth value. In the south PRP file 100,319 of 2,880,000 records hold `ice_depth = -1.0`. The label defines only 0 (ice stable to sublimation at the surface) and -999.0 (deeper than 2.8738 m). No definition of -1.0 was found in the label. The pre-registered primary rows (everything except -999 counts as valid) are kept unchanged and still include -1.0 in `p5_valid`. Supplemental rows `n_minus1_undocumented`, `frac_minus1_undocumented` and `*_valid_excl_minus1` are added. `ice_depth` is reference context only and not scored, so no score depends on this choice. No other pre-registered quantity changed. The first run took about 2.5 minutes in total because the files are small; the 17:00 IST stop and the 10-minute status interval were not tested by a long run.
