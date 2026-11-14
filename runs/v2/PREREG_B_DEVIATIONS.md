@@ -1,0 +1,14 @@
+# PREREG_B deviations and label findings
+
+`PREREG_B.md` is not edited (its sha256 is in `prereg_b.sha256`). Items found after registration go here, dated, and each is written before the large downloads start.
+
+## 2026-11-15 01:30 IST, before any download over 1 MB
+
+1. Repo mismatch. The brief names `v1-final` and `data/reference/raw/*.csv`. This clone has no tag and no `data/reference/`; the score CSVs are in `data/raw/`. Impact: none on this run.
+2. PCP byte-range probe. Step 2 says HEAD only. A 200-byte `Range: bytes=0-199` request on `pcp_avg_tbol_poln_sum_ltim01_240.tab` was also sent. Result: HTTP 206, so PCP supports byte ranges. Per PREREG_B, PCP is still not used and diurnal range stays "not covered".
+3. Accept-Ranges: `bytes` for the TES day map, the PRP south file and the PCP file. PRP Content-Length 604,800,210 matches the brief.
+4. Mars radius. The TES labels give A, B and C axis radii of 3396.0 km. PREREG_B wrote 3389.5 km. The label wins: 3396.0 km is used. Pixel geometry comes from the label (`LINE_PROJECTION_OFFSET` 1800.5, `SAMPLE_PROJECTION_OFFSET` 3600.5, 20 pix/deg, planetocentric, east-positive, -180 to 180).
+5. TES scale and fill. The brief says to read them from the `.lbl` files. Neither `global_ti_day_2007.lbl` nor the night label states a scale factor or a fill value (the labels hold units, size and projection only). Rule fixed now: scale 1.0 (units J m-2 K-1 s-1/2 as the label states), no fill value. Pixels with value <= 0 are excluded and counted; the maximum is reported unfiltered.
+6. TES masks. The mask labels say `SAMPLE_BITS = 8` and `RECORD_BYTES = 7200` (one byte per pixel). Value 0 means interpolated, from each mask's own label. `datainfo.txt` names `global_ti_day_2007.img` in the night-mask text; that is the copy error the brief mentions and is ignored.
+7. PRP label. `version_id` 1.0, `lro:product_version_id` 2, Moon radius 1737.4 km, `-999` is the declared invalid constant for `ice_depth`. Data table starts at byte offset 210 (one header record), fields 1-based: `tri_clon` at 127 (15 wide), `tri_clat` at 144 (15), `tri_calt` at 161 (15), `temp_avg` at 178 (8), `temp_max` at 188 (8), `ice_depth` at 198 (11). Bundle version 5.0 is taken from the brief; the PRP label does not state it.
+8. Line endings. Git here converts LF to CRLF on checkout (`core.autocrlf`). The sha256 in `prereg_b.sha256` is of the LF file as written; a Windows checkout may hash differently.
