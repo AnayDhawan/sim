@@ -1,0 +1,2 @@
+runs/v2/*.md text eol=lf
+runs/v2/*.sha256 text eol=lf

@@ -12,3 +12,9 @@ results/*
 .env
 docs/source/*
 !docs/source/.gitkeep
+
+# role C evidence run: status, logs, caches never committed
+runs/v2/STATUS*.md
+runs/v2/logs/
+runs/v2/cache/
+*.log
