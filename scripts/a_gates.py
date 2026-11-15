@@ -1,6 +1,6 @@
 """ROLE A: evaluate G1 to G3 (PREREG_A) and write runs/v2/metrics.json, ledger.json, claims_a.csv, results_a.md.
 
-Needs: data/processed/earth_features_v2_6km.parquet, results/a_baseline/*, results/a_thermal/*, data/interim/a_thermal/*.json
+Needs: data/processed/earth_features_v2_6km.parquet, results/a_baseline/*, results/a_H/*, data/interim/a_thermal/*.json
 Status strings are exactly PASS, FAIL, NOT TESTED. Nothing is tuned; a FAIL is reported as FAIL.
 """
 from __future__ import annotations
@@ -108,7 +108,7 @@ def val(mode: str, body: str):
 
 def g2() -> dict:
     out = {"clauses": {}}
-    vm, vs = val("thermal", "moon"), val("thermal", "mars")
+    vm, vs = val("H", "moon"), val("H", "mars")
     bm, bs = val("baseline", "moon"), val("baseline", "mars")
     # (a)
     if vm and vm.get("results"):
@@ -182,7 +182,7 @@ def g3(e: pd.DataFrame, cfg: dict) -> dict:
     for body, tgts in TARGETS.items():
         br = None
         for t in tgts:
-            d = ROOT / "results" / "a_thermal" / body / f"{t}__base"
+            d = ROOT / "results" / "a_H" / body / f"{t}__base"
             mcp = d / "mc_summary.parquet"
             v1p = V1_ZIP_DIR / "results" / body / f"{t}__base" / "mc_summary.parquet"
             if not mcp.exists() or not v1p.exists():
@@ -197,7 +197,7 @@ def g3(e: pd.DataFrame, cfg: dict) -> dict:
             ras[rob // NCOLS, rob % NCOLS] = True
             lab, _ = label_wrap(ras)
             ids = lab[rob // NCOLS, rob % NCOLS]
-            br = br or S.make_br("thermal", body, 2000, 1)
+            br = br or S.make_br("H", body, 2000, 1)
             job = br.job(t, "base")
             fam = S.P.fam_arrays(job)
             famname = "temperature" if body == "moon" else "thermal_inertia"
@@ -272,11 +272,11 @@ def main() -> None:
             add(f"g2c.{k}", "baseline", f"terrain-only baseline {k}", "rank_pct", v, f"{v:.1f}", f"results/a_baseline/{'mars' if k == 'mars_median' else 'moon'}/validation.json", "Reproduction of the v1 number with the v1 config and Earth file.")
     if "rank_pct" in c.get("a", {}):
         for k, v in c["a"]["rank_pct"].items():
-            add(f"g2a.{k}", "controls", f"thermal run control {k} rank percentile", "rank_pct", v, fmt(v), "results/a_thermal/moon/validation.json", "Negative control; the pre-registered maximum is 25.0.")
+            add(f"g2a.{k}", "controls", f"thermal run control {k} rank percentile", "rank_pct", v, fmt(v), "results/a_H/moon/validation.json", "Negative control; the pre-registered maximum is 25.0.")
     if "rank_pct" in c.get("b", {}):
         for k, v in c["b"]["rank_pct"].items():
-            add(f"g2b.{k}", "positives", f"thermal run Mars positive {k} rank percentile", "rank_pct", v, fmt(v), "results/a_thermal/mars/validation.json", f"Status {c['b']['status_by_site'][k]}.")
-        add("g2b.share_scorable", "positives", "Mars positives recalled in top 5 percent, scorable denominator", "ratio", c["b"]["share_scorable"], fmt(c["b"]["share_scorable"], 4) if c["b"]["share_scorable"] is not None else "n/a", "results/a_thermal/mars/validation.json", "Pre-registered pass level is 0.6.")
+            add(f"g2b.{k}", "positives", f"thermal run Mars positive {k} rank percentile", "rank_pct", v, fmt(v), "results/a_H/mars/validation.json", f"Status {c['b']['status_by_site'][k]}.")
+        add("g2b.share_scorable", "positives", "Mars positives recalled in top 5 percent, scorable denominator", "ratio", c["b"]["share_scorable"], fmt(c["b"]["share_scorable"], 4) if c["b"]["share_scorable"] is not None else "n/a", "results/a_H/mars/validation.json", "Pre-registered pass level is 0.6.")
     for name, p in G1.get("points", {}).items():
         for f in ("th_mean_K", "th_max_K", "th_dn_K"):
             add(f"g1.{name}.{f}", "smoke_test", f"{name} {f}", "K", p[f], fmt(p[f], 2), "data/processed/earth_features_v2_6km.parquet", f"Nearest v1 tile {p['tile_id']} at {p['km']:.1f} km.")
