@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from .fidelity import fidelity, ledger_table
-from .provenance import _jsonable, read_json, write_json, write_manifest
+from .provenance import SLOPE_LABEL, _jsonable, read_json, write_json, write_manifest
 
 MAX_BYTES = 3 * 1024 * 1024
 TOP_N = 500
@@ -39,7 +39,7 @@ def export_job(job_dir: Path, out_dir: Path, name: str, summary: dict[str, Any])
            "profile": summary["profile"], "confidence": summary["confidence"],
            "fails_own_gate": summary["fails_own_gate"], "runs": summary.get("runs"),
            "n_robust": summary.get("n_robust"), "n_gated_tiles": summary["gates"]["n_passed"],
-           "candidates": _records(mc[cols])}
+           **SLOPE_LABEL, "candidates": _records(mc[cols])}
     while len(json.dumps(doc, default=_jsonable)) > MAX_BYTES and len(doc["candidates"]) > 10:
         doc["candidates"] = doc["candidates"][: len(doc["candidates"]) // 2]
         doc["truncated_to_fit_3mb"] = True
@@ -51,7 +51,7 @@ def export_job(job_dir: Path, out_dir: Path, name: str, summary: dict[str, Any])
 
 
 def export_body(body: str, res_dir: Path, ledger: dict[str, Any], summaries: dict[str, dict[str, Any]],
-                unscored: dict[str, str], profiles: list[str]) -> Path:
+                unscored: dict[str, str], profiles: list[str], extra: dict[str, Any] | None = None) -> Path:
     out = res_dir / "export"
     out.mkdir(parents=True, exist_ok=True)
     files: list[Path] = []
@@ -69,9 +69,9 @@ def export_body(body: str, res_dir: Path, ledger: dict[str, Any], summaries: dic
     write_json(out / "fidelity.json", {"body": body, "relevance_provisional": True,
                                        "per_purpose": {p: fidelity(ledger, body, p) for p in profiles},
                                        "ledger": ledger_table(ledger, body),
-                                       "note": "Reported beside the score. Never multiplied into it."})
+                                       "note": "Reported beside the score. Never multiplied into it.", **SLOPE_LABEL})
     write_json(out / "index.json", {"schema_version": SCHEMA_VERSION, "body": body, "views": meta_rows,
-                                    "unscored": unscored})
+                                    "unscored": unscored, **SLOPE_LABEL, **(extra or {})})
     files += [out / "fidelity.json", out / "index.json"]
     if (res_dir / "validation.json").exists():
         shutil.copyfile(res_dir / "validation.json", out / "validation.json")

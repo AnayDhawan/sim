@@ -15,7 +15,7 @@ from . import gates as G
 from . import montecarlo as MC
 from . import similarity as S
 from . import weights as W
-from .provenance import write_json
+from .provenance import SLOPE_LABEL, write_json
 
 ILLUM_FAMILIES = ("illumination", "sunlight")
 
@@ -44,6 +44,46 @@ def load_target_profiles(path: Path | str) -> dict[str, dict[str, Any]]:
 
 
 # --------------------------------------------------------------------------- job
+
+DROP_KEYS = ("all", "moon", "mars")
+
+
+def drop_columns_for(run_cfg: dict[str, Any], body: str, body_cfg: dict[str, Any] | None = None) -> list[str]:
+    """Columns dropped for one body, from config/run.yaml drop_columns.
+    - a list applies to every body (the original form; a column the body does not use is simply not there);
+    - a mapping {all: [...], moon: [...], mars: [...]} drops `all` plus the body's own list, so a column dropped for one
+      body is never dropped for the other. In this form every listed column must belong to one of that body's families
+      (when body_cfg is given), so a typo cannot silently drop nothing."""
+    d = run_cfg.get("drop_columns") or []
+    if not isinstance(d, dict):
+        return list(d)
+    unknown = sorted(set(d) - set(DROP_KEYS))
+    if unknown:
+        raise ValueError(f"run.yaml drop_columns: unknown key(s) {unknown}; use one of {list(DROP_KEYS)}")
+    out = list(dict.fromkeys([*(d.get("all") or []), *(d.get(body) or [])]))
+    if body_cfg is not None:
+        used = {c for f in body_cfg.values() for c in f["columns"]}
+        stray = [c for c in (d.get(body) or []) if c not in used]
+        if stray:
+            raise ValueError(f"run.yaml drop_columns.{body}: {stray} is not a column of any {body} family")
+    return out
+
+
+def skip_profiles_for(cfg: dict[str, Any], body: str) -> dict[str, list[str]]:
+    """Purpose profiles a person decided not to run for this body: config/run.yaml skip_profiles
+    {body: {profile: [missing columns]}}. Each skipped profile must exist for the body, must not be `base`, and must name
+    at least one missing column (that column is what the outputs report as the reason)."""
+    sk = (cfg["run"].get("skip_profiles") or {}).get(body) or {}
+    known = cfg["purposes"]["profiles"][body]
+    out = {}
+    for prof, cols in sk.items():
+        if prof == "base" or prof not in known:
+            raise ValueError(f"run.yaml skip_profiles.{body}: {prof!r} is not a skippable {body} profile ({known[1:]})")
+        if not cols:
+            raise ValueError(f"run.yaml skip_profiles.{body}.{prof}: name the missing column(s)")
+        out[prof] = list(cols)
+    return out
+
 
 def active_body_cfg(body_cfg: dict[str, Any], drop: list[str]) -> dict[str, Any]:
     out = {}
@@ -86,7 +126,7 @@ class Job:
 
 def prepare_job(body: str, target: str, profile: str, cfg: dict[str, Any], earth: pd.DataFrame,
                 tprof: dict[str, Any], gate_df: pd.DataFrame | None = None) -> Job:
-    drop = list(cfg["run"].get("drop_columns") or [])
+    drop = drop_columns_for(cfg["run"], body, cfg["weights"][body])
     body_cfg = active_body_cfg(cfg["weights"][body], drop)
     fam_cols = {f: v["columns"] for f, v in body_cfg.items()}
     columns = list(dict.fromkeys(c for cols in fam_cols.values() for c in cols))   # first-appearance order
@@ -141,6 +181,14 @@ def base_score(job: Job) -> tuple[np.ndarray, np.ndarray | None, dict[str, np.nd
     score = S.tile_score(fam, job.profile_weights)
     illum = next((fam[f] for f in ILLUM_FAMILIES if f in fam), None)
     return score, illum, fam
+
+
+def score_rows(job: Job, rows: np.ndarray) -> np.ndarray:
+    """Base score of arbitrary rows of job.earth with the job's own targets, sigma and weights (the sigma comes from the
+    gated tiles, so the score is on the same scale as the gated scores). Used for the informational ungated block (E28)."""
+    rows = np.asarray(rows, dtype=np.int64)
+    Xd = {c: job.earth[c].to_numpy(dtype=np.float32)[rows] for c in job.columns}
+    return S.tile_score(S.family_scores(Xd, job.target_vals, job.sigma, job.fam_cols), job.profile_weights)
 
 
 def top_overlap(a: np.ndarray, b: np.ndarray, frac: float = 0.01) -> float:
@@ -214,5 +262,6 @@ def run_job(job: Job, cfg: dict[str, Any], out_dir: Path | str, runs: int, worke
         summary.update({"runs": runs, "mc_timings_s": res.timings_s, "weight_draw_stats": res.weight_stats,
                         "n_robust": int(res.robust_mask.sum())})
     summary["seconds"] = time.perf_counter() - t0
+    summary.update(SLOPE_LABEL)
     write_json(out_dir / "summary.json", summary)
     return summary

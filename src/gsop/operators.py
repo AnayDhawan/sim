@@ -91,7 +91,7 @@ def _nanstat(v: np.ndarray, fn) -> np.ndarray:
 
 
 def tile_features(dem: np.ndarray, res_m: float, tile_m: float = 6000.0, stride_m: float | None = None,
-                  slope_baseline_m: float = 500.0, rough_baselines_m: tuple[float, float] | None = (100.0, 1000.0),
+                  slope_baseline_m: float = 500.0, rough_baselines_m: tuple[float, float] | None = (300.0, 1000.0),
                   margin_m: float = 0.0, kx_rows: np.ndarray | None = None) -> dict[str, np.ndarray]:
     """Terrain features on a grid of tiles. stride_m defaults to tile_m (non-overlapping).
     rough_baselines_m=None skips roughness (used when the DEM is too coarse for the baselines: the open-data fallback).

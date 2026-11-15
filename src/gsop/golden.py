@@ -30,6 +30,8 @@ def golden_cfg(cfg: dict[str, Any]) -> dict[str, Any]:
     g["run"]["runs"] = N_RUNS
     g["run"]["batch_runs"] = 25
     g["run"]["convergence_checkpoints"] = [25, 50]
+    g["run"]["drop_columns"] = []          # the golden slice scores every synthetic column, whatever run.yaml drops
+    g["run"]["skip_profiles"] = {}         # ... and every profile
     g["targets"]["moon"] = {t: {"lat": -89.0, "lon_e": 10.0, "source": "synthetic"} for t in TARGET_ROWS}
     g["targets"]["mars"] = {"golden_a": {"lat": 18.0, "lon_e": 77.0, "source": "synthetic"}}
     return g

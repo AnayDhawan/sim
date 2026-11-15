@@ -18,6 +18,41 @@ moon_pole_illumination: {sun_max_elev: 1.5, sun_low_share: 1.0, evidence_grade: 
 #              https://www.grc.nasa.gov/www/k-12/airplane/atmosmrm.html . A curve fit, not Mars-GRAM.
 #   fact_sheet NASA Mars fact sheet, https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html : 6.36 mb, scale height 11.0 km.
 #              It has no temperature model, so it cannot give a density by itself; listed only to show the disagreement.
+# Mars sunlight family (insol_annual, sun_max_elev; targets/mars.py sun_rows): the Earth tile code (earth/solar.py,
+# latitude and obliquity only, flat horizon, circular orbit) with Mars constants. Source opened 2026-11-13: NASA Mars fact
+# sheet https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html ("Last Updated: 19 May 2025"): "Obliquity to orbit
+# (deg) 25.19", "Solar irradiance (W/m2) 586.2". Eccentricity 0.0935 is ignored, as Earth's is. Decided (DECISIONS E21).
+mars_solar: {obliquity_deg: 25.19, s0_w_m2: 586.2, source: "NASA Mars fact sheet, marsfact.html, opened 2026-11-13"}
+# Mars target columns derived from downloaded data (targets/mars.py themis_rows and mcd_rows), status DERIVED. Values and
+# spreads are computed, never typed here; this block holds the provenance that goes into every row's source text
+# (docs/PROVENANCE.md has the numbers). Run on 2026-11-14.
+mars_derived:
+  aux_thermal_inertia_si:
+    unit: "J m-2 K-1 s-1/2"
+    product: "THEMIS-derived Thermal Inertia of Jezero Crater, Mars, file Jezero_Thermal_Inertia_v1.tiff (Edwards and Buz, 2021, CC BY 4.0, md5 53fec7c990a90629e98c871a7a0da474)"
+    url: "https://zenodo.org/records/4931348 (doi 10.5281/zenodo.4931348)"
+    date_run: "2026-11-14"
+    command: "uv run gsop s2 targets --body mars --dem <MOLA 463 m tif> --themis <Jezero_Thermal_Inertia_v1.tiff> --mcd docs/evidence/mcd_v6_2_jezero_tsurf_2026-11-14.csv"
+  t_mean:
+    unit: "K"
+    product: "Mars Climate Database v6.2, climatology average solar scenario, variable tsurf (surface temperature), web interface CGI"
+    url: "https://www-mars.lmd.jussieu.fr/mcd_python/ (request URL in docs/evidence/mcd_v6_2_jezero_tsurf_2026-11-14.meta.json)"
+    date_run: "2026-11-14"
+    command: "uv run python scripts/mcd_jezero.py, then uv run gsop s2 targets --body mars --dem <MOLA 463 m tif> --themis <Jezero_Thermal_Inertia_v1.tiff> --mcd docs/evidence/mcd_v6_2_jezero_tsurf_2026-11-14.csv"
+  t_coldest:
+    unit: "K"
+    product: "Mars Climate Database v6.2, climatology average solar scenario, variable tsurf (surface temperature), web interface CGI"
+    url: "https://www-mars.lmd.jussieu.fr/mcd_python/ (request URL in docs/evidence/mcd_v6_2_jezero_tsurf_2026-11-14.meta.json)"
+    date_run: "2026-11-14"
+    command: "uv run python scripts/mcd_jezero.py, then uv run gsop s2 targets --body mars --dem <MOLA 463 m tif> --themis <Jezero_Thermal_Inertia_v1.tiff> --mcd docs/evidence/mcd_v6_2_jezero_tsurf_2026-11-14.csv"
+# Mars climate sampling and time weights. month_sols: duration in sols of the twelve 30-degree Ls months, from the LMD page
+# http://www-mars.lmd.jussieu.fr/mars/time/solar_longitude.html (opened 2026-11-14; they sum to the 668.6-sol Martian year).
+# t_mean weights the surface temperature of each month (sampled at the month centre Ls) by its length, because equal steps
+# in Ls are not equal steps in time on an orbit with eccentricity 0.0935.
+mars_climate:
+  month_sols: [61.2, 65.4, 66.7, 64.5, 59.7, 54.4, 49.7, 46.9, 46.1, 47.4, 50.9, 55.7]
+  ls_step_deg: 15          # Ls 0, 15, ..., 345 (the month centres are the odd multiples of 15)
+  local_time_step_h: 1     # local true solar time 0, 1, ..., 23 martian hours
 mars_atmosphere:
   use: glenn
   glenn: {p0_kpa: 0.699, scale_per_m: 0.00009, t0_c: -31.0, t_slope_c_per_m: 0.000998, gas_const: 0.1921, kelvin: 273.1,

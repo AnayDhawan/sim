@@ -12,7 +12,7 @@ What it does NOT do, on purpose:
   * It never makes terrain finer than its source. Slope and relief use the same operator as every other body
     (`operators.py`, 500 m baseline), so the DEM must have cells of at most 500 m. A ~1.8 km global relief grid
     (for example ETOPO 60 arcsec) cannot give a 500 m baseline slope, so slope_med, slope_p90 and relief are then left
-    out with the reason logged. rough_a and rough_b (100 m and 1000 m baselines) need native cells of at most 33 m and
+    out with the reason logged. rough_a and rough_b (300 m and 1000 m baselines) need native cells of at most 100 m and
     333 m and are always left out here: they come from the Earth Engine route. Left-out columns are listed in the
     returned report and in `open_data_report.json`.
 """

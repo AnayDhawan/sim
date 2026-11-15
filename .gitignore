@@ -12,3 +12,5 @@ results/*
 .env
 docs/source/*
 !docs/source/.gitkeep
+runs/v2/logs/
+runs/v2/cache/

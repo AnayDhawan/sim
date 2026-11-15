@@ -47,3 +47,37 @@ def test_missing_land_frac_is_an_error(tmp_path):
     _write(tmp_path / "c.tif", {"slope_med": np.ones((3, 3))}, 0.0, 0.0)
     with pytest.raises(ValueError, match="land_frac"):
         build_earth_table(tmp_path / "c.tif", tmp_path / "o.parquet")
+
+
+def _write_plain(path, arrays, x_left=0.0, y_top=0.0):
+    """GeoTIFF with NO band descriptions."""
+    h, w = arrays[0].shape
+    with rasterio.open(path, "w", driver="GTiff", height=h, width=w, count=len(arrays), dtype="float32", crs="EPSG:6933",
+                       transform=Affine(6000.0, 0, x_left, 0, -6000.0, y_top)) as ds:
+        for i, a in enumerate(arrays, 1):
+            ds.write(a.astype("float32"), i)
+
+
+def test_single_band_name_comes_from_file_name(tmp_path):
+    _write_plain(tmp_path / "abc.land_frac.tif", [np.ones((3, 3))])
+    _write_plain(tmp_path / "abc.slope_med.tif", [np.full((3, 3), 7.0)])
+    df = build_earth_table(tmp_path, tmp_path / "out" / "e.parquet")
+    assert "slope_med" in df.columns and (df["slope_med"] == 7.0).all()
+
+
+def test_multiband_without_descriptions_uses_bands_json(tmp_path):
+    import json
+    _write_plain(tmp_path / "stack.tif", [np.ones((3, 3)), np.full((3, 3), 2.0), np.full((3, 3), 3.0)])
+    (tmp_path / "bands.json").write_text(json.dumps({"bands": ["land_frac", "slope_med", "relief"], "region": [0, 0, 3, 3],
+                                                     "name": "t"}))
+    df = build_earth_table(tmp_path / "stack.tif", tmp_path / "out" / "e.parquet")
+    assert (df["slope_med"] == 2.0).all() and (df["relief"] == 3.0).all()
+
+
+def test_bands_json_band_count_mismatch_raises(tmp_path):
+    import json
+    _write_plain(tmp_path / "stack.tif", [np.ones((3, 3)), np.ones((3, 3))])
+    (tmp_path / "bands.json").write_text(json.dumps({"bands": ["land_frac", "slope_med", "relief"], "region": [0, 0, 3, 3],
+                                                     "name": "t"}))
+    with pytest.raises(ValueError, match="bands.json"):
+        build_earth_table(tmp_path / "stack.tif", tmp_path / "out" / "e.parquet")

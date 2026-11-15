@@ -17,7 +17,7 @@ import numpy as np
 from .. import operators as O
 from ..grid import Grid
 from ..provenance import write_json
-from . import gee_export as GX
+from . import gee_export_layers as GX
 from . import gee_operators as GO
 from . import open_data as OD
 

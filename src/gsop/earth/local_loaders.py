@@ -4,8 +4,10 @@ Input: a GeoTIFF or a folder of GeoTIFFs in EPSG:6933 with 6000 m cells. Band na
   1. the band description inside the file (the open-data fallback writes these);
   2. for a single-band file named `<id>.<band>.tif` (Earth Engine's per-band download), the `<band>` part of the name;
   3. for a multiband file with no descriptions (an Earth Engine Drive export), the `band_order` of the
-     `<name>_export_plan.json` that `gee_export` wrote, matched by the file's name (the plan lists each task's file name). The
-     plan is looked for in the file's own folder, or is given explicitly (`plan=`, CLI `--plan`);
+     `<name>_export_plan.json` that `gee_export_layers` wrote, matched by the file's name (the plan lists each task's file
+     name), looked for in the file's own folder or given explicitly (`plan=`, CLI `--plan`); else a `bands.json` in the same
+     folder (written by `gee_export.download_test_box`);
+The gate and terrain90 Drive exports are read by `earth/assemble.py` instead, which knows their fixed band orders.
   4. for a single-band file, its stem (`land_frac.tif`).
 Anything else is an error: a band is never guessed.
 Files that share one grid are merged (one file per column, or one multiband file). Files on different grids are separate
@@ -42,6 +44,14 @@ def plan_band_order(f: Path, plan_path: Path | None = None) -> list[str] | None:
     return None
 
 
+def _bands_json_order(f: Path) -> list[str] | None:
+    """`bands.json` next to the file (written by `gee_export.download_test_box`), or None."""
+    p = f.parent / "bands.json"
+    if p.exists():
+        return list(json.loads(p.read_text(encoding="utf-8"))["bands"])
+    return None
+
+
 def _band_names(f: Path, ds, plan_path: Path | None = None) -> list[str]:
     names = []
     plan = None
@@ -50,7 +60,9 @@ def _band_names(f: Path, ds, plan_path: Path | None = None) -> list[str]:
         if not name and ds.count == 1 and "." in f.stem:
             name = f.stem.rsplit(".", 1)[1]                       # <id>.<band>.tif
         if not name and ds.count > 1:
-            plan = plan if plan is not None else (plan_band_order(f, plan_path) or [])
+            plan = plan if plan is not None else (plan_band_order(f, plan_path) or _bands_json_order(f) or [])
+            if plan and len(plan) != ds.count:
+                raise ValueError(f"{f}: the export plan or bands.json lists {len(plan)} bands but the raster has {ds.count}")
             name = plan[i - 1] if len(plan) == ds.count else None
         if not name and ds.count == 1:
             name = f.stem
@@ -114,11 +126,10 @@ def build_earth_table(src: Path | str, out_path: Path | str, grid: Grid | None =
     if df["tile_id"].duplicated().any():
         raise ValueError(f"{int(df['tile_id'].duplicated().sum())} tiles appear in more than one block: the blocks overlap")
     if add_solar:
-        # computed from latitude only (earth/solar.py); a band that the raster already has is never overwritten
-        from .solar import sun_features
-        for k, v in sun_features(df["lat"].to_numpy(), solar_cfg).items():
-            if k not in df.columns:
-                df[k] = v.astype(np.float32)
+        # sun columns from latitude only (earth/solar.py) and air_density from elev_mean (astro.py); a band that the
+        # raster already has is never overwritten
+        from ..astro import add_earth_derived
+        df = add_earth_derived(df, solar_cfg)
     df = df.sort_values("tile_id").reset_index(drop=True)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

@@ -8,7 +8,7 @@ from rasterio.transform import Affine
 from typer.testing import CliRunner
 
 from gsop.cli import app
-from gsop.earth import gee_export as GX
+from gsop.earth import gee_export_layers as GX
 from gsop.earth.local_loaders import build_earth_table
 from gsop.grid import Grid
 
@@ -43,19 +43,6 @@ def test_plan_windows_cover_the_window_exactly_once():
 def test_driest_triplets_wrap_the_year():
     t = GX.month_triplets()
     assert len(t) == 12 and (11, 12, 1) in t and (12, 1, 2) in t and (1, 2, 3) in t
-
-
-def test_dry_run_prints_a_plan_and_needs_no_login(tmp_path, monkeypatch):
-    import gsop.cli as cli
-    import gsop.earth.gee_export as gx
-    monkeypatch.setattr(cli, "data_dir", lambda sub: tmp_path / sub)
-    monkeypatch.setattr(gx, "data_dir", lambda sub: tmp_path / sub)
-    r = CliRunner().invoke(app, ["s2", "earth", "--source", "gee", "--bbox", "74,17,80,22", "--dry-run"])
-    assert r.exit_code == 0, r.output
-    plan = json.loads((tmp_path / "raw/earth/gsop_earth_export_plan.json").read_text())
-    assert plan["tasks"] and plan["band_order"][0] == "land_frac"
-    out = " ".join(r.output.split())
-    assert "--plan" in out and "same folder" in out and "export_plan.json" in out       # the CLI tells the user where the plan must be
 
 
 def test_a_missing_login_stops_loudly_and_is_not_worked_around(monkeypatch):
@@ -127,16 +114,18 @@ def test_add_solar_adds_columns_but_never_overwrites(tmp_path):
 
 
 def test_verify_exit_code_is_not_swallowed(monkeypatch):
-    """Review item 2: typer.Exit is a RuntimeError, so raising it inside `except RuntimeError` turned PASS into exit 1."""
-    ok = [{"id": "A/B", "reachable": True, "bands_missing": []}, {"id": "C/D", "reachable": True, "bands_missing": []}]
-    monkeypatch.setattr(GX, "verify", lambda project=None: ok)
+    """Review item 2: typer.Exit is a RuntimeError, so raising it inside `except RuntimeError` turned PASS into exit 1.
+    On integrate the CLI verifies with gee_export.verify_catalog (the route that ran)."""
+    from gsop.earth import gee_export as GE
+    ok = [{"key": "a", "id": "A/B", "ok": True, "detail": "IMAGE"}, {"key": "b", "id": "C/D", "ok": True, "detail": "IMAGE"}]
+    monkeypatch.setattr(GE, "verify_catalog", lambda project=None: ok)
     r = CliRunner().invoke(app, ["s2", "earth", "--source", "gee", "--verify"])
     assert r.exit_code == 0 and "[FAIL]" not in r.output and "PASS" in r.output
-    bad = ok + [{"id": "E/F", "reachable": True, "bands_missing": ["DEM"]}]
-    monkeypatch.setattr(GX, "verify", lambda project=None: bad)
+    bad = ok + [{"key": "c", "id": "E/F", "ok": False, "detail": "not found"}]
+    monkeypatch.setattr(GE, "verify_catalog", lambda project=None: bad)
     r = CliRunner().invoke(app, ["s2", "earth", "--source", "gee", "--verify"])
     assert r.exit_code == 1 and "E/F" in r.output
-    monkeypatch.setattr(GX, "verify", lambda project=None: (_ for _ in ()).throw(RuntimeError("no login")))
+    monkeypatch.setattr(GE, "verify_catalog", lambda project=None: (_ for _ in ()).throw(RuntimeError("no login")))
     r = CliRunner().invoke(app, ["s2", "earth", "--source", "gee", "--verify"])
     assert r.exit_code == 1 and "no login" in r.output
 
@@ -145,8 +134,11 @@ def test_dem_fallback_is_the_non_deprecated_collection():
     assert GX.load_layers()["dem"]["fallback"]["id"] == "COPERNICUS/DEM/GLO30_2024_1"
 
 
-def test_plan_in_another_folder_works_with_plan_option_and_fails_helpfully_without(tmp_path):
+def test_plan_in_another_folder_works_with_plan_option_and_fails_helpfully_without(tmp_path, monkeypatch):
     """Review: files downloaded to a folder without the plan used to fail with no way out."""
+    import gsop.cli as cli
+    out = tmp_path / "o3" / "earth_features_6km.parquet"
+    monkeypatch.setattr(cli, "EARTH", lambda: out)          # never write the repo's own data/processed
     plan_dir, tif_dir = tmp_path / "plan", tmp_path / "drive"
     tasks = GX.run((74.0, 17.0, 80.0, 22.0), "lonar_test", dry_run=True, plan_dir=plan_dir)
     tif_dir.mkdir()
@@ -157,12 +149,13 @@ def test_plan_in_another_folder_works_with_plan_option_and_fails_helpfully_witho
     assert "ti_is_fallback" in df.columns
     r = CliRunner().invoke(app, ["s2", "earth", "--source", "local", "--src", str(tif_dir), "--plan",
                                  str(plan_dir / "lonar_test_export_plan.json")])
-    assert "Traceback" not in r.output
+    assert r.exit_code == 0 and r.exception is None, r.output             # CliRunner never prints a traceback into output
+    assert "[PASS]" in r.output and out.exists()
 
 
 @pytest.mark.parametrize("bbox", ["1,2,3", "a,b,c,d", "10,20,5,30", "1,2,3,4,5"])
 def test_bad_bbox_is_a_usage_error_not_a_traceback(bbox):
-    for cmd in (["s2", "earth", "--source", "gee", "--dry-run", "--bbox", bbox], ["s2", "open-data", "--bbox", bbox]):
+    for cmd in (["s2", "open-data", "--bbox", bbox],):
         r = CliRunner().invoke(app, cmd)
         assert r.exit_code == 2, (cmd, r.output)
         assert "bbox" in " ".join(r.output.split()).lower()

@@ -19,6 +19,12 @@ from typing import Any
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# DECISIONS E29: stamped into every results output (run_meta.json, validation.json, export files).
+SLOPE_LABEL = {"slope_ground_scale_corrected": False,
+               "slope_limitation": ("Earth slope_med and slope_p90 are not corrected for the EPSG:6933 ground scale "
+                                    "(kx = cos(lat)/cos(30 deg)): exact at 30 deg latitude; east-west slopes read too steep "
+                                    "toward the equator and too gentle poleward of 30 deg, north-south slopes the reverse "
+                                    "(SPEC section 3f); a robustness run on latitude 20 to 40 checks the ranking.")}
 
 
 def _jsonable(o: Any) -> Any:
@@ -117,7 +123,7 @@ def machine_info() -> dict[str, Any]:
 def run_meta(cfg_hash: str, seeds: dict, timings: dict, extra: dict | None = None) -> dict[str, Any]:
     meta = {"git_commit": git_sha(), "config_hash": cfg_hash, "package_versions": package_versions(),
             "machine": machine_info(), "seeds": seeds, "timings_s": timings,
-            "written": time.strftime("%Y-%m-%d %H:%M:%S%z")}
+            "written": time.strftime("%Y-%m-%d %H:%M:%S%z"), **SLOPE_LABEL}
     if extra:
         meta.update(extra)
     return meta
