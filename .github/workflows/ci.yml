@@ -45,7 +45,7 @@ jobs:
         # --check also compares with tests/golden/golden_expected.json, so a drift on either OS fails here.
         run: uv run gsop golden --check --out golden-${{ matrix.label }}.json
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: golden-${{ matrix.label }}
@@ -77,7 +77,7 @@ jobs:
       - name: Compare the two golden files
         run: uv run gsop compare golden/golden-windows.json golden/golden-macos-arm64.json --report compare_report.json
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: compare-report
