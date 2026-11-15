@@ -96,7 +96,12 @@ def g1(e: pd.DataFrame) -> dict:
         out["status"] = "FAIL" if pull_ok else "NOT TESTED"
     else:
         out["status"] = "PASS" if (all(conds.values()) and pull_ok) else ("FAIL" if pull_ok else "NOT TESTED")
-    out["failed_blocks"] = len(pull.get("failed", []))
+    land = pd.read_parquet(TH / "land_ixiy.parquet")
+    keys = set(zip((land["ix"] // 50 * 50).tolist(), (land["iy"] // 50 * 50).tolist()))
+    flags = {tuple(map(int, f.stem.split("_")[1:3])) for f in (TH / "blocks").glob("done_*.flag")}
+    out["land_blocks"] = len(keys)
+    out["blocks_without_data"] = sorted(k for k in keys if k not in flags)
+    out["failed_blocks"] = len(out["blocks_without_data"])
     out["asm"] = asm
     return out
 

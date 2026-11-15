@@ -1,0 +1,165 @@
+claim,number,source_file,sha256
+G1 data pulled and smoke test,FAIL,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+"G2 scoring clauses a, b, c",FAIL,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+"G3 supported regions, target 3 or more",FAIL,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+G2 clause (a),FAIL,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+G2 clause (b),FAIL,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+G2 clause (c),PASS,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+Moon layer-2 held-out recall,NOT TESTED,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+Earth tiles valid in all three thermal features,"2,622,387",data/interim/a_thermal/assemble.json,edac3ea7518e4a561c2f6a225ede0fedcd379eba762a23158c7a152869fa7c0d
+Earth tiles with a valid mean thermal value,"2,721,615",data/interim/a_thermal/assemble.json,edac3ea7518e4a561c2f6a225ede0fedcd379eba762a23158c7a152869fa7c0d
+Share of land tiles 55S to 60N with valid th_mean_K,0.7340,data/interim/a_thermal/assemble.json,edac3ea7518e4a561c2f6a225ede0fedcd379eba762a23158c7a152869fa7c0d
+v1 land tiles,"3,972,955",data/interim/a_thermal/assemble.json,edac3ea7518e4a561c2f6a225ede0fedcd379eba762a23158c7a152869fa7c0d
+terrain-only baseline namib,90.2,results/a_baseline/moon/validation.json,96989d214f208289c7038a1eecbcc9b95c2618e748789941618c57198edc5ba2
+terrain-only baseline rub,75.6,results/a_baseline/moon/validation.json,96989d214f208289c7038a1eecbcc9b95c2618e748789941618c57198edc5ba2
+terrain-only baseline mars_median,61.3,results/a_baseline/mars/validation.json,7ebf8ef601cceef326957705682d2be8e5ed5b17f5d0532a75f72befd5ebca66
+thermal run control namib_sand_sea rank percentile,58.2,results/a_H/moon/validation.json,cdf19df80a85e3717faa485fec185eeec7cacb40a9996721c317319103a3387e
+thermal run control rub_al_khali rank percentile,38.0,results/a_H/moon/validation.json,cdf19df80a85e3717faa485fec185eeec7cacb40a9996721c317319103a3387e
+thermal run Mars positive lonar rank percentile,n/a,results/a_H/mars/validation.json,a8e15551dd4825aebc008367eb7f253367e270536412c0ed3e06d1af3b155793
+thermal run Mars positive haughton rank percentile,86.6,results/a_H/mars/validation.json,a8e15551dd4825aebc008367eb7f253367e270536412c0ed3e06d1af3b155793
+thermal run Mars positive mcmurdo_dry_valleys rank percentile,0.0,results/a_H/mars/validation.json,a8e15551dd4825aebc008367eb7f253367e270536412c0ed3e06d1af3b155793
+thermal run Mars positive atacama_salars rank percentile,52.7,results/a_H/mars/validation.json,a8e15551dd4825aebc008367eb7f253367e270536412c0ed3e06d1af3b155793
+thermal run Mars positive ladakh_puga rank percentile,8.3,results/a_H/mars/validation.json,a8e15551dd4825aebc008367eb7f253367e270536412c0ed3e06d1af3b155793
+thermal run Mars positive mdrs_utah rank percentile,75.0,results/a_H/mars/validation.json,a8e15551dd4825aebc008367eb7f253367e270536412c0ed3e06d1af3b155793
+"Mars positives recalled in top 5 percent, scorable denominator",0.0000,results/a_H/mars/validation.json,a8e15551dd4825aebc008367eb7f253367e270536412c0ed3e06d1af3b155793
+rub_al_khali th_mean_K,306.25,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+rub_al_khali th_max_K,324.63,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+rub_al_khali th_dn_K,18.40,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+namib_sand_sea th_mean_K,303.36,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+namib_sand_sea th_max_K,328.04,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+namib_sand_sea th_dn_K,28.17,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+amazon_basin th_mean_K,n/a,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+amazon_basin th_max_K,n/a,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+amazon_basin th_dn_K,n/a,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+lonar th_mean_K,301.72,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+lonar th_max_K,320.74,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+lonar th_dn_K,15.65,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+haughton th_mean_K,253.54,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+haughton th_max_K,283.89,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+haughton th_dn_K,2.58,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"connecting_ridge_c1__base v2 regions (at least 100 tiles, 100 km from known sites)",19,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+connecting_ridge_c1__base supported regions,0,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+"shackleton_rim__base v2 regions (at least 100 tiles, 100 km from known sites)",31,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+shackleton_rim__base supported regions,2,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+"jezero__base v2 regions (at least 100 tiles, 100 km from known sites)",36,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+jezero__base supported regions,0,runs/v2/results_a.md,caccf06feab7c28710c9cc29df4af933c23712a466dc8a44e84b7f1d116adf8e
+v1 land tiles,3972955,data/interim/a_thermal/assemble.json,edac3ea7518e4a561c2f6a225ede0fedcd379eba762a23158c7a152869fa7c0d
+valid in all three thermal features,2622387,data/interim/a_thermal/assemble.json,edac3ea7518e4a561c2f6a225ede0fedcd379eba762a23158c7a152869fa7c0d
+"land tiles with missing th_mean_K, latitude -90 to -80",75513,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude -80 to -70",112769,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude -70 to -60",986,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude -60 to -50",3905,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude -50 to -40",19877,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude -40 to -30",50629,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude -30 to -20",130137,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude -20 to -10",36190,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude -10 to 0",161553,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude 0 to 10",147557,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude 10 to 20",38289,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude 20 to 30",36621,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude 30 to 40",67211,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude 40 to 50",34221,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude 50 to 60",132979,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude 60 to 70",164288,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude 70 to 80",36521,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"land tiles with missing th_mean_K, latitude 80 to 90",2094,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+lowest valid Earth th_mean_K,216.4478,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+"moon haughton best-of-radius percentile, baseline",85.7953,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"moon haughton own-tile percentile, baseline",80.8401,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"moon namib_sand_sea best-of-radius percentile, baseline",90.1933,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"moon namib_sand_sea own-tile percentile, baseline",41.8560,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"moon rub_al_khali best-of-radius percentile, baseline",75.5588,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"moon rub_al_khali own-tile percentile, baseline",11.4912,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"moon haughton best-of-radius percentile, B3",85.7942,results/a_B3/secondary.json,4c0f730fdfb3a5793541b9148a81da5eb773d502641cdede37daa7aabaaf6934
+"moon haughton own-tile percentile, B3",80.8395,results/a_B3/secondary.json,4c0f730fdfb3a5793541b9148a81da5eb773d502641cdede37daa7aabaaf6934
+"moon namib_sand_sea best-of-radius percentile, B3",90.1933,results/a_B3/secondary.json,4c0f730fdfb3a5793541b9148a81da5eb773d502641cdede37daa7aabaaf6934
+"moon namib_sand_sea own-tile percentile, B3",41.8595,results/a_B3/secondary.json,4c0f730fdfb3a5793541b9148a81da5eb773d502641cdede37daa7aabaaf6934
+"moon rub_al_khali best-of-radius percentile, B3",75.5589,results/a_B3/secondary.json,4c0f730fdfb3a5793541b9148a81da5eb773d502641cdede37daa7aabaaf6934
+"moon rub_al_khali own-tile percentile, B3",11.5060,results/a_B3/secondary.json,4c0f730fdfb3a5793541b9148a81da5eb773d502641cdede37daa7aabaaf6934
+"moon haughton best-of-radius percentile, H",71.8768,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"moon haughton own-tile percentile, H",65.4012,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"moon namib_sand_sea best-of-radius percentile, H",58.1728,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"moon namib_sand_sea own-tile percentile, H",5.1476,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"moon rub_al_khali best-of-radius percentile, H",37.9750,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"moon rub_al_khali own-tile percentile, H",3.3750,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"moon haughton best-of-radius percentile, S0",88.6156,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"moon haughton own-tile percentile, S0",85.1933,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"moon namib_sand_sea best-of-radius percentile, S0",92.4592,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"moon namib_sand_sea own-tile percentile, S0",18.2668,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"moon rub_al_khali best-of-radius percentile, S0",78.7689,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"moon rub_al_khali own-tile percentile, S0",2.4292,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"moon haughton best-of-radius percentile, S1",90.0294,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"moon haughton own-tile percentile, S1",84.0765,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"moon namib_sand_sea best-of-radius percentile, S1",91.6782,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"moon namib_sand_sea own-tile percentile, S1",7.0208,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"moon rub_al_khali best-of-radius percentile, S1",73.3211,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"moon rub_al_khali own-tile percentile, S1",2.5973,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"moon haughton best-of-radius percentile, S2",47.1359,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"moon haughton own-tile percentile, S2",43.2551,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"moon namib_sand_sea best-of-radius percentile, S2",35.4328,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"moon namib_sand_sea own-tile percentile, S2",5.3721,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"moon rub_al_khali best-of-radius percentile, S2",17.8657,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"moon rub_al_khali own-tile percentile, S2",4.2214,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"moon haughton best-of-radius percentile, S3",77.1237,results/a_S3/secondary.json,0b6ab897be6563d56ec762c5874aae9686cf4bcd8eb787a0145230a0fc26bedf
+"moon haughton own-tile percentile, S3",71.4836,results/a_S3/secondary.json,0b6ab897be6563d56ec762c5874aae9686cf4bcd8eb787a0145230a0fc26bedf
+"moon namib_sand_sea best-of-radius percentile, S3",68.3963,results/a_S3/secondary.json,0b6ab897be6563d56ec762c5874aae9686cf4bcd8eb787a0145230a0fc26bedf
+"moon namib_sand_sea own-tile percentile, S3",5.2880,results/a_S3/secondary.json,0b6ab897be6563d56ec762c5874aae9686cf4bcd8eb787a0145230a0fc26bedf
+"moon rub_al_khali best-of-radius percentile, S3",44.6429,results/a_S3/secondary.json,0b6ab897be6563d56ec762c5874aae9686cf4bcd8eb787a0145230a0fc26bedf
+"moon rub_al_khali own-tile percentile, S3",3.1411,results/a_S3/secondary.json,0b6ab897be6563d56ec762c5874aae9686cf4bcd8eb787a0145230a0fc26bedf
+"mars atacama_salars best-of-radius percentile, baseline",61.2884,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"mars atacama_salars own-tile percentile, baseline",42.3178,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"mars haughton best-of-radius percentile, baseline",97.2207,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"mars haughton own-tile percentile, baseline",35.0434,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"mars ladakh_puga best-of-radius percentile, baseline",16.2020,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"mars ladakh_puga own-tile percentile, baseline",16.0295,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"mars mdrs_utah best-of-radius percentile, baseline",83.2995,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"mars mdrs_utah own-tile percentile, baseline",37.1066,results/a_baseline/secondary.json,52271733e2de253d144444f4b9bc10611f2b5668f8c5b0c95bf7cc4caaa5c855
+"mars atacama_salars best-of-radius percentile, H",52.6816,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"mars atacama_salars own-tile percentile, H",31.2375,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"mars haughton best-of-radius percentile, H",86.5874,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"mars haughton own-tile percentile, H",27.7680,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"mars ladakh_puga best-of-radius percentile, H",8.2587,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"mars ladakh_puga own-tile percentile, H",8.1385,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"mars mdrs_utah best-of-radius percentile, H",75.0305,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"mars mdrs_utah own-tile percentile, H",24.7147,results/a_H/secondary.json,78a507dd5587ef8cb583c737130efdbcd54d0aa754a8b014d7c1649bb4a1b884
+"mars atacama_salars best-of-radius percentile, S0",58.8324,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"mars atacama_salars own-tile percentile, S0",36.2664,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"mars haughton best-of-radius percentile, S0",93.2152,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"mars haughton own-tile percentile, S0",25.9849,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"mars ladakh_puga best-of-radius percentile, S0",8.4414,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"mars ladakh_puga own-tile percentile, S0",8.3205,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"mars mdrs_utah best-of-radius percentile, S0",79.4767,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"mars mdrs_utah own-tile percentile, S0",24.7742,results/a_S0/secondary.json,86d391a085dd0fbc11024c39952a6c1030d7498940957730a041137aeb429351
+"mars atacama_salars best-of-radius percentile, S1",58.1365,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"mars atacama_salars own-tile percentile, S1",35.0508,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"mars haughton best-of-radius percentile, S1",93.3039,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"mars haughton own-tile percentile, S1",24.7774,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"mars ladakh_puga best-of-radius percentile, S1",8.4105,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"mars ladakh_puga own-tile percentile, S1",8.2897,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"mars mdrs_utah best-of-radius percentile, S1",82.1747,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"mars mdrs_utah own-tile percentile, S1",27.4656,results/a_S1/secondary.json,12ecc174b786b164b1e530bac7610daae90b963c1a7d2c76cfd20894f3b7d40a
+"mars atacama_salars best-of-radius percentile, S2",51.1256,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"mars atacama_salars own-tile percentile, S2",30.4670,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"mars haughton best-of-radius percentile, S2",85.3350,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"mars haughton own-tile percentile, S2",44.2054,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"mars ladakh_puga best-of-radius percentile, S2",8.1841,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"mars ladakh_puga own-tile percentile, S2",8.0653,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"mars mdrs_utah best-of-radius percentile, S2",72.0437,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"mars mdrs_utah own-tile percentile, S2",24.0076,results/a_S2/secondary.json,cd6c782b2be7b53259dfad1eb560a9efcb0a009039c35dbd747ab0f803480415
+"mars primary median rank percentile, baseline",61.2884,results/a_baseline/mars/validation.json,7ebf8ef601cceef326957705682d2be8e5ed5b17f5d0532a75f72befd5ebca66
+"mars primary median rank percentile, H",52.6816,results/a_H/mars/validation.json,a8e15551dd4825aebc008367eb7f253367e270536412c0ed3e06d1af3b155793
+"mars primary median rank percentile, S0",58.8324,results/a_S0/mars/validation.json,3b9f4c96940e4a4bbe5300a2ff18b8ba59a2fee188173bca0cc67a8c9afb3d77
+"mars primary median rank percentile, S1",58.1365,results/a_S1/mars/validation.json,20a538419463b1ec21871253797b86dd71e996ef0fefcbab14b86b6b87487ae7
+"mars primary median rank percentile, S2",51.1256,results/a_S2/mars/validation.json,c721a3449afd73d1762258710de100fed2d6908ebde06abb47c30295a7d62e50
+smoke test rub_al_khali th_mean_K,306.2498,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test rub_al_khali th_max_K,324.6252,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test rub_al_khali th_dn_K,18.4047,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test namib_sand_sea th_mean_K,303.3570,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test namib_sand_sea th_max_K,328.0350,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test namib_sand_sea th_dn_K,28.1703,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test lonar th_mean_K,301.7174,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test lonar th_max_K,320.7398,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test lonar th_dn_K,15.6537,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test haughton th_mean_K,253.5401,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test haughton th_max_K,283.8859,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5
+smoke test haughton th_dn_K,2.5828,data/processed/earth_features_v2_6km.parquet,701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5

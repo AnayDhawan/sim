@@ -151,8 +151,36 @@ def main() -> None:
             cl(f"mars primary median rank percentile, {v}", f"{r['primary_median_rank_pct']:.4f}", f"results/a_{v}/mars/validation.json")
     A("\nPREREG_A sha256 and addendum sha256 are stated at the top of this file and apply to every row above.\n")
     A("## What failed and what is NOT TESTED\n")
-    for g, d in (("G1", G1), ("G2", G2), ("G3", G3)):
-        A(f"- {g}: {d.get('status', 'NOT TESTED')}. {' '.join(d.get('reasons', []))}")
+    c1 = G1.get("conditions", {})
+    P1 = G1.get("points", {})
+    A(f"- G1: {G1.get('status', 'NOT TESTED')}. Coverage between 55 S and 60 N is {asm.get('band_valid_share', float('nan')):.4f} against the pre-registered 0.85 ({'met' if c1.get('coverage_band_ge_85pct') else 'not met'}). At the five smoke-test points: " + "; ".join(
+        (f"{k} th_mean {p['th_mean_K']:.1f} K, th_max {p['th_max_K']:.1f} K, th_dn {p['th_dn_K']:.1f} K" if p['th_mean_K'] == p['th_mean_K'] else f"{k} has no valid value") for k, p in P1.items())
+      + f". {G1.get('failed_blocks', 'n/a')} of {G1.get('land_blocks', 'n/a')} land blocks returned no data (south-polar rows; Earth Engine could not transform them).")
+    for k, p in P1.items():
+        for f in ("th_mean_K", "th_max_K", "th_dn_K"):
+            if p[f] == p[f]:
+                cl(f"smoke test {k} {f}", f"{p[f]:.4f}", "data/processed/earth_features_v2_6km.parquet")
+    ca, cb = G2.get("clauses", {}).get("a", {}), G2.get("clauses", {}).get("b", {})
+    if ca.get("rank_pct"):
+        A("- G2(a): " + ", ".join(f"{k} {f1(v)}" for k, v in ca["rank_pct"].items()) + " on the v1 site statistic (best-of-radius), maximum allowed 25.0.")
+    if cb.get("n_scorable") is not None:
+        A(f"- G2(b): {sum(cb['recalled'].values())} of {cb['n_scorable']} scorable Mars positives at or above the 95th percentile (needs 60 percent). Not scorable: " + ", ".join(k for k, s in cb["status_by_site"].items() if s != "scored") + ".")
+    for vname, d in G3.get("views", {}).items():
+        if d.get("status") == "computed":
+            A(f"- G3 {vname}: {d['n_regions']} regions of at least 100 robust tiles and 100 km from known sites, {d['n_supported']} supported ({d['n_robust_tiles_v2']:,} robust tiles in v2, {d['n_robust_tiles_v1']:,} in v1).")
+    A("")
+    A("### Reading\n")
+    sb, sh = (sec.get("baseline") or {}).get("bodies", {}), (sec.get("H") or {}).get("bodies", {})
+    def g(s, body, site, key):
+        return ((s.get(body) or {}).get(site) or {}).get(key)
+    A("- Descriptive change from v1 to H (thermal 0.5): " + "; ".join(
+        f"{lab} best-of-radius {f1(g(sb, b, s, 'mean_best_of_radius_pct'))} to {f1(g(sh, b, s, 'mean_best_of_radius_pct'))}, own tile {f1(g(sb, b, s, 'mean_own_tile_pct'))} to {f1(g(sh, b, s, 'mean_own_tile_pct'))}"
+        for lab, b, s in (("Moon Namib", "moon", "namib_sand_sea"), ("Moon Rub' al Khali", "moon", "rub_al_khali"), ("Moon Haughton", "moon", "haughton"), ("Mars Atacama", "mars", "atacama_salars"), ("Mars MDRS", "mars", "mdrs_utah"), ("Mars Ladakh", "mars", "ladakh_puga"))) + ".")
+    A("- Chance level for the best-of-radius statistic is about 97, so every best-of-radius value above sits below it. The own-tile statistic has chance level about 50.")
+    A("- The thermal columns lower the Moon controls and the Mars positives together. Two causes are untested hypotheses: the thermal pair is a coarse physical match, and the Earth thermal set lacks the tiles with no thermal value (see the coverage finding).")
+    A("- Coverage finding: under the pre-registered QC rule (QC bits 0-1 equal 0) the composites over central Australia carry bits 0-1 equal to 1 (other quality), so those tiles have no thermal value (checked at one point, 133 E 25 S, where all 229 composites carry bits 0-1 equal to 1; the regional validity shares are in the table above). Indonesia, the Amazon, parts of Siberia and the tropics lose most tiles to cloud and quality flags. Missing tiles are rejected as missing data, so the Earth set that is scored is not a random sample of Earth. This was not corrected; a rerun with bits 0-1 in {0, 1} would be a separate, labelled sensitivity.")
+    A("- The Moon thermal target ranks come from only the two polar PRP sites inside a south-polar set; the Mars target from Jezero alone. Neither is checked against any positive.\n")
+    A("### Not run or not tested\n")
     A("- Moon layer-2 recall: NOT TESTED (two positives, one gated out).")
     A("- Arcadia: NOT TESTED (no centre in the v1 target list, no thermal reference).")
     A("- Moon ice depth, diurnal range, cold-trap share; Mars surface temperature: not scored (no Earth partner or no source).")
@@ -165,6 +193,29 @@ def main() -> None:
     A("5. Earth Engine blocks. 50 x 50 tile blocks, split into halves where a block exceeded the memory limit or could not be transformed near the poles; two worker processes. Not outcome-affecting.")
     A("6. Profiles. Only the base profile was run, as PREREG_A states.")
     A("7. Two log files were committed by mistake in 978910c and untracked later (no secrets).")
+    mp = V2 / "metrics.json"
+    m = json.loads(mp.read_text(encoding="utf-8"))
+    m["meta"]["preregistration_hashes"] = {"PREREG_A": PRE, "PREREG_A_addendum1": ADD}
+    m["meta"]["limits"].append("G2(a) cannot be met by construction under a best-of-35-tiles score; G2(b) passes by chance about 83% of the time. See ENGINE_AUDIT.md.")
+    m["meta"]["limits"].append("Under the pre-registered QC rule, tiles in central Australia, Indonesia, the Amazon and much of the high latitudes have no thermal value and are not scored.")
+    for v in ORDER:
+        sv = (sec.get(v) or {}).get("bodies", {})
+        for body, ss in sv.items():
+            for site, d in ss.items():
+                for key, lab in (("mean_best_of_radius_pct", "best-of-radius percentile"), ("mean_own_tile_pct", "own-tile percentile")):
+                    if d.get(key) is None:
+                        continue
+                    m["entries"].append({"id": f"desc.{v}.{body}.{site}.{key}", "group": "descriptive", "label": f"{LABEL[v]}: {body} {site} {lab}",
+                                         "unit": "rank_pct", "value": d[key], "display": f"{d[key]:.1f}", "source_file": f"results/a_{v}/secondary.json",
+                                         "sha256": sha(ROOT / "results" / f"a_{v}" / "secondary.json"),
+                                         "what_this_means_for_the_analogy": "Descriptive. The best-of-radius statistic has a chance level near 97; the own-tile statistic near 50. Not a gate."})
+        r = (val.get((v, "mars")) or {}).get("results")
+        if r:
+            m["entries"].append({"id": f"desc.{v}.mars.primary_median", "group": "descriptive", "label": f"{LABEL[v]}: Mars primary median rank percentile",
+                                 "unit": "rank_pct", "value": r["primary_median_rank_pct"], "display": f"{r['primary_median_rank_pct']:.1f}",
+                                 "source_file": f"results/a_{v}/mars/validation.json", "sha256": sha(ROOT / "results" / f"a_{v}" / "mars" / "validation.json"),
+                                 "what_this_means_for_the_analogy": "Descriptive, v1 site statistic."})
+    mp.write_text(json.dumps(m, indent=1), encoding="utf-8")
     (V2 / "results_a.md").write_text("\n".join(L) + "\n", encoding="utf-8")
     with open(V2 / "claims_a.csv", "a", newline="", encoding="utf-8") as f:
         w = csv.writer(f)

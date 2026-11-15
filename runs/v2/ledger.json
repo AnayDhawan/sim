@@ -1,0 +1,99 @@
+{
+ "meta": {
+  "schema_version": 1,
+  "file": "runs/v2/ledger.json",
+  "role": "A"
+ },
+ "entries": [
+  {
+   "id": "src.modis",
+   "type": "source",
+   "status": "used",
+   "statement": "MODIS/061/MOD11A2 8-day 1 km LST, bands LST_Day_1km, LST_Night_1km, QC_Day, QC_Night, 2019 to 2023, QC bits 0-1 equal 0. MODIS/061/MOD11C3 is not in the Earth Engine catalog.",
+   "source_file": "runs/v2/PREREG_A.md",
+   "sha256": "1758b132701ea831dea51c82ee9ebc3bd5c2c3a9e1544fdfe3eb7cd7a1e7992e",
+   "limit": "Skin temperature at overpass; cloud gaps; 1 km pixels averaged to 6 km."
+  },
+  {
+   "id": "src.v1_earth",
+   "type": "source",
+   "status": "used",
+   "statement": "v1 Earth feature file, 3,972,955 land tiles",
+   "source_file": "data/raw/v1/gsop_v1/data/processed/earth_features_6km.parquet",
+   "sha256": "df31e93c4034ecb908a2d378ab2335d817e8751b32616e135de8febc0182a966",
+   "limit": "v1 terrain limits apply (see v1 docs/UNVERIFIED.md)."
+  },
+  {
+   "id": "src.v2_earth",
+   "type": "output",
+   "status": "built",
+   "statement": "v1 columns plus th_mean_K, th_max_K, th_dn_K, valid shares and rank columns th_mean, th_max, th_ti",
+   "source_file": "data/processed/earth_features_v2_6km.parquet",
+   "sha256": "701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5",
+   "limit": "Not committed to git; rebuild with scripts/a_build_earth.py from the block cache."
+  },
+  {
+   "id": "src.dlre_prp_south.tab",
+   "type": "source",
+   "status": "used",
+   "statement": "dlre_prp_south.tab sha256 equals the Role B record: True",
+   "source_file": "data/reference/thermal_refs_files.csv (branch data/thermal-refs)",
+   "sha256": "393deaa5d8925d45bb2ed608f937a824f5eae029c2558aad1d2da8206b83a62d",
+   "limit": "Moon PRP is a modelled 2 cm depth temperature on about 500 m triangles; Mars TES is 3 km pixels."
+  },
+  {
+   "id": "src.global_ti_day_2007.img",
+   "type": "source",
+   "status": "used",
+   "statement": "global_ti_day_2007.img sha256 equals the Role B record: True",
+   "source_file": "data/reference/thermal_refs_files.csv (branch data/thermal-refs)",
+   "sha256": "d8b1ac57c5f2c6d4f43d7e5331591fae0254f48af7629bd0d230c2603da48f9a",
+   "limit": "Moon PRP is a modelled 2 cm depth temperature on about 500 m triangles; Mars TES is 3 km pixels."
+  },
+  {
+   "id": "src.global_ti_night_2007.img",
+   "type": "source",
+   "status": "used",
+   "statement": "global_ti_night_2007.img sha256 equals the Role B record: True",
+   "source_file": "data/reference/thermal_refs_files.csv (branch data/thermal-refs)",
+   "sha256": "faee32838da40045ee7ebd21bed156cc649620312c01165b556d77a2128258f4",
+   "limit": "Moon PRP is a modelled 2 cm depth temperature on about 500 m triangles; Mars TES is 3 km pixels."
+  },
+  {
+   "id": "src.global_ti_msk_day_2007.img",
+   "type": "source",
+   "status": "used",
+   "statement": "global_ti_msk_day_2007.img sha256 equals the Role B record: True",
+   "source_file": "data/reference/thermal_refs_files.csv (branch data/thermal-refs)",
+   "sha256": "23bab175ab99e5aa7b68a4b664f3d616f08c92fcc410188c116d5083103d16cb",
+   "limit": "Moon PRP is a modelled 2 cm depth temperature on about 500 m triangles; Mars TES is 3 km pixels."
+  },
+  {
+   "id": "src.global_ti_msk_night_2007.img",
+   "type": "source",
+   "status": "used",
+   "statement": "global_ti_msk_night_2007.img sha256 equals the Role B record: True",
+   "source_file": "data/reference/thermal_refs_files.csv (branch data/thermal-refs)",
+   "sha256": "fca7ec6fab8b3e81226e1d14dbb3a22509ad111bda4e03bf2b64f050bd550d0b",
+   "limit": "Moon PRP is a modelled 2 cm depth temperature on about 500 m triangles; Mars TES is 3 km pixels."
+  },
+  {
+   "id": "limit.proxy",
+   "type": "known_limit",
+   "status": "open",
+   "statement": "Mars thermal inertia is paired with the inverted Earth day-minus-night range, a proxy driven also by humidity, cloud, vegetation and soil moisture.",
+   "source_file": "docs/refs_limits.md (branch data/thermal-refs)",
+   "sha256": "",
+   "limit": "Proxy"
+  },
+  {
+   "id": "limit.moon_not_scored",
+   "type": "unscored_property",
+   "status": "open",
+   "statement": "Moon ice_depth, diurnal range and cold-trap share are not scored; Mars surface temperature and Arcadia are not covered.",
+   "source_file": "runs/v2/PREREG_A.md",
+   "sha256": "1758b132701ea831dea51c82ee9ebc3bd5c2c3a9e1544fdfe3eb7cd7a1e7992e",
+   "limit": "No Earth partner or no source."
+  }
+ ]
+}
