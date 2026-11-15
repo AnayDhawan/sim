@@ -1,0 +1,26 @@
+name: Bug report
+description: Something in the engine is wrong or crashes
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong
+      description: What you ran, what you saw and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: cmd
+    attributes:
+      label: Command and output
+      description: The exact `gsop` command and the error or the numbers.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Machine
+      placeholder: Windows 11 or macOS 14 on Apple silicon, 16 cores, 24 GB
+    validations:
+      required: false
