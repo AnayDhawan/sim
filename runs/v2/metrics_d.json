@@ -1,0 +1,2695 @@
+{
+ "meta": {
+  "label": "ROLE D. Fitted and cross-validated on a very small labelled set. Exploratory; nothing here is a success claim and nothing replaces Role A's headline.",
+  "preregistration": {
+   "file": "runs/v2/PREREG_D.md",
+   "sha256": "78b4c00cd1df5219ca8dbc2919d744d0414083aeba2e0cc35b5086e41a529610"
+  },
+  "thermal_layer": {
+   "label": "Role A earth_features_v2_6km.parquet, MODIS MOD11A2 2019-2023, copied 2026-11-15 11:45 IST",
+   "sha256": "701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5"
+  },
+  "shuffled_baseline": "1000 draws, seed 20261114, Earth thermal ranks permuted across the tiles of each universe; M3 repeats the full fit per draw",
+  "universe": {
+   "moon": {
+    "n_U": 804789,
+    "n_v1_gated": 1226294,
+    "rejected_by_reason": {
+     "missing_data": 2194305,
+     "vegetated": 944406,
+     "open_water_or_ice": 21442,
+     "built_or_cropland": 8013
+    }
+   },
+   "mars": {
+    "n_U": 818255,
+    "n_v1_gated": 1226654,
+    "rejected_by_reason": {
+     "missing_data": 2136671,
+     "vegetated": 987652,
+     "open_water_or_ice": 22259,
+     "built_or_cropland": 8118
+    }
+   }
+  },
+  "engine_check": {
+   "moon/connecting_ridge_c1": {
+    "same_tile_set": true,
+    "n": 1226294,
+    "max_abs_diff": 0.0,
+    "ok": true
+   },
+   "moon/shackleton_rim": {
+    "same_tile_set": true,
+    "n": 1226294,
+    "max_abs_diff": 0.0,
+    "ok": true
+   },
+   "mars/jezero": {
+    "same_tile_set": true,
+    "n": 1226654,
+    "max_abs_diff": 0.0,
+    "ok": true
+   },
+   "all_ok": true
+  },
+  "reference_cross_check_ok": true
+ },
+ "metrics": [
+  {
+   "id": "d.noill.M0.fpr25_moon_all",
+   "group": "d_noill",
+   "label": "Moon false-positive rate at top 25 percent, all scorable negative units (M0, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.21393034825870647,
+   "display": "21.4%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Share of negative units (desert tiles and two sand seas, each by its own tile) that the Moon score ranks in the top 25 percent. A desert is not a polar ridge; a high rate means the score is fooled by broad terrain traits. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.fpr25_moon_tiles",
+   "group": "d_noill",
+   "label": "Moon false-positive rate at top 25 percent, 200 sampled tiles (M0, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.21608040201005024,
+   "display": "21.6%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Same rate over the 200 sampled tiles only. The tiles sit in a few deserts and are not independent. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.namib_rank",
+   "group": "d_noill",
+   "label": "Namib sand sea, Moon percentile of its own tile (M0, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 49.618595681601015,
+   "display": "49.6",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.rub_rank",
+   "group": "d_noill",
+   "label": "Rub' al Khali, Moon percentile of its own tile (M0, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 12.515143720900758,
+   "display": "12.5",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.recall5",
+   "group": "d_noill",
+   "label": "Mars recall at top 5 percent, scorable positives (M0, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.recall10",
+   "group": "d_noill",
+   "label": "Mars recall at top 10 percent, scorable positives (M0, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.recall25",
+   "group": "d_noill",
+   "label": "Mars recall at top 25 percent, scorable positives (M0, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.mars_primary_median",
+   "group": "d_noill",
+   "label": "Mars primary median percentile, scorable positives (M0, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 28.050852118227205,
+   "display": "28.1",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Median over very few sites; terrain and a thermal inertia proxy only. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.auc_mars",
+   "group": "d_noill",
+   "label": "Positives against negative units, Mars profile AUC (M0, Moon without illumination (primary))",
+   "unit": "AUC",
+   "value": 0.03731343283582089,
+   "display": "0.037",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Rank separation under the Jezero profile; 0.5 is chance. The negative tiles are not independent, so intervals are too narrow. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.fpr25_mars_all",
+   "group": "d_noill",
+   "label": "Negative units at top 25 percent under the Mars profile (M0, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.3681592039800995,
+   "display": "36.8%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Supplementary. Not a gate and not in the fit. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.rank_mars.lonar",
+   "group": "d_noill",
+   "label": "Mars percentile of lonar, own tile (M0, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.rank_mars.haughton",
+   "group": "d_noill",
+   "label": "Mars percentile of haughton, own tile (M0, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 27.939456526388472,
+   "display": "27.9",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.rank_mars.mcmurdo_dry_valleys",
+   "group": "d_noill",
+   "label": "Mars percentile of mcmurdo_dry_valleys, own tile (M0, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.rank_mars.atacama_salars",
+   "group": "d_noill",
+   "label": "Mars percentile of atacama_salars, own tile (M0, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 39.71231462074781,
+   "display": "39.7",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.rank_mars.ladakh_puga",
+   "group": "d_noill",
+   "label": "Mars percentile of ladakh_puga, own tile (M0, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 9.712742360266665,
+   "display": "9.7",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M0.rank_mars.mdrs_utah",
+   "group": "d_noill",
+   "label": "Mars percentile of mdrs_utah, own tile (M0, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 28.162247710065934,
+   "display": "28.2",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.noill.M1.fpr25_moon_all",
+   "group": "d_noill",
+   "label": "Moon false-positive rate at top 25 percent, all scorable negative units (M1, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.01990049751243781,
+   "display": "2.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Share of negative units (desert tiles and two sand seas, each by its own tile) that the Moon score ranks in the top 25 percent. A desert is not a polar ridge; a high rate means the score is fooled by broad terrain traits. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.11442786069651742,
+    "median": 0.1791044776119403,
+    "max": 0.25870646766169153,
+    "n_draws": 1000,
+    "display": "11.4% to 25.9%, median 17.9%"
+   }
+  },
+  {
+   "id": "d.noill.M1.fpr25_moon_tiles",
+   "group": "d_noill",
+   "label": "Moon false-positive rate at top 25 percent, 200 sampled tiles (M1, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.020100502512562814,
+   "display": "2.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Same rate over the 200 sampled tiles only. The tiles sit in a few deserts and are not independent. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.11557788944723618,
+    "median": 0.18090452261306533,
+    "max": 0.2562814070351759,
+    "n_draws": 1000,
+    "display": "11.6% to 25.6%, median 18.1%"
+   }
+  },
+  {
+   "id": "d.noill.M1.namib_rank",
+   "group": "d_noill",
+   "label": "Namib sand sea, Moon percentile of its own tile (M1, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 9.41886631154253,
+   "display": "9.4",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 3.131193393547874,
+    "median": 36.90774849059816,
+    "max": 84.57477674272387,
+    "n_draws": 1000,
+    "display": "3.1 to 84.6, median 36.9"
+   }
+  },
+  {
+   "id": "d.noill.M1.rub_rank",
+   "group": "d_noill",
+   "label": "Rub' al Khali, Moon percentile of its own tile (M1, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 2.8699447929830058,
+   "display": "2.9",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.041936457879021706,
+    "median": 29.893145905324253,
+    "max": 80.3122309077286,
+    "n_draws": 1000,
+    "display": "0.0 to 80.3, median 29.9"
+   }
+  },
+  {
+   "id": "d.noill.M1.recall5",
+   "group": "d_noill",
+   "label": "Mars recall at top 5 percent, scorable positives (M1, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.0,
+    "n_draws": 1000,
+    "display": "0.0% to 0.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.noill.M1.recall10",
+   "group": "d_noill",
+   "label": "Mars recall at top 10 percent, scorable positives (M1, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.0,
+    "n_draws": 1000,
+    "display": "0.0% to 0.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.noill.M1.recall25",
+   "group": "d_noill",
+   "label": "Mars recall at top 25 percent, scorable positives (M1, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.25,
+    "n_draws": 1000,
+    "display": "0.0% to 25.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.noill.M1.mars_primary_median",
+   "group": "d_noill",
+   "label": "Mars primary median percentile, scorable positives (M1, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 26.14337828671991,
+   "display": "26.1",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Median over very few sites; terrain and a thermal inertia proxy only. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 26.51349518181985,
+    "median": 26.559874366792748,
+    "max": 56.53598205938246,
+    "n_draws": 1000,
+    "display": "26.5 to 56.5, median 26.6"
+   }
+  },
+  {
+   "id": "d.noill.M1.auc_mars",
+   "group": "d_noill",
+   "label": "Positives against negative units, Mars profile AUC (M1, Moon without illumination (primary))",
+   "unit": "AUC",
+   "value": 0.03855721393034826,
+   "display": "0.039",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Rank separation under the Jezero profile; 0.5 is chance. The negative tiles are not independent, so intervals are too narrow. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.024875621890547265,
+    "median": 0.036069651741293535,
+    "max": 0.30472636815920395,
+    "n_draws": 1000,
+    "display": "0.025 to 0.305, median 0.036"
+   }
+  },
+  {
+   "id": "d.noill.M1.fpr25_mars_all",
+   "group": "d_noill",
+   "label": "Negative units at top 25 percent under the Mars profile (M1, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.34328358208955223,
+   "display": "34.3%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Supplementary. Not a gate and not in the fit. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.3482587064676617,
+    "median": 0.3781094527363184,
+    "max": 0.42786069651741293,
+    "n_draws": 1000,
+    "display": "34.8% to 42.8%, median 37.8%"
+   }
+  },
+  {
+   "id": "d.noill.M1.rank_mars.lonar",
+   "group": "d_noill",
+   "label": "Mars percentile of lonar, own tile (M1, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.noill.M1.rank_mars.haughton",
+   "group": "d_noill",
+   "label": "Mars percentile of haughton, own tile (M1, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 26.53524879163586,
+   "display": "26.5",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 26.403016174664376,
+    "median": 26.445667915258692,
+    "max": 60.38508777825983,
+    "n_draws": 1000,
+    "display": "26.4 to 60.4, median 26.4"
+   }
+  },
+  {
+   "id": "d.noill.M1.rank_mars.mcmurdo_dry_valleys",
+   "group": "d_noill",
+   "label": "Mars percentile of mcmurdo_dry_valleys, own tile (M1, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.noill.M1.rank_mars.atacama_salars",
+   "group": "d_noill",
+   "label": "Mars percentile of atacama_salars, own tile (M1, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 37.26882206647072,
+   "display": "37.3",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 38.024087845476046,
+    "median": 38.08464354021668,
+    "max": 75.76660087625496,
+    "n_draws": 1000,
+    "display": "38.0 to 75.8, median 38.1"
+   }
+  },
+  {
+   "id": "d.noill.M1.rank_mars.ladakh_puga",
+   "group": "d_noill",
+   "label": "Mars percentile of ladakh_puga, own tile (M1, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 8.37135122914006,
+   "display": "8.4",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 8.581921283707402,
+    "median": 8.620601157340928,
+    "max": 30.085242375543075,
+    "n_draws": 1000,
+    "display": "8.6 to 30.1, median 8.6"
+   }
+  },
+  {
+   "id": "d.noill.M1.rank_mars.mdrs_utah",
+   "group": "d_noill",
+   "label": "Mars percentile of mdrs_utah, own tile (M1, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 25.751507781803962,
+   "display": "25.8",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 26.62397418897532,
+    "median": 26.663937281165406,
+    "max": 60.71603595456184,
+    "n_draws": 1000,
+    "display": "26.6 to 60.7, median 26.7"
+   }
+  },
+  {
+   "id": "d.noill.M2.fpr25_moon_all",
+   "group": "d_noill",
+   "label": "Moon false-positive rate at top 25 percent, all scorable negative units (M2, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.009950248756218905,
+   "display": "1.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Share of negative units (desert tiles and two sand seas, each by its own tile) that the Moon score ranks in the top 25 percent. A desert is not a polar ridge; a high rate means the score is fooled by broad terrain traits. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.13930348258706468,
+    "median": 0.22388059701492538,
+    "max": 0.32338308457711445,
+    "n_draws": 1000,
+    "display": "13.9% to 32.3%, median 22.4%"
+   }
+  },
+  {
+   "id": "d.noill.M2.fpr25_moon_tiles",
+   "group": "d_noill",
+   "label": "Moon false-positive rate at top 25 percent, 200 sampled tiles (M2, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.010050251256281407,
+   "display": "1.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Same rate over the 200 sampled tiles only. The tiles sit in a few deserts and are not independent. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.1407035175879397,
+    "median": 0.22110552763819097,
+    "max": 0.32160804020100503,
+    "n_draws": 1000,
+    "display": "14.1% to 32.2%, median 22.1%"
+   }
+  },
+  {
+   "id": "d.noill.M2.namib_rank",
+   "group": "d_noill",
+   "label": "Namib sand sea, Moon percentile of its own tile (M2, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 6.243189208600018,
+   "display": "6.2",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.9083747417024834,
+    "median": 39.132120344587214,
+    "max": 92.61744382689128,
+    "n_draws": 1000,
+    "display": "0.9 to 92.6, median 39.1"
+   }
+  },
+  {
+   "id": "d.noill.M2.rub_rank",
+   "group": "d_noill",
+   "label": "Rub' al Khali, Moon percentile of its own tile (M2, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 3.427668618731121,
+   "display": "3.4",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.023919313012479047,
+    "median": 35.31341755416637,
+    "max": 90.36088962448542,
+    "n_draws": 1000,
+    "display": "0.0 to 90.4, median 35.3"
+   }
+  },
+  {
+   "id": "d.noill.M2.recall5",
+   "group": "d_noill",
+   "label": "Mars recall at top 5 percent, scorable positives (M2, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.5,
+    "n_draws": 1000,
+    "display": "0.0% to 50.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.noill.M2.recall10",
+   "group": "d_noill",
+   "label": "Mars recall at top 10 percent, scorable positives (M2, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000,
+    "display": "0.0% to 75.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.noill.M2.recall25",
+   "group": "d_noill",
+   "label": "Mars recall at top 25 percent, scorable positives (M2, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000,
+    "display": "0.0% to 75.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.noill.M2.mars_primary_median",
+   "group": "d_noill",
+   "label": "Mars primary median percentile, scorable positives (M2, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 25.809863673304775,
+   "display": "25.8",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Median over very few sites; terrain and a thermal inertia proxy only. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 24.434436697606493,
+    "median": 24.501133509724962,
+    "max": 95.27800013443242,
+    "n_draws": 1000,
+    "display": "24.4 to 95.3, median 24.5"
+   }
+  },
+  {
+   "id": "d.noill.M2.auc_mars",
+   "group": "d_noill",
+   "label": "Positives against negative units, Mars profile AUC (M2, Moon without illumination (primary))",
+   "unit": "AUC",
+   "value": 0.05223880597014925,
+   "display": "0.052",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Rank separation under the Jezero profile; 0.5 is chance. The negative tiles are not independent, so intervals are too narrow. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.01990049751243781,
+    "median": 0.03855721393034826,
+    "max": 0.7437810945273632,
+    "n_draws": 1000,
+    "display": "0.020 to 0.744, median 0.039"
+   }
+  },
+  {
+   "id": "d.noill.M2.fpr25_mars_all",
+   "group": "d_noill",
+   "label": "Negative units at top 25 percent under the Mars profile (M2, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.3034825870646766,
+   "display": "30.3%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Supplementary. Not a gate and not in the fit. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.3333333333333333,
+    "median": 0.38308457711442784,
+    "max": 0.44776119402985076,
+    "n_draws": 1000,
+    "display": "33.3% to 44.8%, median 38.3%"
+   }
+  },
+  {
+   "id": "d.noill.M2.rank_mars.lonar",
+   "group": "d_noill",
+   "label": "Mars percentile of lonar, own tile (M2, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.noill.M2.rank_mars.haughton",
+   "group": "d_noill",
+   "label": "Mars percentile of haughton, own tile (M2, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 28.93352316820551,
+   "display": "28.9",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 24.33300132599251,
+    "median": 24.388424146506896,
+    "max": 97.49760160341214,
+    "n_draws": 1000,
+    "display": "24.3 to 97.5, median 24.4"
+   }
+  },
+  {
+   "id": "d.noill.M2.rank_mars.mcmurdo_dry_valleys",
+   "group": "d_noill",
+   "label": "Mars percentile of mcmurdo_dry_valleys, own tile (M2, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.noill.M2.rank_mars.atacama_salars",
+   "group": "d_noill",
+   "label": "Mars percentile of atacama_salars, own tile (M2, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 32.968940000366636,
+   "display": "33.0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 34.9563400162541,
+    "median": 35.009196399655366,
+    "max": 98.24810114206451,
+    "n_draws": 1000,
+    "display": "35.0 to 98.2, median 35.0"
+   }
+  },
+  {
+   "id": "d.noill.M2.rank_mars.ladakh_puga",
+   "group": "d_noill",
+   "label": "Mars percentile of ladakh_puga, own tile (M2, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 8.205632718406854,
+   "display": "8.2",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 8.234719005688936,
+    "median": 8.274559886587921,
+    "max": 95.92070931433355,
+    "n_draws": 1000,
+    "display": "8.2 to 95.9, median 8.3"
+   }
+  },
+  {
+   "id": "d.noill.M2.rank_mars.mdrs_utah",
+   "group": "d_noill",
+   "label": "Mars percentile of mdrs_utah, own tile (M2, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 22.686204178404044,
+   "display": "22.7",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 24.53318342081625,
+    "median": 24.588850663912837,
+    "max": 97.49564622275452,
+    "n_draws": 1000,
+    "display": "24.5 to 97.5, median 24.6"
+   }
+  },
+  {
+   "id": "d.noill.M3.fpr25_moon_all",
+   "group": "d_noill",
+   "label": "Moon false-positive rate at top 25 percent, all scorable negative units (M3, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.009950248756218905,
+   "display": "1.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Share of negative units (desert tiles and two sand seas, each by its own tile) that the Moon score ranks in the top 25 percent. A desert is not a polar ridge; a high rate means the score is fooled by broad terrain traits. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.11442786069651742,
+    "median": 0.18407960199004975,
+    "max": 0.3482587064676617,
+    "n_draws": 1000,
+    "display": "11.4% to 34.8%, median 18.4%"
+   }
+  },
+  {
+   "id": "d.noill.M3.fpr25_moon_tiles",
+   "group": "d_noill",
+   "label": "Moon false-positive rate at top 25 percent, 200 sampled tiles (M3, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.010050251256281407,
+   "display": "1.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Same rate over the 200 sampled tiles only. The tiles sit in a few deserts and are not independent. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.11055276381909548,
+    "median": 0.18592964824120603,
+    "max": 0.34673366834170855,
+    "n_draws": 1000,
+    "display": "11.1% to 34.7%, median 18.6%"
+   }
+  },
+  {
+   "id": "d.noill.M3.namib_rank",
+   "group": "d_noill",
+   "label": "Namib sand sea, Moon percentile of its own tile (M3, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 5.830907231584925,
+   "display": "5.8",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.22347472443087565,
+    "median": 38.25275941892844,
+    "max": 97.11992832904028,
+    "n_draws": 1000,
+    "display": "0.2 to 97.1, median 38.3"
+   }
+  },
+  {
+   "id": "d.noill.M3.rub_rank",
+   "group": "d_noill",
+   "label": "Rub' al Khali, Moon percentile of its own tile (M3, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 4.269628436770383,
+   "display": "4.3",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.07032899306526307,
+    "median": 31.161832480314715,
+    "max": 97.56464116681515,
+    "n_draws": 1000,
+    "display": "0.1 to 97.6, median 31.2"
+   }
+  },
+  {
+   "id": "d.noill.M3.recall5",
+   "group": "d_noill",
+   "label": "Mars recall at top 5 percent, scorable positives (M3, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.5,
+    "n_draws": 1000,
+    "display": "0.0% to 50.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.noill.M3.recall10",
+   "group": "d_noill",
+   "label": "Mars recall at top 10 percent, scorable positives (M3, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000,
+    "display": "0.0% to 75.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.noill.M3.recall25",
+   "group": "d_noill",
+   "label": "Mars recall at top 25 percent, scorable positives (M3, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000,
+    "display": "0.0% to 75.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.noill.M3.mars_primary_median",
+   "group": "d_noill",
+   "label": "Mars primary median percentile, scorable positives (M3, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 27.127973553476608,
+   "display": "27.1",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Median over very few sites; terrain and a thermal inertia proxy only. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 18.73774067986141,
+    "median": 25.502257853603098,
+    "max": 95.27800013443242,
+    "n_draws": 1000,
+    "display": "18.7 to 95.3, median 25.5"
+   }
+  },
+  {
+   "id": "d.noill.M3.auc_mars",
+   "group": "d_noill",
+   "label": "Positives against negative units, Mars profile AUC (M3, Moon without illumination (primary))",
+   "unit": "AUC",
+   "value": 0.11194029850746269,
+   "display": "0.112",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Rank separation under the Jezero profile; 0.5 is chance. The negative tiles are not independent, so intervals are too narrow. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.021144278606965175,
+    "median": 0.03731343283582089,
+    "max": 0.822139303482587,
+    "n_draws": 1000,
+    "display": "0.021 to 0.822, median 0.037"
+   }
+  },
+  {
+   "id": "d.noill.M3.fpr25_mars_all",
+   "group": "d_noill",
+   "label": "Negative units at top 25 percent under the Mars profile (M3, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.25870646766169153,
+   "display": "25.9%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Supplementary. Not a gate and not in the fit. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.1890547263681592,
+    "median": 0.38308457711442784,
+    "max": 0.44776119402985076,
+    "n_draws": 1000,
+    "display": "18.9% to 44.8%, median 38.3%"
+   }
+  },
+  {
+   "id": "d.noill.M3.rank_mars.lonar",
+   "group": "d_noill",
+   "label": "Mars percentile of lonar, own tile (M3, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.noill.M3.rank_mars.haughton",
+   "group": "d_noill",
+   "label": "Mars percentile of haughton, own tile (M3, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 43.76227459654997,
+   "display": "43.8",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 3.111621682727267,
+    "median": 25.384507274627104,
+    "max": 98.80575126335923,
+    "n_draws": 1000,
+    "display": "3.1 to 98.8, median 25.4"
+   }
+  },
+  {
+   "id": "d.noill.M3.rank_mars.mcmurdo_dry_valleys",
+   "group": "d_noill",
+   "label": "Mars percentile of mcmurdo_dry_valleys, own tile (M3, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.noill.M3.rank_mars.atacama_salars",
+   "group": "d_noill",
+   "label": "Mars percentile of atacama_salars, own tile (M3, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 32.00982578780454,
+   "display": "32.0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 1.6582850089519772,
+    "median": 36.589632816175886,
+    "max": 98.41565282216423,
+    "n_draws": 1000,
+    "display": "1.7 to 98.4, median 36.6"
+   }
+  },
+  {
+   "id": "d.noill.M3.rank_mars.ladakh_puga",
+   "group": "d_noill",
+   "label": "Mars percentile of ladakh_puga, own tile (M3, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 8.129861717924118,
+   "display": "8.1",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 1.8174041099657197,
+    "median": 8.4064258696861,
+    "max": 98.2157151499227,
+    "n_draws": 1000,
+    "display": "1.8 to 98.2, median 8.4"
+   }
+  },
+  {
+   "id": "d.noill.M3.rank_mars.mdrs_utah",
+   "group": "d_noill",
+   "label": "Mars percentile of mdrs_utah, own tile (M3, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 22.246121319148678,
+   "display": "22.2",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 3.56783643240799,
+    "median": 25.59464958967559,
+    "max": 99.38258855735681,
+    "n_draws": 1000,
+    "display": "3.6 to 99.4, median 25.6"
+   }
+  },
+  {
+   "id": "d.noill.M3_insample.fpr25_moon_all",
+   "group": "d_noill",
+   "label": "Moon false-positive rate at top 25 percent, all scorable negative units (M3, in-sample, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.004975124378109453,
+   "display": "0.5%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.11442786069651742,
+    "median": 0.18407960199004975,
+    "max": 0.3482587064676617,
+    "n_draws": 1000,
+    "display": "11.4% to 34.8%, median 18.4%"
+   }
+  },
+  {
+   "id": "d.noill.M3_insample.recall10",
+   "group": "d_noill",
+   "label": "Mars recall at top 10 percent, scorable positives (M3, in-sample, Moon without illumination (primary))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000,
+    "display": "0.0% to 75.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.noill.M3_insample.auc_mars",
+   "group": "d_noill",
+   "label": "Positives against negative units, Mars profile AUC (M3, in-sample, Moon without illumination (primary))",
+   "unit": "AUC",
+   "value": 0.11194029850746269,
+   "display": "0.112",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.021144278606965175,
+    "median": 0.03731343283582089,
+    "max": 0.8955223880597015,
+    "n_draws": 1000,
+    "display": "0.021 to 0.896, median 0.037"
+   }
+  },
+  {
+   "id": "d.noill.M3_insample.namib_rank",
+   "group": "d_noill",
+   "label": "Namib sand sea, Moon percentile of its own tile (M3, in-sample, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 5.830907231584925,
+   "display": "5.8",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.22347472443087565,
+    "median": 38.25275941892844,
+    "max": 97.11992832904028,
+    "n_draws": 1000,
+    "display": "0.2 to 97.1, median 38.3"
+   }
+  },
+  {
+   "id": "d.noill.M3_insample.rub_rank",
+   "group": "d_noill",
+   "label": "Rub' al Khali, Moon percentile of its own tile (M3, in-sample, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 4.269628436770383,
+   "display": "4.3",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.07032899306526307,
+    "median": 31.161832480314715,
+    "max": 97.56464116681515,
+    "n_draws": 1000,
+    "display": "0.1 to 97.6, median 31.2"
+   }
+  },
+  {
+   "id": "d.noill.M3_insample.mars_primary_median",
+   "group": "d_noill",
+   "label": "Mars primary median percentile, scorable positives (M3, in-sample, Moon without illumination (primary))",
+   "unit": "percentile",
+   "value": 27.127973553476608,
+   "display": "27.1",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 23.841284196246892,
+    "median": 25.50390770603296,
+    "max": 95.27800013443242,
+    "n_draws": 1000,
+    "display": "23.8 to 95.3, median 25.5"
+   }
+  },
+  {
+   "id": "d.noill.fpr25_moon_all.n",
+   "group": "d_noill",
+   "label": "Scorable units for fpr25_moon_all.n (Moon without illumination (primary))",
+   "unit": "count",
+   "value": 201,
+   "display": "201",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "The denominator of the rates above. Units whose own tile is not scored are left out and listed in the ledger."
+  },
+  {
+   "id": "d.noill.fpr25_moon_tiles.n",
+   "group": "d_noill",
+   "label": "Scorable units for fpr25_moon_tiles.n (Moon without illumination (primary))",
+   "unit": "count",
+   "value": 199,
+   "display": "199",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "The denominator of the rates above. Units whose own tile is not scored are left out and listed in the ledger."
+  },
+  {
+   "id": "d.noill.recall.n",
+   "group": "d_noill",
+   "label": "Scorable units for recall.n (Moon without illumination (primary))",
+   "unit": "count",
+   "value": 4,
+   "display": "4",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "The denominator of the rates above. Units whose own tile is not scored are left out and listed in the ledger."
+  },
+  {
+   "id": "d.noill.M3.w_full",
+   "group": "d_noill",
+   "label": "M3 w fitted on all units",
+   "unit": "weight",
+   "value": 0.75,
+   "display": "0.75",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.noill.M3.n_folds_w0.0",
+   "group": "d_noill",
+   "label": "M3 held-out folds that chose 0.0",
+   "unit": "count",
+   "value": 0,
+   "display": "0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.noill.M3.n_folds_w0.25",
+   "group": "d_noill",
+   "label": "M3 held-out folds that chose 0.25",
+   "unit": "count",
+   "value": 0,
+   "display": "0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.noill.M3.n_folds_w0.5",
+   "group": "d_noill",
+   "label": "M3 held-out folds that chose 0.5",
+   "unit": "count",
+   "value": 1,
+   "display": "1",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.noill.M3.n_folds_w0.75",
+   "group": "d_noill",
+   "label": "M3 held-out folds that chose 0.75",
+   "unit": "count",
+   "value": 204,
+   "display": "204",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.noill.M3.n_folds_w1.0",
+   "group": "d_noill",
+   "label": "M3 held-out folds that chose 1.0",
+   "unit": "count",
+   "value": 0,
+   "display": "0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.ill.M0.fpr25_moon_all",
+   "group": "d_ill",
+   "label": "Moon false-positive rate at top 25 percent, all scorable negative units (M0, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.21393034825870647,
+   "display": "21.4%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Share of negative units (desert tiles and two sand seas, each by its own tile) that the Moon score ranks in the top 25 percent. A desert is not a polar ridge; a high rate means the score is fooled by broad terrain traits. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.fpr25_moon_tiles",
+   "group": "d_ill",
+   "label": "Moon false-positive rate at top 25 percent, 200 sampled tiles (M0, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.21608040201005024,
+   "display": "21.6%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Same rate over the 200 sampled tiles only. The tiles sit in a few deserts and are not independent. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.namib_rank",
+   "group": "d_ill",
+   "label": "Namib sand sea, Moon percentile of its own tile (M0, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 49.618595681601015,
+   "display": "49.6",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.rub_rank",
+   "group": "d_ill",
+   "label": "Rub' al Khali, Moon percentile of its own tile (M0, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 12.515143720900758,
+   "display": "12.5",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.recall5",
+   "group": "d_ill",
+   "label": "Mars recall at top 5 percent, scorable positives (M0, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.recall10",
+   "group": "d_ill",
+   "label": "Mars recall at top 10 percent, scorable positives (M0, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.recall25",
+   "group": "d_ill",
+   "label": "Mars recall at top 25 percent, scorable positives (M0, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.mars_primary_median",
+   "group": "d_ill",
+   "label": "Mars primary median percentile, scorable positives (M0, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 28.050852118227205,
+   "display": "28.1",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Median over very few sites; terrain and a thermal inertia proxy only. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.auc_mars",
+   "group": "d_ill",
+   "label": "Positives against negative units, Mars profile AUC (M0, Moon with illumination (variant))",
+   "unit": "AUC",
+   "value": 0.03731343283582089,
+   "display": "0.037",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Rank separation under the Jezero profile; 0.5 is chance. The negative tiles are not independent, so intervals are too narrow. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.fpr25_mars_all",
+   "group": "d_ill",
+   "label": "Negative units at top 25 percent under the Mars profile (M0, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.3681592039800995,
+   "display": "36.8%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Supplementary. Not a gate and not in the fit. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.rank_mars.lonar",
+   "group": "d_ill",
+   "label": "Mars percentile of lonar, own tile (M0, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.rank_mars.haughton",
+   "group": "d_ill",
+   "label": "Mars percentile of haughton, own tile (M0, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 27.939456526388472,
+   "display": "27.9",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.rank_mars.mcmurdo_dry_valleys",
+   "group": "d_ill",
+   "label": "Mars percentile of mcmurdo_dry_valleys, own tile (M0, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.rank_mars.atacama_salars",
+   "group": "d_ill",
+   "label": "Mars percentile of atacama_salars, own tile (M0, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 39.71231462074781,
+   "display": "39.7",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.rank_mars.ladakh_puga",
+   "group": "d_ill",
+   "label": "Mars percentile of ladakh_puga, own tile (M0, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 9.712742360266665,
+   "display": "9.7",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M0.rank_mars.mdrs_utah",
+   "group": "d_ill",
+   "label": "Mars percentile of mdrs_utah, own tile (M0, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 28.162247710065934,
+   "display": "28.2",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "note": "thermal weight is zero for M0, so the shuffled baseline equals the value"
+   }
+  },
+  {
+   "id": "d.ill.M1.fpr25_moon_all",
+   "group": "d_ill",
+   "label": "Moon false-positive rate at top 25 percent, all scorable negative units (M1, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.03482587064676617,
+   "display": "3.5%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Share of negative units (desert tiles and two sand seas, each by its own tile) that the Moon score ranks in the top 25 percent. A desert is not a polar ridge; a high rate means the score is fooled by broad terrain traits. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.10945273631840796,
+    "median": 0.17412935323383086,
+    "max": 0.2537313432835821,
+    "n_draws": 1000,
+    "display": "10.9% to 25.4%, median 17.4%"
+   }
+  },
+  {
+   "id": "d.ill.M1.fpr25_moon_tiles",
+   "group": "d_ill",
+   "label": "Moon false-positive rate at top 25 percent, 200 sampled tiles (M1, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.035175879396984924,
+   "display": "3.5%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Same rate over the 200 sampled tiles only. The tiles sit in a few deserts and are not independent. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.11055276381909548,
+    "median": 0.17587939698492464,
+    "max": 0.25125628140703515,
+    "n_draws": 1000,
+    "display": "11.1% to 25.1%, median 17.6%"
+   }
+  },
+  {
+   "id": "d.ill.M1.namib_rank",
+   "group": "d_ill",
+   "label": "Namib sand sea, Moon percentile of its own tile (M1, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 9.685209415138626,
+   "display": "9.7",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 3.3691439619577306,
+    "median": 36.81412146537788,
+    "max": 83.98592674601666,
+    "n_draws": 1000,
+    "display": "3.4 to 84.0, median 36.8"
+   }
+  },
+  {
+   "id": "d.ill.M1.rub_rank",
+   "group": "d_ill",
+   "label": "Rub' al Khali, Moon percentile of its own tile (M1, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 2.8442237654838722,
+   "display": "2.8",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.043986684708662765,
+    "median": 29.627703658971484,
+    "max": 79.64087481314978,
+    "n_draws": 1000,
+    "display": "0.0 to 79.6, median 29.6"
+   }
+  },
+  {
+   "id": "d.ill.M1.recall5",
+   "group": "d_ill",
+   "label": "Mars recall at top 5 percent, scorable positives (M1, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.0,
+    "n_draws": 1000,
+    "display": "0.0% to 0.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.ill.M1.recall10",
+   "group": "d_ill",
+   "label": "Mars recall at top 10 percent, scorable positives (M1, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.0,
+    "n_draws": 1000,
+    "display": "0.0% to 0.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.ill.M1.recall25",
+   "group": "d_ill",
+   "label": "Mars recall at top 25 percent, scorable positives (M1, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.25,
+    "n_draws": 1000,
+    "display": "0.0% to 25.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.ill.M1.mars_primary_median",
+   "group": "d_ill",
+   "label": "Mars primary median percentile, scorable positives (M1, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 26.14337828671991,
+   "display": "26.1",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Median over very few sites; terrain and a thermal inertia proxy only. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 26.51349518181985,
+    "median": 26.559874366792748,
+    "max": 56.53598205938246,
+    "n_draws": 1000,
+    "display": "26.5 to 56.5, median 26.6"
+   }
+  },
+  {
+   "id": "d.ill.M1.auc_mars",
+   "group": "d_ill",
+   "label": "Positives against negative units, Mars profile AUC (M1, Moon with illumination (variant))",
+   "unit": "AUC",
+   "value": 0.03855721393034826,
+   "display": "0.039",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Rank separation under the Jezero profile; 0.5 is chance. The negative tiles are not independent, so intervals are too narrow. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.024875621890547265,
+    "median": 0.036069651741293535,
+    "max": 0.30472636815920395,
+    "n_draws": 1000,
+    "display": "0.025 to 0.305, median 0.036"
+   }
+  },
+  {
+   "id": "d.ill.M1.fpr25_mars_all",
+   "group": "d_ill",
+   "label": "Negative units at top 25 percent under the Mars profile (M1, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.34328358208955223,
+   "display": "34.3%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Supplementary. Not a gate and not in the fit. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.3482587064676617,
+    "median": 0.3781094527363184,
+    "max": 0.42786069651741293,
+    "n_draws": 1000,
+    "display": "34.8% to 42.8%, median 37.8%"
+   }
+  },
+  {
+   "id": "d.ill.M1.rank_mars.lonar",
+   "group": "d_ill",
+   "label": "Mars percentile of lonar, own tile (M1, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.ill.M1.rank_mars.haughton",
+   "group": "d_ill",
+   "label": "Mars percentile of haughton, own tile (M1, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 26.53524879163586,
+   "display": "26.5",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 26.403016174664376,
+    "median": 26.445667915258692,
+    "max": 60.38508777825983,
+    "n_draws": 1000,
+    "display": "26.4 to 60.4, median 26.4"
+   }
+  },
+  {
+   "id": "d.ill.M1.rank_mars.mcmurdo_dry_valleys",
+   "group": "d_ill",
+   "label": "Mars percentile of mcmurdo_dry_valleys, own tile (M1, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.ill.M1.rank_mars.atacama_salars",
+   "group": "d_ill",
+   "label": "Mars percentile of atacama_salars, own tile (M1, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 37.26882206647072,
+   "display": "37.3",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 38.024087845476046,
+    "median": 38.08464354021668,
+    "max": 75.76660087625496,
+    "n_draws": 1000,
+    "display": "38.0 to 75.8, median 38.1"
+   }
+  },
+  {
+   "id": "d.ill.M1.rank_mars.ladakh_puga",
+   "group": "d_ill",
+   "label": "Mars percentile of ladakh_puga, own tile (M1, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 8.37135122914006,
+   "display": "8.4",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 8.581921283707402,
+    "median": 8.620601157340928,
+    "max": 30.085242375543075,
+    "n_draws": 1000,
+    "display": "8.6 to 30.1, median 8.6"
+   }
+  },
+  {
+   "id": "d.ill.M1.rank_mars.mdrs_utah",
+   "group": "d_ill",
+   "label": "Mars percentile of mdrs_utah, own tile (M1, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 25.751507781803962,
+   "display": "25.8",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 26.62397418897532,
+    "median": 26.663937281165406,
+    "max": 60.71603595456184,
+    "n_draws": 1000,
+    "display": "26.6 to 60.7, median 26.7"
+   }
+  },
+  {
+   "id": "d.ill.M2.fpr25_moon_all",
+   "group": "d_ill",
+   "label": "Moon false-positive rate at top 25 percent, all scorable negative units (M2, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.004975124378109453,
+   "display": "0.5%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Share of negative units (desert tiles and two sand seas, each by its own tile) that the Moon score ranks in the top 25 percent. A desert is not a polar ridge; a high rate means the score is fooled by broad terrain traits. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.13930348258706468,
+    "median": 0.23383084577114427,
+    "max": 0.3383084577114428,
+    "n_draws": 1000,
+    "display": "13.9% to 33.8%, median 23.4%"
+   }
+  },
+  {
+   "id": "d.ill.M2.fpr25_moon_tiles",
+   "group": "d_ill",
+   "label": "Moon false-positive rate at top 25 percent, 200 sampled tiles (M2, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.005025125628140704,
+   "display": "0.5%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Same rate over the 200 sampled tiles only. The tiles sit in a few deserts and are not independent. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.1407035175879397,
+    "median": 0.23115577889447236,
+    "max": 0.33668341708542715,
+    "n_draws": 1000,
+    "display": "14.1% to 33.7%, median 23.1%"
+   }
+  },
+  {
+   "id": "d.ill.M2.namib_rank",
+   "group": "d_ill",
+   "label": "Namib sand sea, Moon percentile of its own tile (M2, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 5.942675657843235,
+   "display": "5.9",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.6251327987832835,
+    "median": 40.254339957429835,
+    "max": 94.14529771157409,
+    "n_draws": 1000,
+    "display": "0.6 to 94.1, median 40.3"
+   }
+  },
+  {
+   "id": "d.ill.M2.rub_rank",
+   "group": "d_ill",
+   "label": "Rub' al Khali, Moon percentile of its own tile (M2, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 3.621881014775301,
+   "display": "3.6",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.021806958097091288,
+    "median": 37.22519194472092,
+    "max": 92.36737828176081,
+    "n_draws": 1000,
+    "display": "0.0 to 92.4, median 37.2"
+   }
+  },
+  {
+   "id": "d.ill.M2.recall5",
+   "group": "d_ill",
+   "label": "Mars recall at top 5 percent, scorable positives (M2, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.5,
+    "n_draws": 1000,
+    "display": "0.0% to 50.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.ill.M2.recall10",
+   "group": "d_ill",
+   "label": "Mars recall at top 10 percent, scorable positives (M2, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000,
+    "display": "0.0% to 75.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.ill.M2.recall25",
+   "group": "d_ill",
+   "label": "Mars recall at top 25 percent, scorable positives (M2, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000,
+    "display": "0.0% to 75.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.ill.M2.mars_primary_median",
+   "group": "d_ill",
+   "label": "Mars primary median percentile, scorable positives (M2, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 25.809863673304775,
+   "display": "25.8",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Median over very few sites; terrain and a thermal inertia proxy only. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 24.434436697606493,
+    "median": 24.501133509724962,
+    "max": 95.27800013443242,
+    "n_draws": 1000,
+    "display": "24.4 to 95.3, median 24.5"
+   }
+  },
+  {
+   "id": "d.ill.M2.auc_mars",
+   "group": "d_ill",
+   "label": "Positives against negative units, Mars profile AUC (M2, Moon with illumination (variant))",
+   "unit": "AUC",
+   "value": 0.05223880597014925,
+   "display": "0.052",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Rank separation under the Jezero profile; 0.5 is chance. The negative tiles are not independent, so intervals are too narrow. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.01990049751243781,
+    "median": 0.03855721393034826,
+    "max": 0.7437810945273632,
+    "n_draws": 1000,
+    "display": "0.020 to 0.744, median 0.039"
+   }
+  },
+  {
+   "id": "d.ill.M2.fpr25_mars_all",
+   "group": "d_ill",
+   "label": "Negative units at top 25 percent under the Mars profile (M2, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.3034825870646766,
+   "display": "30.3%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Supplementary. Not a gate and not in the fit. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.3333333333333333,
+    "median": 0.38308457711442784,
+    "max": 0.44776119402985076,
+    "n_draws": 1000,
+    "display": "33.3% to 44.8%, median 38.3%"
+   }
+  },
+  {
+   "id": "d.ill.M2.rank_mars.lonar",
+   "group": "d_ill",
+   "label": "Mars percentile of lonar, own tile (M2, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.ill.M2.rank_mars.haughton",
+   "group": "d_ill",
+   "label": "Mars percentile of haughton, own tile (M2, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 28.93352316820551,
+   "display": "28.9",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 24.33300132599251,
+    "median": 24.388424146506896,
+    "max": 97.49760160341214,
+    "n_draws": 1000,
+    "display": "24.3 to 97.5, median 24.4"
+   }
+  },
+  {
+   "id": "d.ill.M2.rank_mars.mcmurdo_dry_valleys",
+   "group": "d_ill",
+   "label": "Mars percentile of mcmurdo_dry_valleys, own tile (M2, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.ill.M2.rank_mars.atacama_salars",
+   "group": "d_ill",
+   "label": "Mars percentile of atacama_salars, own tile (M2, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 32.968940000366636,
+   "display": "33.0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 34.9563400162541,
+    "median": 35.009196399655366,
+    "max": 98.24810114206451,
+    "n_draws": 1000,
+    "display": "35.0 to 98.2, median 35.0"
+   }
+  },
+  {
+   "id": "d.ill.M2.rank_mars.ladakh_puga",
+   "group": "d_ill",
+   "label": "Mars percentile of ladakh_puga, own tile (M2, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 8.205632718406854,
+   "display": "8.2",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 8.234719005688936,
+    "median": 8.274559886587921,
+    "max": 95.92070931433355,
+    "n_draws": 1000,
+    "display": "8.2 to 95.9, median 8.3"
+   }
+  },
+  {
+   "id": "d.ill.M2.rank_mars.mdrs_utah",
+   "group": "d_ill",
+   "label": "Mars percentile of mdrs_utah, own tile (M2, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 22.686204178404044,
+   "display": "22.7",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 24.53318342081625,
+    "median": 24.588850663912837,
+    "max": 97.49564622275452,
+    "n_draws": 1000,
+    "display": "24.5 to 97.5, median 24.6"
+   }
+  },
+  {
+   "id": "d.ill.M3.fpr25_moon_all",
+   "group": "d_ill",
+   "label": "Moon false-positive rate at top 25 percent, all scorable negative units (M3, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.004975124378109453,
+   "display": "0.5%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Share of negative units (desert tiles and two sand seas, each by its own tile) that the Moon score ranks in the top 25 percent. A desert is not a polar ridge; a high rate means the score is fooled by broad terrain traits. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.11940298507462686,
+    "median": 0.19900497512437812,
+    "max": 0.39800995024875624,
+    "n_draws": 1000,
+    "display": "11.9% to 39.8%, median 19.9%"
+   }
+  },
+  {
+   "id": "d.ill.M3.fpr25_moon_tiles",
+   "group": "d_ill",
+   "label": "Moon false-positive rate at top 25 percent, 200 sampled tiles (M3, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.005025125628140704,
+   "display": "0.5%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Same rate over the 200 sampled tiles only. The tiles sit in a few deserts and are not independent. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.12060301507537688,
+    "median": 0.20100502512562815,
+    "max": 0.4020100502512563,
+    "n_draws": 1000,
+    "display": "12.1% to 40.2%, median 20.1%"
+   }
+  },
+  {
+   "id": "d.ill.M3.namib_rank",
+   "group": "d_ill",
+   "label": "Namib sand sea, Moon percentile of its own tile (M3, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 5.942675657843235,
+   "display": "5.9",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.16103599825544335,
+    "median": 43.23157995449739,
+    "max": 97.11992832904028,
+    "n_draws": 1000,
+    "display": "0.2 to 97.1, median 43.2"
+   }
+  },
+  {
+   "id": "d.ill.M3.rub_rank",
+   "group": "d_ill",
+   "label": "Rub' al Khali, Moon percentile of its own tile (M3, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 3.621881014775301,
+   "display": "3.6",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "One tile, one number. A flat sand sea should rank low against a polar slope. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.16787008768758022,
+    "median": 30.19443605715287,
+    "max": 97.56464116681515,
+    "n_draws": 1000,
+    "display": "0.2 to 97.6, median 30.2"
+   }
+  },
+  {
+   "id": "d.ill.M3.recall5",
+   "group": "d_ill",
+   "label": "Mars recall at top 5 percent, scorable positives (M3, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.5,
+    "n_draws": 1000,
+    "display": "0.0% to 50.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.ill.M3.recall10",
+   "group": "d_ill",
+   "label": "Mars recall at top 10 percent, scorable positives (M3, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000,
+    "display": "0.0% to 75.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.ill.M3.recall25",
+   "group": "d_ill",
+   "label": "Mars recall at top 25 percent, scorable positives (M3, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A handful of positives; one site moves this by 25 points or more. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000,
+    "display": "0.0% to 75.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.ill.M3.mars_primary_median",
+   "group": "d_ill",
+   "label": "Mars primary median percentile, scorable positives (M3, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 25.809863673304775,
+   "display": "25.8",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Median over very few sites; terrain and a thermal inertia proxy only. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 18.73774067986141,
+    "median": 25.508398970980927,
+    "max": 95.27800013443242,
+    "n_draws": 1000,
+    "display": "18.7 to 95.3, median 25.5"
+   }
+  },
+  {
+   "id": "d.ill.M3.auc_mars",
+   "group": "d_ill",
+   "label": "Positives against negative units, Mars profile AUC (M3, Moon with illumination (variant))",
+   "unit": "AUC",
+   "value": 0.05223880597014925,
+   "display": "0.052",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Rank separation under the Jezero profile; 0.5 is chance. The negative tiles are not independent, so intervals are too narrow. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.021144278606965175,
+    "median": 0.03731343283582089,
+    "max": 0.822139303482587,
+    "n_draws": 1000,
+    "display": "0.021 to 0.822, median 0.037"
+   }
+  },
+  {
+   "id": "d.ill.M3.fpr25_mars_all",
+   "group": "d_ill",
+   "label": "Negative units at top 25 percent under the Mars profile (M3, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.3034825870646766,
+   "display": "30.3%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Supplementary. Not a gate and not in the fit. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.1890547263681592,
+    "median": 0.3781094527363184,
+    "max": 0.44776119402985076,
+    "n_draws": 1000,
+    "display": "18.9% to 44.8%, median 37.8%"
+   }
+  },
+  {
+   "id": "d.ill.M3.rank_mars.lonar",
+   "group": "d_ill",
+   "label": "Mars percentile of lonar, own tile (M3, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.ill.M3.rank_mars.haughton",
+   "group": "d_ill",
+   "label": "Mars percentile of haughton, own tile (M3, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 28.93352316820551,
+   "display": "28.9",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 3.111621682727267,
+    "median": 25.38707371174023,
+    "max": 98.80575126335923,
+    "n_draws": 1000,
+    "display": "3.1 to 98.8, median 25.4"
+   }
+  },
+  {
+   "id": "d.ill.M3.rank_mars.mcmurdo_dry_valleys",
+   "group": "d_ill",
+   "label": "Mars percentile of mcmurdo_dry_valleys, own tile (M3, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": NaN,
+   "display": "n/a",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline."
+  },
+  {
+   "id": "d.ill.M3.rank_mars.atacama_salars",
+   "group": "d_ill",
+   "label": "Mars percentile of atacama_salars, own tile (M3, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 32.968940000366636,
+   "display": "33.0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 1.6582850089519772,
+    "median": 36.592565887162316,
+    "max": 98.607402337902,
+    "n_draws": 1000,
+    "display": "1.7 to 98.6, median 36.6"
+   }
+  },
+  {
+   "id": "d.ill.M3.rank_mars.ladakh_puga",
+   "group": "d_ill",
+   "label": "Mars percentile of ladakh_puga, own tile (M3, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 8.205632718406854,
+   "display": "8.2",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 1.8174041099657197,
+    "median": 8.408808989862575,
+    "max": 98.2157151499227,
+    "n_draws": 1000,
+    "display": "1.8 to 98.2, median 8.4"
+   }
+  },
+  {
+   "id": "d.ill.M3.rank_mars.mdrs_utah",
+   "group": "d_ill",
+   "label": "Mars percentile of mdrs_utah, own tile (M3, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 22.686204178404044,
+   "display": "22.7",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Single tile under the Jezero profile; unscorable sites show n/a. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 3.56783643240799,
+    "median": 25.597521555016467,
+    "max": 99.38258855735681,
+    "n_draws": 1000,
+    "display": "3.6 to 99.4, median 25.6"
+   }
+  },
+  {
+   "id": "d.ill.M3_insample.fpr25_moon_all",
+   "group": "d_ill",
+   "label": "Moon false-positive rate at top 25 percent, all scorable negative units (M3, in-sample, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.004975124378109453,
+   "display": "0.5%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.11940298507462686,
+    "median": 0.19900497512437812,
+    "max": 0.3482587064676617,
+    "n_draws": 1000,
+    "display": "11.9% to 34.8%, median 19.9%"
+   }
+  },
+  {
+   "id": "d.ill.M3_insample.recall10",
+   "group": "d_ill",
+   "label": "Mars recall at top 10 percent, scorable positives (M3, in-sample, Moon with illumination (variant))",
+   "unit": "share",
+   "value": 0.0,
+   "display": "0.0%",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000,
+    "display": "0.0% to 75.0%, median 0.0%"
+   }
+  },
+  {
+   "id": "d.ill.M3_insample.auc_mars",
+   "group": "d_ill",
+   "label": "Positives against negative units, Mars profile AUC (M3, in-sample, Moon with illumination (variant))",
+   "unit": "AUC",
+   "value": 0.05223880597014925,
+   "display": "0.052",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.021144278606965175,
+    "median": 0.03731343283582089,
+    "max": 0.8955223880597015,
+    "n_draws": 1000,
+    "display": "0.021 to 0.896, median 0.037"
+   }
+  },
+  {
+   "id": "d.ill.M3_insample.namib_rank",
+   "group": "d_ill",
+   "label": "Namib sand sea, Moon percentile of its own tile (M3, in-sample, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 5.942675657843235,
+   "display": "5.9",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.16103599825544335,
+    "median": 43.23157995449739,
+    "max": 97.11992832904028,
+    "n_draws": 1000,
+    "display": "0.2 to 97.1, median 43.2"
+   }
+  },
+  {
+   "id": "d.ill.M3_insample.rub_rank",
+   "group": "d_ill",
+   "label": "Rub' al Khali, Moon percentile of its own tile (M3, in-sample, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 3.621881014775301,
+   "display": "3.6",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 0.16787008768758022,
+    "median": 29.97555881106725,
+    "max": 97.56464116681515,
+    "n_draws": 1000,
+    "display": "0.2 to 97.6, median 30.0"
+   }
+  },
+  {
+   "id": "d.ill.M3_insample.mars_primary_median",
+   "group": "d_ill",
+   "label": "Mars primary median percentile, scorable positives (M3, in-sample, Moon with illumination (variant))",
+   "unit": "percentile",
+   "value": 25.809863673304775,
+   "display": "25.8",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "In-sample: w fitted on all units, so it is not a held-out value and feeds no gate. Fitted and cross-validated on a very small labelled set; never replaces Role A's headline.",
+   "chance": {
+    "min": 23.841284196246892,
+    "median": 25.51735094805409,
+    "max": 95.27800013443242,
+    "n_draws": 1000,
+    "display": "23.8 to 95.3, median 25.5"
+   }
+  },
+  {
+   "id": "d.ill.fpr25_moon_all.n",
+   "group": "d_ill",
+   "label": "Scorable units for fpr25_moon_all.n (Moon with illumination (variant))",
+   "unit": "count",
+   "value": 201,
+   "display": "201",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "The denominator of the rates above. Units whose own tile is not scored are left out and listed in the ledger."
+  },
+  {
+   "id": "d.ill.fpr25_moon_tiles.n",
+   "group": "d_ill",
+   "label": "Scorable units for fpr25_moon_tiles.n (Moon with illumination (variant))",
+   "unit": "count",
+   "value": 199,
+   "display": "199",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "The denominator of the rates above. Units whose own tile is not scored are left out and listed in the ledger."
+  },
+  {
+   "id": "d.ill.recall.n",
+   "group": "d_ill",
+   "label": "Scorable units for recall.n (Moon with illumination (variant))",
+   "unit": "count",
+   "value": 4,
+   "display": "4",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "The denominator of the rates above. Units whose own tile is not scored are left out and listed in the ledger."
+  },
+  {
+   "id": "d.ill.M3.w_full",
+   "group": "d_ill",
+   "label": "M3 w fitted on all units",
+   "unit": "weight",
+   "value": 0.5,
+   "display": "0.5",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.ill.M3.n_folds_w0.0",
+   "group": "d_ill",
+   "label": "M3 held-out folds that chose 0.0",
+   "unit": "count",
+   "value": 0,
+   "display": "0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.ill.M3.n_folds_w0.25",
+   "group": "d_ill",
+   "label": "M3 held-out folds that chose 0.25",
+   "unit": "count",
+   "value": 0,
+   "display": "0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.ill.M3.n_folds_w0.5",
+   "group": "d_ill",
+   "label": "M3 held-out folds that chose 0.5",
+   "unit": "count",
+   "value": 205,
+   "display": "205",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.ill.M3.n_folds_w0.75",
+   "group": "d_ill",
+   "label": "M3 held-out folds that chose 0.75",
+   "unit": "count",
+   "value": 0,
+   "display": "0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.ill.M3.n_folds_w1.0",
+   "group": "d_ill",
+   "label": "M3 held-out folds that chose 1.0",
+   "unit": "count",
+   "value": 0,
+   "display": "0",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Shows how stable the fitted thermal weight is across leave-one-site-out folds. In-sample for w_full."
+  },
+  {
+   "id": "d.noill.M0.auc_mars.bootstrap95",
+   "group": "d_noill",
+   "label": "AUC 95 percent bootstrap interval (M0)",
+   "unit": "AUC",
+   "value": [
+    0.0024875621890547263,
+    0.09455845771144276
+   ],
+   "display": "0.002 to 0.095",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "1000 draws resampling 4 positives and 201 negative units. Too narrow because the negatives are clustered."
+  },
+  {
+   "id": "d.noill.M1.auc_mars.bootstrap95",
+   "group": "d_noill",
+   "label": "AUC 95 percent bootstrap interval (M1)",
+   "unit": "AUC",
+   "value": [
+    0.0037313432835820895,
+    0.09207089552238804
+   ],
+   "display": "0.004 to 0.092",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "1000 draws resampling 4 positives and 201 negative units. Too narrow because the negatives are clustered."
+  },
+  {
+   "id": "d.noill.M2.auc_mars.bootstrap95",
+   "group": "d_noill",
+   "label": "AUC 95 percent bootstrap interval (M2)",
+   "unit": "AUC",
+   "value": [
+    0.009919154228855724,
+    0.10820895522388059
+   ],
+   "display": "0.010 to 0.108",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "1000 draws resampling 4 positives and 201 negative units. Too narrow because the negatives are clustered."
+  },
+  {
+   "id": "d.noill.M3.auc_mars.bootstrap95",
+   "group": "d_noill",
+   "label": "AUC 95 percent bootstrap interval (M3)",
+   "unit": "AUC",
+   "value": [
+    0.007462686567164179,
+    0.24754353233830845
+   ],
+   "display": "0.007 to 0.248",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "1000 draws resampling 4 positives and 201 negative units. Too narrow because the negatives are clustered."
+  },
+  {
+   "id": "d.noill.M3_insample.auc_mars.bootstrap95",
+   "group": "d_noill",
+   "label": "AUC 95 percent bootstrap interval (M3_insample)",
+   "unit": "AUC",
+   "value": [
+    0.004975124378109453,
+    0.2575248756218905
+   ],
+   "display": "0.005 to 0.258",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "1000 draws resampling 4 positives and 201 negative units. Too narrow because the negatives are clustered."
+  },
+  {
+   "id": "gate.D1",
+   "group": "gate",
+   "label": "D1: negative-set false-positive rate at top 25 percent, M3 held-out, at most 10 percent",
+   "unit": "status",
+   "value": 0.009950248756218905,
+   "display": "1.0%",
+   "status": "NOT TESTED",
+   "threshold": 0.1,
+   "comparison": "at most",
+   "reason": "thermal layer valid share 73.4% below 85% in latitude -55 to 60",
+   "inside_shuffled_range": false,
+   "chance": {
+    "min": 0.11442786069651742,
+    "median": 0.18407960199004975,
+    "max": 0.3482587064676617,
+    "n_draws": 1000
+   },
+   "descriptive_only": false,
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "A pass means the fitted score does not rank deserts high; it does not show the analogy holds."
+  },
+  {
+   "id": "gate.D2",
+   "group": "gate",
+   "label": "D2: Mars leave-one-out recall at top 10 percent, M3, at least 50 percent",
+   "unit": "status",
+   "value": 0.0,
+   "display": "0.0%",
+   "status": "NOT TESTED",
+   "threshold": 0.5,
+   "comparison": "at least",
+   "reason": "thermal layer valid share 73.4% below 85% in latitude -55 to 60",
+   "inside_shuffled_range": true,
+   "chance": {
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.75,
+    "n_draws": 1000
+   },
+   "descriptive_only": true,
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Descriptive only (instruction of 15 Nov after registration): the threshold comparison is shown but is not a pass or fail claim. It rests on very few positives."
+  },
+  {
+   "id": "gate.moon_recall",
+   "group": "gate",
+   "label": "Moon recall of known sites",
+   "unit": "status",
+   "value": null,
+   "display": "NOT TESTED",
+   "status": "NOT TESTED",
+   "reason": "two Moon positives, one of them not scorable",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "No claim is made about Moon recall."
+  }
+ ]
+}

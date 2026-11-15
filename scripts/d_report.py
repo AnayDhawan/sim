@@ -14,7 +14,7 @@ WORK, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 LAYER_SHA, LAYER_LABEL = sys.argv[3], sys.argv[4]
 RAW = OUT / "raw_d"
 RAW.mkdir(parents=True, exist_ok=True)
-for f in ("real_metrics.json", "shuffle_baseline.json", "prep.json"):
+for f in ("real_metrics.json", "shuffle_baseline.json", "prep.json", "ranks_real.npz"):
     shutil.copy(WORK / f, RAW / f)
 shutil.copy(ROOT / "data" / "interim" / "d_ref" / "ref_targets_d.json", RAW / "ref_targets_d.json")
 
@@ -201,6 +201,9 @@ def L(i, t, body, status, statement, meaning, src="prep"):
 L("limit.small_labelled_set", "known_limit", "mars", "open",
   f"The fit uses {N.get('M3.recall.n', 0):.0f} scorable Mars positives and {N.get('M0.fpr25_moon_all.n', 0):.0f} negative units. One positive moves recall by 25 points or more.",
   "Any fitted thermal weight is close to a guess. Fitted and cross-validated on a very small labelled set.")
+L("limit.layer_coverage", "known_limit", "moon", "open",
+  f"Role A's Earth thermal layer has a valid th_mean for {100 * LAYER_SHARE:.1f} percent of v1 land tiles between 55S and 60N. The registered rule needs 85 percent. Tiles without a value (polar blocks and areas where the pre-registered MODIS QC rule leaves no value) are outside the universe.",
+  "The scored universe is a subset of Earth that leaves out much of the driest land that a desert negative set would sample. D1 and D2 are NOT TESTED under the registered rule; the metrics are reported as descriptive numbers.")
 L("limit.negatives_clustered", "known_limit", "moon", "open",
   "The 200 negative tiles were drawn from bare, low, near-equatorial land. They cluster in a few deserts and are not independent.",
   "Bootstrap intervals and the false-positive rate look more certain than they are.", "real")
@@ -275,12 +278,22 @@ fails = [f"{g['id']} FAIL: value {g['display']} against {g['comparison']} {100 *
 nt = [f"{g['id']} NOT TESTED: {g['reason']}" for g in (D1, D2) if g["status"] == "NOT TESTED"] + ["Moon recall NOT TESTED: two Moon positives, one not scorable.",
                                                                                                      "Arcadia: no centre, no thermal reference."]
 within = [g["id"] for g in (D1, D2) if g.get("inside_shuffled_range")]
+outside = [g["id"] for g in (D1, D2) if g.get("inside_shuffled_range") is False]
+import numpy as _np
+_z = _np.load(RAW / "ranks_real.npz")
+_mp = _z["mars"][:5, :len([n for n in PREP["units"] if PREP["units"][n]["group"] == "pos"])]
+_mx = float(_np.nanmax(_mp)) if _np.isfinite(_mp).any() else float("nan")
+_hits = int((_np.nan_to_num(_mp, nan=-1) >= 90).sum())
+_mo = _z["moon_noill"][:5]
+_fpr = [float((_mo[i] >= 75).sum() / _np.isfinite(_mo[i]).sum()) for i in range(5)]
 md = [f"# Results D: fitted thermal terms, leave-one-site-out", "",
       "Fitted and cross-validated on a very small labelled set. Never replaces Role A's headline. Exploratory; nothing here is a success claim.", "",
       f"Pre-registration `runs/v2/PREREG_D.md`, sha256 `{PREREG_HASH}` (recorded in `prereg_d.sha256`). Thermal layer: {LAYER_LABEL}, sha256 `{LAYER_SHA}`.", "",
       "## Gates (headline: M3, held-out, Moon without illumination, single-tile percentiles)", ""] + gt + [""]
 if within:
     md += [f"Inside the shuffled-feature range, so not distinguishable from chance on this check: {', '.join(within)}.", ""]
+if outside:
+    md += [f"Outside the shuffled-feature range: {', '.join(outside)} (gate status is still NOT TESTED, see reason)", ""]
 md += ["## M0 to M3 metrics, Moon without illumination (primary)", "",
        "Each cell: value, then the shuffled-feature chance range over 1000 draws (min to max, median). M3 values are held-out outcomes of the leave-one-site-out fit.", ""] + table("noill") + [""]
 md += ["## M0 to M3 metrics, Moon with illumination (variant, feeds no gate)", ""] + table("ill") + [""]
@@ -309,7 +322,7 @@ tm = {}
 for n, r in unsc_m.items():
     if n.startswith("neg"):
         tm[r] = tm.get(r, 0) + 1
-md += ["", f"Of the 200 sampled negative tiles, {sum(tm.values())} are not scored under the Moon profile" + (": " + ", ".join(f"{v}, {why(k)}" for k, v in tm.items()) if tm else "") + ".", ""]
+md += ["", f"Of the 200 sampled negative tiles, {sum(tm.values())} {'is' if sum(tm.values()) == 1 else 'are'} not scored under the Moon profile" + (": " + ", ".join(f"{why(k)}" for k, v in tm.items()) if tm else "") + ".", ""]
 md += ["## Earth tiles with missing thermal values, by latitude band", "",
        "Tiles are v1 land tiles. A thermal value is missing where the MODIS layer is NaN or the valid share is under 0.5. Bands with |latitude| above 60 are the polar bands (south polar: -90 to -60; north polar: 60 to 90).", "",
        "| Band | Region | Land tiles | Missing th_mean | Missing th_max | Missing th_ti | Missing share th_mean |", "|---|---|---|---|---|---|---|"]
@@ -325,7 +338,10 @@ all_miss = sum(lb["missing_th_mean"] for lb in PREP["lat_bands"])
 md += ["", f"Polar bands hold {polar_miss} of the {all_miss} tiles missing `th_mean`.", ""]
 claim("d.latband.polar_missing_th_mean", str(polar_miss), "prep")
 claim("d.latband.all_missing_th_mean", str(all_miss), "prep")
-md += ["## What failed", ""] + ([f"- {x}" for x in fails] or ["- No gate returned FAIL."]) + [""]
+md += ["## What failed and what the fit decided", ""] + ([f"- {x}" for x in fails] or ["- No gate was tested, so no gate returned PASS or FAIL."])
+md += [f"- Mars recall at top 5, 10 and 25 percent is 0 for M0 to M3. The highest Mars percentile any scorable positive reaches at any grid weight (0, 0.25, 0.5, 0.75, 1) is {_mx:.1f}; positives at or above the 90th percentile over the whole grid: {_hits}.",
+       "- Because positive recall at top 10 percent is 0 at every grid weight, the M3 fit is decided by the false-positive term alone. Moon false-positive rate by grid weight (0, 0.25, 0.5, 0.75, 1): " + ", ".join(f"{100 * x:.1f}%" for x in _fpr) + ". The fit picks the smallest weight at the minimum.",
+       "- Reading, interpretation and not a metric: the lunar polar targets are cold and the negative tiles are hot deserts, so any thermal term pushes deserts down. A lower false-positive rate here says the thermal columns separate hot Earth deserts from cold targets. It does not say thermal terms pull known Mars analog sites up; they did not.", ""]
 md += ["## D2 is descriptive only", "", "D2 (Mars leave-one-out recall at top 10 percent) was registered as a gate. Anay instructed on 15 Nov, after registration, that D2 is descriptive only. The table shows what it would read against the threshold; it is not a pass or fail claim, because it rests on a handful of scorable positives.", ""]
 md += ["## NOT TESTED", ""] + [f"- {x}" for x in nt] + [""]
 md += ["## Units not scorable (own tile not scored)", ""] + [f"- {n}: {w}" for n, w in {**unsc_r}.items()] + [""]
@@ -342,6 +358,10 @@ for k, v in (("universe.moon_n", PREP["meta"]["moon_universe"]["n_U"]), ("univer
 for m, x in b.items():
     claim(f"d.noill.{m}.auc_n_pos", str(x["n_pos"]), "real")
     claim(f"d.noill.{m}.auc_n_neg", str(x["n_neg"]), "real")
+claim("d.noill.grid.max_mars_positive_rank", f"{_mx:.1f}", "real")
+claim("d.noill.grid.positives_at_or_above_p90", str(_hits), "real")
+for _i, _g in enumerate((0, 0.25, 0.5, 0.75, 1)):
+    claim(f"d.noill.grid.moon_fpr25_w{_g}", f"{100 * _fpr[_i]:.1f}%", "real")
 claims.sort(key=lambda r: r[0])
 with open(OUT / "claims_d.csv", "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f, lineterminator="\n")

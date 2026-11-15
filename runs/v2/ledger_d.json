@@ -1,0 +1,192 @@
+{
+ "meta": {
+  "label": "ROLE D. Fitted and cross-validated on a very small labelled set. Exploratory; nothing here is a success claim and nothing replaces Role A's headline.",
+  "preregistration": {
+   "file": "runs/v2/PREREG_D.md",
+   "sha256": "78b4c00cd1df5219ca8dbc2919d744d0414083aeba2e0cc35b5086e41a529610"
+  },
+  "thermal_layer": {
+   "label": "Role A earth_features_v2_6km.parquet, MODIS MOD11A2 2019-2023, copied 2026-11-15 11:45 IST",
+   "sha256": "701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5"
+  },
+  "shuffled_baseline": "1000 draws, seed 20261114, Earth thermal ranks permuted across the tiles of each universe; M3 repeats the full fit per draw",
+  "universe": {
+   "moon": {
+    "n_U": 804789,
+    "n_v1_gated": 1226294,
+    "rejected_by_reason": {
+     "missing_data": 2194305,
+     "vegetated": 944406,
+     "open_water_or_ice": 21442,
+     "built_or_cropland": 8013
+    }
+   },
+   "mars": {
+    "n_U": 818255,
+    "n_v1_gated": 1226654,
+    "rejected_by_reason": {
+     "missing_data": 2136671,
+     "vegetated": 987652,
+     "open_water_or_ice": 22259,
+     "built_or_cropland": 8118
+    }
+   }
+  },
+  "engine_check": {
+   "moon/connecting_ridge_c1": {
+    "same_tile_set": true,
+    "n": 1226294,
+    "max_abs_diff": 0.0,
+    "ok": true
+   },
+   "moon/shackleton_rim": {
+    "same_tile_set": true,
+    "n": 1226294,
+    "max_abs_diff": 0.0,
+    "ok": true
+   },
+   "mars/jezero": {
+    "same_tile_set": true,
+    "n": 1226654,
+    "max_abs_diff": 0.0,
+    "ok": true
+   },
+   "all_ok": true
+  },
+  "reference_cross_check_ok": true,
+  "inputs": {
+   "layer_sha256": "701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5",
+   "reference_files": {
+    "dlre_prp_south.tab": "393deaa5d8925d45bb2ed608f937a824f5eae029c2558aad1d2da8206b83a62d",
+    "global_ti_day_2007.img": "d8b1ac57c5f2c6d4f43d7e5331591fae0254f48af7629bd0d230c2603da48f9a",
+    "global_ti_night_2007.img": "faee32838da40045ee7ebd21bed156cc649620312c01165b556d77a2128258f4",
+    "global_ti_msk_day_2007.img": "23bab175ab99e5aa7b68a4b664f3d616f08c92fcc410188c116d5083103d16cb",
+    "global_ti_msk_night_2007.img": "fca7ec6fab8b3e81226e1d14dbb3a22509ad111bda4e03bf2b64f050bd550d0b"
+   },
+   "v1_earth_features_sha256": "df31e93c4034ecb908a2d378ab2335d817e8751b32616e135de8febc0182a966"
+  }
+ },
+ "entries": [
+  {
+   "id": "limit.small_labelled_set",
+   "type": "known_limit",
+   "body": "mars",
+   "status": "open",
+   "provisional": true,
+   "statement": "The fit uses 4 scorable Mars positives and 201 negative units. One positive moves recall by 25 points or more.",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "Any fitted thermal weight is close to a guess. Fitted and cross-validated on a very small labelled set."
+  },
+  {
+   "id": "limit.layer_coverage",
+   "type": "known_limit",
+   "body": "moon",
+   "status": "open",
+   "provisional": true,
+   "statement": "Role A's Earth thermal layer has a valid th_mean for 73.4 percent of v1 land tiles between 55S and 60N. The registered rule needs 85 percent. Tiles without a value (polar blocks and areas where the pre-registered MODIS QC rule leaves no value) are outside the universe.",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "The scored universe is a subset of Earth that leaves out much of the driest land that a desert negative set would sample. D1 and D2 are NOT TESTED under the registered rule; the metrics are reported as descriptive numbers."
+  },
+  {
+   "id": "limit.negatives_clustered",
+   "type": "known_limit",
+   "body": "moon",
+   "status": "open",
+   "provisional": true,
+   "statement": "The 200 negative tiles were drawn from bare, low, near-equatorial land. They cluster in a few deserts and are not independent.",
+   "source_file": "runs/v2/raw_d/real_metrics.json",
+   "sha256": "0bf58ed016b533af2222ad2b55a71ca67aa678090d5b834b76a08e23360527ec",
+   "what_this_means_for_the_analogy": "Bootstrap intervals and the false-positive rate look more certain than they are."
+  },
+  {
+   "id": "limit.bare_proxy",
+   "type": "known_limit",
+   "body": "moon",
+   "status": "open",
+   "provisional": true,
+   "statement": "The v1 Earth file has no share of bare or sparse cover. The negative set uses NDVI median at most 0.10 and little water, ice, built or crop.",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "The negatives are bare-ground tiles by a proxy, not by a land-cover class share."
+  },
+  {
+   "id": "limit.mars_ti_proxy",
+   "type": "known_limit",
+   "body": "mars",
+   "status": "open",
+   "provisional": true,
+   "statement": "The Earth partner of Mars thermal inertia is the rank of minus the MODIS day-minus-night swing. It is a proxy, not thermal inertia.",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "A match in rank says the day-night swing is of similar rank, not that the ground has the same inertia."
+  },
+  {
+   "id": "limit.moon_thermal_definition",
+   "type": "known_limit",
+   "body": "moon",
+   "status": "open",
+   "provisional": true,
+   "statement": "Moon PRP temp_avg and temp_max are modelled values; the Earth partners are satellite skin temperatures from MODIS composites.",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "Rank within each body is compared. Absolute values cannot match: Earth has no surface near polar cold-trap temperatures."
+  },
+  {
+   "id": "unscored.ice_depth_illumination",
+   "type": "unscored_property",
+   "body": "moon",
+   "status": "open",
+   "provisional": true,
+   "statement": "Moon ice_depth is context only. The primary Moon score leaves out the illumination family; a variant with it is reported next to it.",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "Earth cannot match polar lighting, so the primary Moon score says nothing about illumination."
+  },
+  {
+   "id": "unscored.arcadia_diurnal",
+   "type": "unscored_property",
+   "body": "mars",
+   "status": "open",
+   "provisional": true,
+   "statement": "Arcadia has no centre and no thermal reference. Moon diurnal range, cold-trap share and Mars surface temperature have no source or no Earth partner.",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "These properties are not scored here."
+  },
+  {
+   "id": "unscorable.lonar",
+   "type": "known_limit",
+   "body": "mars",
+   "status": "open",
+   "provisional": true,
+   "statement": "lonar: own tile not scored (vegetated).",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "This site does not enter the denominators."
+  },
+  {
+   "id": "unscorable.mcmurdo_dry_valleys",
+   "type": "known_limit",
+   "body": "mars",
+   "status": "open",
+   "provisional": true,
+   "statement": "mcmurdo_dry_valleys: own tile not scored (not a v1 land tile).",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "This site does not enter the denominators."
+  },
+  {
+   "id": "unscorable.neg199",
+   "type": "known_limit",
+   "body": "moon",
+   "status": "open",
+   "provisional": true,
+   "statement": "neg199: own tile not scored (thermal value invalid).",
+   "source_file": "runs/v2/raw_d/prep.json",
+   "sha256": "67d445934d05d6f852a4ee1ef9b7a39466194cb24c15e22215499d52284d4e82",
+   "what_this_means_for_the_analogy": "This site does not enter the denominators."
+  }
+ ]
+}

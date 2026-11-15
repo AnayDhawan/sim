@@ -1,0 +1,1578 @@
+{
+ "noill": {
+  "M0.fpr25_moon_all": {
+   "min": 0.21393034825870647,
+   "median": 0.21393034825870647,
+   "max": 0.21393034825870647,
+   "n_draws": 1000
+  },
+  "M0.fpr25_moon_all.n": {
+   "min": 201.0,
+   "median": 201.0,
+   "max": 201.0,
+   "n_draws": 1000
+  },
+  "M0.fpr25_moon_tiles": {
+   "min": 0.21608040201005024,
+   "median": 0.21608040201005024,
+   "max": 0.21608040201005024,
+   "n_draws": 1000
+  },
+  "M0.fpr25_moon_tiles.n": {
+   "min": 199.0,
+   "median": 199.0,
+   "max": 199.0,
+   "n_draws": 1000
+  },
+  "M0.namib_rank": {
+   "min": 49.618595681601015,
+   "median": 49.618595681601015,
+   "max": 49.618595681601015,
+   "n_draws": 1000
+  },
+  "M0.rub_rank": {
+   "min": 12.515143720900758,
+   "median": 12.515143720900758,
+   "max": 12.515143720900758,
+   "n_draws": 1000
+  },
+  "M0.recall5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall5.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall5_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall10": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall10.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall10_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall25": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall25.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall25_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall.n": {
+   "min": 4.0,
+   "median": 4.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M0.mars_primary_median": {
+   "min": 28.050852118227205,
+   "median": 28.050852118227205,
+   "max": 28.050852118227205,
+   "n_draws": 1000
+  },
+  "M0.auc_mars": {
+   "min": 0.03731343283582089,
+   "median": 0.03731343283582089,
+   "max": 0.03731343283582089,
+   "n_draws": 1000
+  },
+  "M0.rank_mars.lonar": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M0.rank_mars.haughton": {
+   "min": 27.939456526388472,
+   "median": 27.939456526388472,
+   "max": 27.939456526388472,
+   "n_draws": 1000
+  },
+  "M0.rank_mars.mcmurdo_dry_valleys": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M0.rank_mars.atacama_salars": {
+   "min": 39.71231462074781,
+   "median": 39.71231462074781,
+   "max": 39.71231462074781,
+   "n_draws": 1000
+  },
+  "M0.rank_mars.ladakh_puga": {
+   "min": 9.712742360266665,
+   "median": 9.712742360266665,
+   "max": 9.712742360266665,
+   "n_draws": 1000
+  },
+  "M0.rank_mars.mdrs_utah": {
+   "min": 28.162247710065934,
+   "median": 28.162247710065934,
+   "max": 28.162247710065934,
+   "n_draws": 1000
+  },
+  "M0.fpr25_mars_all": {
+   "min": 0.3681592039800995,
+   "median": 0.3681592039800995,
+   "max": 0.3681592039800995,
+   "n_draws": 1000
+  },
+  "M1.fpr25_moon_all": {
+   "min": 0.11442786069651742,
+   "median": 0.1791044776119403,
+   "max": 0.25870646766169153,
+   "n_draws": 1000
+  },
+  "M1.fpr25_moon_all.n": {
+   "min": 201.0,
+   "median": 201.0,
+   "max": 201.0,
+   "n_draws": 1000
+  },
+  "M1.fpr25_moon_tiles": {
+   "min": 0.11557788944723618,
+   "median": 0.18090452261306533,
+   "max": 0.2562814070351759,
+   "n_draws": 1000
+  },
+  "M1.fpr25_moon_tiles.n": {
+   "min": 199.0,
+   "median": 199.0,
+   "max": 199.0,
+   "n_draws": 1000
+  },
+  "M1.namib_rank": {
+   "min": 3.131193393547874,
+   "median": 36.90774849059816,
+   "max": 84.57477674272387,
+   "n_draws": 1000
+  },
+  "M1.rub_rank": {
+   "min": 0.041936457879021706,
+   "median": 29.893145905324253,
+   "max": 80.3122309077286,
+   "n_draws": 1000
+  },
+  "M1.recall5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall5.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall5_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall10": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall10.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall10_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall25": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.25,
+   "n_draws": 1000
+  },
+  "M1.recall25.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 1.0,
+   "n_draws": 1000
+  },
+  "M1.recall25_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.16666666666666666,
+   "n_draws": 1000
+  },
+  "M1.recall.n": {
+   "min": 4.0,
+   "median": 4.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M1.mars_primary_median": {
+   "min": 26.51349518181985,
+   "median": 26.559874366792748,
+   "max": 56.53598205938246,
+   "n_draws": 1000
+  },
+  "M1.auc_mars": {
+   "min": 0.024875621890547265,
+   "median": 0.036069651741293535,
+   "max": 0.30472636815920395,
+   "n_draws": 1000
+  },
+  "M1.rank_mars.lonar": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M1.rank_mars.haughton": {
+   "min": 26.403016174664376,
+   "median": 26.445667915258692,
+   "max": 60.38508777825983,
+   "n_draws": 1000
+  },
+  "M1.rank_mars.mcmurdo_dry_valleys": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M1.rank_mars.atacama_salars": {
+   "min": 38.024087845476046,
+   "median": 38.08464354021668,
+   "max": 75.76660087625496,
+   "n_draws": 1000
+  },
+  "M1.rank_mars.ladakh_puga": {
+   "min": 8.581921283707402,
+   "median": 8.620601157340928,
+   "max": 30.085242375543075,
+   "n_draws": 1000
+  },
+  "M1.rank_mars.mdrs_utah": {
+   "min": 26.62397418897532,
+   "median": 26.663937281165406,
+   "max": 60.71603595456184,
+   "n_draws": 1000
+  },
+  "M1.fpr25_mars_all": {
+   "min": 0.3482587064676617,
+   "median": 0.3781094527363184,
+   "max": 0.42786069651741293,
+   "n_draws": 1000
+  },
+  "M2.fpr25_moon_all": {
+   "min": 0.13930348258706468,
+   "median": 0.22388059701492538,
+   "max": 0.32338308457711445,
+   "n_draws": 1000
+  },
+  "M2.fpr25_moon_all.n": {
+   "min": 201.0,
+   "median": 201.0,
+   "max": 201.0,
+   "n_draws": 1000
+  },
+  "M2.fpr25_moon_tiles": {
+   "min": 0.1407035175879397,
+   "median": 0.22110552763819097,
+   "max": 0.32160804020100503,
+   "n_draws": 1000
+  },
+  "M2.fpr25_moon_tiles.n": {
+   "min": 199.0,
+   "median": 199.0,
+   "max": 199.0,
+   "n_draws": 1000
+  },
+  "M2.namib_rank": {
+   "min": 0.9083747417024834,
+   "median": 39.132120344587214,
+   "max": 92.61744382689128,
+   "n_draws": 1000
+  },
+  "M2.rub_rank": {
+   "min": 0.023919313012479047,
+   "median": 35.31341755416637,
+   "max": 90.36088962448542,
+   "n_draws": 1000
+  },
+  "M2.recall5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M2.recall5.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 2.0,
+   "n_draws": 1000
+  },
+  "M2.recall5_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.3333333333333333,
+   "n_draws": 1000
+  },
+  "M2.recall10": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.75,
+   "n_draws": 1000
+  },
+  "M2.recall10.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 3.0,
+   "n_draws": 1000
+  },
+  "M2.recall10_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M2.recall25": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.75,
+   "n_draws": 1000
+  },
+  "M2.recall25.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 3.0,
+   "n_draws": 1000
+  },
+  "M2.recall25_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M2.recall.n": {
+   "min": 4.0,
+   "median": 4.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M2.mars_primary_median": {
+   "min": 24.434436697606493,
+   "median": 24.501133509724962,
+   "max": 95.27800013443242,
+   "n_draws": 1000
+  },
+  "M2.auc_mars": {
+   "min": 0.01990049751243781,
+   "median": 0.03855721393034826,
+   "max": 0.7437810945273632,
+   "n_draws": 1000
+  },
+  "M2.rank_mars.lonar": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M2.rank_mars.haughton": {
+   "min": 24.33300132599251,
+   "median": 24.388424146506896,
+   "max": 97.49760160341214,
+   "n_draws": 1000
+  },
+  "M2.rank_mars.mcmurdo_dry_valleys": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M2.rank_mars.atacama_salars": {
+   "min": 34.9563400162541,
+   "median": 35.009196399655366,
+   "max": 98.24810114206451,
+   "n_draws": 1000
+  },
+  "M2.rank_mars.ladakh_puga": {
+   "min": 8.234719005688936,
+   "median": 8.274559886587921,
+   "max": 95.92070931433355,
+   "n_draws": 1000
+  },
+  "M2.rank_mars.mdrs_utah": {
+   "min": 24.53318342081625,
+   "median": 24.588850663912837,
+   "max": 97.49564622275452,
+   "n_draws": 1000
+  },
+  "M2.fpr25_mars_all": {
+   "min": 0.3333333333333333,
+   "median": 0.38308457711442784,
+   "max": 0.44776119402985076,
+   "n_draws": 1000
+  },
+  "M3.fpr25_moon_all": {
+   "min": 0.11442786069651742,
+   "median": 0.18407960199004975,
+   "max": 0.3482587064676617,
+   "n_draws": 1000
+  },
+  "M3.fpr25_moon_all.n": {
+   "min": 201.0,
+   "median": 201.0,
+   "max": 201.0,
+   "n_draws": 1000
+  },
+  "M3.fpr25_moon_tiles": {
+   "min": 0.11055276381909548,
+   "median": 0.18592964824120603,
+   "max": 0.34673366834170855,
+   "n_draws": 1000
+  },
+  "M3.fpr25_moon_tiles.n": {
+   "min": 199.0,
+   "median": 199.0,
+   "max": 199.0,
+   "n_draws": 1000
+  },
+  "M3.namib_rank": {
+   "min": 0.22347472443087565,
+   "median": 38.25275941892844,
+   "max": 97.11992832904028,
+   "n_draws": 1000
+  },
+  "M3.rub_rank": {
+   "min": 0.07032899306526307,
+   "median": 31.161832480314715,
+   "max": 97.56464116681515,
+   "n_draws": 1000
+  },
+  "M3.recall5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M3.recall5.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 2.0,
+   "n_draws": 1000
+  },
+  "M3.recall5_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.3333333333333333,
+   "n_draws": 1000
+  },
+  "M3.recall10": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.75,
+   "n_draws": 1000
+  },
+  "M3.recall10.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 3.0,
+   "n_draws": 1000
+  },
+  "M3.recall10_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M3.recall25": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.75,
+   "n_draws": 1000
+  },
+  "M3.recall25.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 3.0,
+   "n_draws": 1000
+  },
+  "M3.recall25_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M3.recall.n": {
+   "min": 4.0,
+   "median": 4.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M3.mars_primary_median": {
+   "min": 18.73774067986141,
+   "median": 25.502257853603098,
+   "max": 95.27800013443242,
+   "n_draws": 1000
+  },
+  "M3.auc_mars": {
+   "min": 0.021144278606965175,
+   "median": 0.03731343283582089,
+   "max": 0.822139303482587,
+   "n_draws": 1000
+  },
+  "M3.rank_mars.lonar": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M3.rank_mars.haughton": {
+   "min": 3.111621682727267,
+   "median": 25.384507274627104,
+   "max": 98.80575126335923,
+   "n_draws": 1000
+  },
+  "M3.rank_mars.mcmurdo_dry_valleys": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M3.rank_mars.atacama_salars": {
+   "min": 1.6582850089519772,
+   "median": 36.589632816175886,
+   "max": 98.41565282216423,
+   "n_draws": 1000
+  },
+  "M3.rank_mars.ladakh_puga": {
+   "min": 1.8174041099657197,
+   "median": 8.4064258696861,
+   "max": 98.2157151499227,
+   "n_draws": 1000
+  },
+  "M3.rank_mars.mdrs_utah": {
+   "min": 3.56783643240799,
+   "median": 25.59464958967559,
+   "max": 99.38258855735681,
+   "n_draws": 1000
+  },
+  "M3.fpr25_mars_all": {
+   "min": 0.1890547263681592,
+   "median": 0.38308457711442784,
+   "max": 0.44776119402985076,
+   "n_draws": 1000
+  },
+  "M3_insample.fpr25_moon_all": {
+   "min": 0.11442786069651742,
+   "median": 0.18407960199004975,
+   "max": 0.3482587064676617,
+   "n_draws": 1000
+  },
+  "M3_insample.fpr25_moon_all.n": {
+   "min": 201.0,
+   "median": 201.0,
+   "max": 201.0,
+   "n_draws": 1000
+  },
+  "M3_insample.fpr25_moon_tiles": {
+   "min": 0.11055276381909548,
+   "median": 0.18592964824120603,
+   "max": 0.34673366834170855,
+   "n_draws": 1000
+  },
+  "M3_insample.fpr25_moon_tiles.n": {
+   "min": 199.0,
+   "median": 199.0,
+   "max": 199.0,
+   "n_draws": 1000
+  },
+  "M3_insample.namib_rank": {
+   "min": 0.22347472443087565,
+   "median": 38.25275941892844,
+   "max": 97.11992832904028,
+   "n_draws": 1000
+  },
+  "M3_insample.rub_rank": {
+   "min": 0.07032899306526307,
+   "median": 31.161832480314715,
+   "max": 97.56464116681515,
+   "n_draws": 1000
+  },
+  "M3_insample.recall5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M3_insample.recall5.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 2.0,
+   "n_draws": 1000
+  },
+  "M3_insample.recall5_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.3333333333333333,
+   "n_draws": 1000
+  },
+  "M3_insample.recall10": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.75,
+   "n_draws": 1000
+  },
+  "M3_insample.recall10.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 3.0,
+   "n_draws": 1000
+  },
+  "M3_insample.recall10_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M3_insample.recall25": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 1.0,
+   "n_draws": 1000
+  },
+  "M3_insample.recall25.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M3_insample.recall25_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.6666666666666666,
+   "n_draws": 1000
+  },
+  "M3_insample.recall.n": {
+   "min": 4.0,
+   "median": 4.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M3_insample.mars_primary_median": {
+   "min": 23.841284196246892,
+   "median": 25.50390770603296,
+   "max": 95.27800013443242,
+   "n_draws": 1000
+  },
+  "M3_insample.auc_mars": {
+   "min": 0.021144278606965175,
+   "median": 0.03731343283582089,
+   "max": 0.8955223880597015,
+   "n_draws": 1000
+  },
+  "M3_insample.rank_mars.lonar": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M3_insample.rank_mars.haughton": {
+   "min": 3.111621682727267,
+   "median": 25.384507274627104,
+   "max": 98.80575126335923,
+   "n_draws": 1000
+  },
+  "M3_insample.rank_mars.mcmurdo_dry_valleys": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M3_insample.rank_mars.atacama_salars": {
+   "min": 1.6582850089519772,
+   "median": 36.589632816175886,
+   "max": 98.41565282216423,
+   "n_draws": 1000
+  },
+  "M3_insample.rank_mars.ladakh_puga": {
+   "min": 1.8174041099657197,
+   "median": 8.4064258696861,
+   "max": 98.2157151499227,
+   "n_draws": 1000
+  },
+  "M3_insample.rank_mars.mdrs_utah": {
+   "min": 3.56783643240799,
+   "median": 25.59464958967559,
+   "max": 99.38258855735681,
+   "n_draws": 1000
+  },
+  "M3_insample.fpr25_mars_all": {
+   "min": 0.18407960199004975,
+   "median": 0.38308457711442784,
+   "max": 0.44776119402985076,
+   "n_draws": 1000
+  },
+  "M3.w_full": {
+   "min": 0.0,
+   "median": 0.25,
+   "max": 1.0,
+   "n_draws": 1000
+  },
+  "M3.n_folds_w0.0": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 205.0,
+   "n_draws": 1000
+  },
+  "M3.n_folds_w0.25": {
+   "min": 0.0,
+   "median": 205.0,
+   "max": 205.0,
+   "n_draws": 1000
+  },
+  "M3.n_folds_w0.5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 205.0,
+   "n_draws": 1000
+  },
+  "M3.n_folds_w0.75": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 204.0,
+   "n_draws": 1000
+  },
+  "M3.n_folds_w1.0": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 205.0,
+   "n_draws": 1000
+  }
+ },
+ "ill": {
+  "M0.fpr25_moon_all": {
+   "min": 0.21393034825870647,
+   "median": 0.21393034825870647,
+   "max": 0.21393034825870647,
+   "n_draws": 1000
+  },
+  "M0.fpr25_moon_all.n": {
+   "min": 201.0,
+   "median": 201.0,
+   "max": 201.0,
+   "n_draws": 1000
+  },
+  "M0.fpr25_moon_tiles": {
+   "min": 0.21608040201005024,
+   "median": 0.21608040201005024,
+   "max": 0.21608040201005024,
+   "n_draws": 1000
+  },
+  "M0.fpr25_moon_tiles.n": {
+   "min": 199.0,
+   "median": 199.0,
+   "max": 199.0,
+   "n_draws": 1000
+  },
+  "M0.namib_rank": {
+   "min": 49.618595681601015,
+   "median": 49.618595681601015,
+   "max": 49.618595681601015,
+   "n_draws": 1000
+  },
+  "M0.rub_rank": {
+   "min": 12.515143720900758,
+   "median": 12.515143720900758,
+   "max": 12.515143720900758,
+   "n_draws": 1000
+  },
+  "M0.recall5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall5.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall5_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall10": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall10.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall10_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall25": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall25.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall25_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M0.recall.n": {
+   "min": 4.0,
+   "median": 4.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M0.mars_primary_median": {
+   "min": 28.050852118227205,
+   "median": 28.050852118227205,
+   "max": 28.050852118227205,
+   "n_draws": 1000
+  },
+  "M0.auc_mars": {
+   "min": 0.03731343283582089,
+   "median": 0.03731343283582089,
+   "max": 0.03731343283582089,
+   "n_draws": 1000
+  },
+  "M0.rank_mars.lonar": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M0.rank_mars.haughton": {
+   "min": 27.939456526388472,
+   "median": 27.939456526388472,
+   "max": 27.939456526388472,
+   "n_draws": 1000
+  },
+  "M0.rank_mars.mcmurdo_dry_valleys": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M0.rank_mars.atacama_salars": {
+   "min": 39.71231462074781,
+   "median": 39.71231462074781,
+   "max": 39.71231462074781,
+   "n_draws": 1000
+  },
+  "M0.rank_mars.ladakh_puga": {
+   "min": 9.712742360266665,
+   "median": 9.712742360266665,
+   "max": 9.712742360266665,
+   "n_draws": 1000
+  },
+  "M0.rank_mars.mdrs_utah": {
+   "min": 28.162247710065934,
+   "median": 28.162247710065934,
+   "max": 28.162247710065934,
+   "n_draws": 1000
+  },
+  "M0.fpr25_mars_all": {
+   "min": 0.3681592039800995,
+   "median": 0.3681592039800995,
+   "max": 0.3681592039800995,
+   "n_draws": 1000
+  },
+  "M1.fpr25_moon_all": {
+   "min": 0.10945273631840796,
+   "median": 0.17412935323383086,
+   "max": 0.2537313432835821,
+   "n_draws": 1000
+  },
+  "M1.fpr25_moon_all.n": {
+   "min": 201.0,
+   "median": 201.0,
+   "max": 201.0,
+   "n_draws": 1000
+  },
+  "M1.fpr25_moon_tiles": {
+   "min": 0.11055276381909548,
+   "median": 0.17587939698492464,
+   "max": 0.25125628140703515,
+   "n_draws": 1000
+  },
+  "M1.fpr25_moon_tiles.n": {
+   "min": 199.0,
+   "median": 199.0,
+   "max": 199.0,
+   "n_draws": 1000
+  },
+  "M1.namib_rank": {
+   "min": 3.3691439619577306,
+   "median": 36.81412146537788,
+   "max": 83.98592674601666,
+   "n_draws": 1000
+  },
+  "M1.rub_rank": {
+   "min": 0.043986684708662765,
+   "median": 29.627703658971484,
+   "max": 79.64087481314978,
+   "n_draws": 1000
+  },
+  "M1.recall5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall5.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall5_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall10": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall10.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall10_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.0,
+   "n_draws": 1000
+  },
+  "M1.recall25": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.25,
+   "n_draws": 1000
+  },
+  "M1.recall25.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 1.0,
+   "n_draws": 1000
+  },
+  "M1.recall25_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.16666666666666666,
+   "n_draws": 1000
+  },
+  "M1.recall.n": {
+   "min": 4.0,
+   "median": 4.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M1.mars_primary_median": {
+   "min": 26.51349518181985,
+   "median": 26.559874366792748,
+   "max": 56.53598205938246,
+   "n_draws": 1000
+  },
+  "M1.auc_mars": {
+   "min": 0.024875621890547265,
+   "median": 0.036069651741293535,
+   "max": 0.30472636815920395,
+   "n_draws": 1000
+  },
+  "M1.rank_mars.lonar": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M1.rank_mars.haughton": {
+   "min": 26.403016174664376,
+   "median": 26.445667915258692,
+   "max": 60.38508777825983,
+   "n_draws": 1000
+  },
+  "M1.rank_mars.mcmurdo_dry_valleys": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M1.rank_mars.atacama_salars": {
+   "min": 38.024087845476046,
+   "median": 38.08464354021668,
+   "max": 75.76660087625496,
+   "n_draws": 1000
+  },
+  "M1.rank_mars.ladakh_puga": {
+   "min": 8.581921283707402,
+   "median": 8.620601157340928,
+   "max": 30.085242375543075,
+   "n_draws": 1000
+  },
+  "M1.rank_mars.mdrs_utah": {
+   "min": 26.62397418897532,
+   "median": 26.663937281165406,
+   "max": 60.71603595456184,
+   "n_draws": 1000
+  },
+  "M1.fpr25_mars_all": {
+   "min": 0.3482587064676617,
+   "median": 0.3781094527363184,
+   "max": 0.42786069651741293,
+   "n_draws": 1000
+  },
+  "M2.fpr25_moon_all": {
+   "min": 0.13930348258706468,
+   "median": 0.23383084577114427,
+   "max": 0.3383084577114428,
+   "n_draws": 1000
+  },
+  "M2.fpr25_moon_all.n": {
+   "min": 201.0,
+   "median": 201.0,
+   "max": 201.0,
+   "n_draws": 1000
+  },
+  "M2.fpr25_moon_tiles": {
+   "min": 0.1407035175879397,
+   "median": 0.23115577889447236,
+   "max": 0.33668341708542715,
+   "n_draws": 1000
+  },
+  "M2.fpr25_moon_tiles.n": {
+   "min": 199.0,
+   "median": 199.0,
+   "max": 199.0,
+   "n_draws": 1000
+  },
+  "M2.namib_rank": {
+   "min": 0.6251327987832835,
+   "median": 40.254339957429835,
+   "max": 94.14529771157409,
+   "n_draws": 1000
+  },
+  "M2.rub_rank": {
+   "min": 0.021806958097091288,
+   "median": 37.22519194472092,
+   "max": 92.36737828176081,
+   "n_draws": 1000
+  },
+  "M2.recall5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M2.recall5.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 2.0,
+   "n_draws": 1000
+  },
+  "M2.recall5_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.3333333333333333,
+   "n_draws": 1000
+  },
+  "M2.recall10": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.75,
+   "n_draws": 1000
+  },
+  "M2.recall10.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 3.0,
+   "n_draws": 1000
+  },
+  "M2.recall10_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M2.recall25": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.75,
+   "n_draws": 1000
+  },
+  "M2.recall25.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 3.0,
+   "n_draws": 1000
+  },
+  "M2.recall25_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M2.recall.n": {
+   "min": 4.0,
+   "median": 4.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M2.mars_primary_median": {
+   "min": 24.434436697606493,
+   "median": 24.501133509724962,
+   "max": 95.27800013443242,
+   "n_draws": 1000
+  },
+  "M2.auc_mars": {
+   "min": 0.01990049751243781,
+   "median": 0.03855721393034826,
+   "max": 0.7437810945273632,
+   "n_draws": 1000
+  },
+  "M2.rank_mars.lonar": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M2.rank_mars.haughton": {
+   "min": 24.33300132599251,
+   "median": 24.388424146506896,
+   "max": 97.49760160341214,
+   "n_draws": 1000
+  },
+  "M2.rank_mars.mcmurdo_dry_valleys": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M2.rank_mars.atacama_salars": {
+   "min": 34.9563400162541,
+   "median": 35.009196399655366,
+   "max": 98.24810114206451,
+   "n_draws": 1000
+  },
+  "M2.rank_mars.ladakh_puga": {
+   "min": 8.234719005688936,
+   "median": 8.274559886587921,
+   "max": 95.92070931433355,
+   "n_draws": 1000
+  },
+  "M2.rank_mars.mdrs_utah": {
+   "min": 24.53318342081625,
+   "median": 24.588850663912837,
+   "max": 97.49564622275452,
+   "n_draws": 1000
+  },
+  "M2.fpr25_mars_all": {
+   "min": 0.3333333333333333,
+   "median": 0.38308457711442784,
+   "max": 0.44776119402985076,
+   "n_draws": 1000
+  },
+  "M3.fpr25_moon_all": {
+   "min": 0.11940298507462686,
+   "median": 0.19900497512437812,
+   "max": 0.39800995024875624,
+   "n_draws": 1000
+  },
+  "M3.fpr25_moon_all.n": {
+   "min": 201.0,
+   "median": 201.0,
+   "max": 201.0,
+   "n_draws": 1000
+  },
+  "M3.fpr25_moon_tiles": {
+   "min": 0.12060301507537688,
+   "median": 0.20100502512562815,
+   "max": 0.4020100502512563,
+   "n_draws": 1000
+  },
+  "M3.fpr25_moon_tiles.n": {
+   "min": 199.0,
+   "median": 199.0,
+   "max": 199.0,
+   "n_draws": 1000
+  },
+  "M3.namib_rank": {
+   "min": 0.16103599825544335,
+   "median": 43.23157995449739,
+   "max": 97.11992832904028,
+   "n_draws": 1000
+  },
+  "M3.rub_rank": {
+   "min": 0.16787008768758022,
+   "median": 30.19443605715287,
+   "max": 97.56464116681515,
+   "n_draws": 1000
+  },
+  "M3.recall5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M3.recall5.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 2.0,
+   "n_draws": 1000
+  },
+  "M3.recall5_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.3333333333333333,
+   "n_draws": 1000
+  },
+  "M3.recall10": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.75,
+   "n_draws": 1000
+  },
+  "M3.recall10.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 3.0,
+   "n_draws": 1000
+  },
+  "M3.recall10_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M3.recall25": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.75,
+   "n_draws": 1000
+  },
+  "M3.recall25.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 3.0,
+   "n_draws": 1000
+  },
+  "M3.recall25_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M3.recall.n": {
+   "min": 4.0,
+   "median": 4.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M3.mars_primary_median": {
+   "min": 18.73774067986141,
+   "median": 25.508398970980927,
+   "max": 95.27800013443242,
+   "n_draws": 1000
+  },
+  "M3.auc_mars": {
+   "min": 0.021144278606965175,
+   "median": 0.03731343283582089,
+   "max": 0.822139303482587,
+   "n_draws": 1000
+  },
+  "M3.rank_mars.lonar": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M3.rank_mars.haughton": {
+   "min": 3.111621682727267,
+   "median": 25.38707371174023,
+   "max": 98.80575126335923,
+   "n_draws": 1000
+  },
+  "M3.rank_mars.mcmurdo_dry_valleys": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M3.rank_mars.atacama_salars": {
+   "min": 1.6582850089519772,
+   "median": 36.592565887162316,
+   "max": 98.607402337902,
+   "n_draws": 1000
+  },
+  "M3.rank_mars.ladakh_puga": {
+   "min": 1.8174041099657197,
+   "median": 8.408808989862575,
+   "max": 98.2157151499227,
+   "n_draws": 1000
+  },
+  "M3.rank_mars.mdrs_utah": {
+   "min": 3.56783643240799,
+   "median": 25.597521555016467,
+   "max": 99.38258855735681,
+   "n_draws": 1000
+  },
+  "M3.fpr25_mars_all": {
+   "min": 0.1890547263681592,
+   "median": 0.3781094527363184,
+   "max": 0.44776119402985076,
+   "n_draws": 1000
+  },
+  "M3_insample.fpr25_moon_all": {
+   "min": 0.11940298507462686,
+   "median": 0.19900497512437812,
+   "max": 0.3482587064676617,
+   "n_draws": 1000
+  },
+  "M3_insample.fpr25_moon_all.n": {
+   "min": 201.0,
+   "median": 201.0,
+   "max": 201.0,
+   "n_draws": 1000
+  },
+  "M3_insample.fpr25_moon_tiles": {
+   "min": 0.12060301507537688,
+   "median": 0.20100502512562815,
+   "max": 0.34673366834170855,
+   "n_draws": 1000
+  },
+  "M3_insample.fpr25_moon_tiles.n": {
+   "min": 199.0,
+   "median": 199.0,
+   "max": 199.0,
+   "n_draws": 1000
+  },
+  "M3_insample.namib_rank": {
+   "min": 0.16103599825544335,
+   "median": 43.23157995449739,
+   "max": 97.11992832904028,
+   "n_draws": 1000
+  },
+  "M3_insample.rub_rank": {
+   "min": 0.16787008768758022,
+   "median": 29.97555881106725,
+   "max": 97.56464116681515,
+   "n_draws": 1000
+  },
+  "M3_insample.recall5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M3_insample.recall5.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 2.0,
+   "n_draws": 1000
+  },
+  "M3_insample.recall5_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.3333333333333333,
+   "n_draws": 1000
+  },
+  "M3_insample.recall10": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.75,
+   "n_draws": 1000
+  },
+  "M3_insample.recall10.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 3.0,
+   "n_draws": 1000
+  },
+  "M3_insample.recall10_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.5,
+   "n_draws": 1000
+  },
+  "M3_insample.recall25": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 1.0,
+   "n_draws": 1000
+  },
+  "M3_insample.recall25.hits": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M3_insample.recall25_all6": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 0.6666666666666666,
+   "n_draws": 1000
+  },
+  "M3_insample.recall.n": {
+   "min": 4.0,
+   "median": 4.0,
+   "max": 4.0,
+   "n_draws": 1000
+  },
+  "M3_insample.mars_primary_median": {
+   "min": 23.841284196246892,
+   "median": 25.51735094805409,
+   "max": 95.27800013443242,
+   "n_draws": 1000
+  },
+  "M3_insample.auc_mars": {
+   "min": 0.021144278606965175,
+   "median": 0.03731343283582089,
+   "max": 0.8955223880597015,
+   "n_draws": 1000
+  },
+  "M3_insample.rank_mars.lonar": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M3_insample.rank_mars.haughton": {
+   "min": 3.111621682727267,
+   "median": 25.38707371174023,
+   "max": 98.80575126335923,
+   "n_draws": 1000
+  },
+  "M3_insample.rank_mars.mcmurdo_dry_valleys": {
+   "min": null,
+   "median": null,
+   "max": null,
+   "n_draws": 0
+  },
+  "M3_insample.rank_mars.atacama_salars": {
+   "min": 1.6582850089519772,
+   "median": 36.592565887162316,
+   "max": 98.607402337902,
+   "n_draws": 1000
+  },
+  "M3_insample.rank_mars.ladakh_puga": {
+   "min": 1.8174041099657197,
+   "median": 8.408808989862575,
+   "max": 98.2157151499227,
+   "n_draws": 1000
+  },
+  "M3_insample.rank_mars.mdrs_utah": {
+   "min": 3.56783643240799,
+   "median": 25.597521555016467,
+   "max": 99.38258855735681,
+   "n_draws": 1000
+  },
+  "M3_insample.fpr25_mars_all": {
+   "min": 0.18407960199004975,
+   "median": 0.3781094527363184,
+   "max": 0.44776119402985076,
+   "n_draws": 1000
+  },
+  "M3.w_full": {
+   "min": 0.0,
+   "median": 0.25,
+   "max": 1.0,
+   "n_draws": 1000
+  },
+  "M3.n_folds_w0.0": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 205.0,
+   "n_draws": 1000
+  },
+  "M3.n_folds_w0.25": {
+   "min": 0.0,
+   "median": 204.5,
+   "max": 205.0,
+   "n_draws": 1000
+  },
+  "M3.n_folds_w0.5": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 205.0,
+   "n_draws": 1000
+  },
+  "M3.n_folds_w0.75": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 205.0,
+   "n_draws": 1000
+  },
+  "M3.n_folds_w1.0": {
+   "min": 0.0,
+   "median": 0.0,
+   "max": 205.0,
+   "n_draws": 1000
+  }
+ }
+}

@@ -1,8 +1,9 @@
 # STATUS_D (ROLE D, fitted thermal terms, leave-one-site-out)
 
-- updated: 2026-11-15 09:35 IST
+- updated: 2026-11-15 12:05 IST
 - hard stop: 2026-11-15 17:00 IST
-- stage: waiting for Role A's global Earth thermal layer (pull about 15 percent done at 09:10 IST per STATUS_A)
-- done: PREREG_D committed and hashed (single-tile metrics, shuffled-feature baseline, Moon with and without illumination); reference side rebuilt from raw products, sha256 match Role B, value-space medians match Role B rows; scoring, fit, shuffle and report scripts written and tested on a synthetic layer (not kept); engine check reproduces v1 base scores exactly
-- next: poll STATUS_A.md every 10 min; when the layer is listed: copy it, run prep, real, shuffle (1000 draws), report; push after each stage
-- failures: none
+- stage: finished; outputs written and pushed
+- done: Role A layer copied (sha256 701a743a82556db243f33c5c629c7d5d070587a2fbee9ae081ee75b80c01ced5); engine check exact; prep, real metrics, 1000-draw shuffled baseline, report; metrics_d.json, ledger_d.json, claims_d.csv, results_d.md written
+- next: nothing scheduled; no merge to main
+- gates: D1 NOT TESTED and D2 NOT TESTED (descriptive only): Role A layer valid th_mean is 73.4 percent of land tiles between 55S and 60N, below the 85 percent rule in PREREG_D. Moon recall NOT TESTED.
+- failures: none in the pipeline. Layer coverage rule not met.

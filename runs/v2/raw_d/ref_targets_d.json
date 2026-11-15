@@ -1,0 +1,135 @@
+{
+ "files": {
+  "dlre_prp_south.tab": {
+   "bytes": 604800210,
+   "sha256": "393deaa5d8925d45bb2ed608f937a824f5eae029c2558aad1d2da8206b83a62d",
+   "expected_sha256": "393deaa5d8925d45bb2ed608f937a824f5eae029c2558aad1d2da8206b83a62d",
+   "match": true
+  },
+  "global_ti_day_2007.img": {
+   "bytes": 51840000,
+   "sha256": "d8b1ac57c5f2c6d4f43d7e5331591fae0254f48af7629bd0d230c2603da48f9a",
+   "expected_sha256": "d8b1ac57c5f2c6d4f43d7e5331591fae0254f48af7629bd0d230c2603da48f9a",
+   "match": true
+  },
+  "global_ti_night_2007.img": {
+   "bytes": 51840000,
+   "sha256": "faee32838da40045ee7ebd21bed156cc649620312c01165b556d77a2128258f4",
+   "expected_sha256": "faee32838da40045ee7ebd21bed156cc649620312c01165b556d77a2128258f4",
+   "match": true
+  },
+  "global_ti_msk_day_2007.img": {
+   "bytes": 25920000,
+   "sha256": "23bab175ab99e5aa7b68a4b664f3d616f08c92fcc410188c116d5083103d16cb",
+   "expected_sha256": "23bab175ab99e5aa7b68a4b664f3d616f08c92fcc410188c116d5083103d16cb",
+   "match": true
+  },
+  "global_ti_msk_night_2007.img": {
+   "bytes": 25920000,
+   "sha256": "fca7ec6fab8b3e81226e1d14dbb3a22509ad111bda4e03bf2b64f050bd550d0b",
+   "expected_sha256": "fca7ec6fab8b3e81226e1d14dbb3a22509ad111bda4e03bf2b64f050bd550d0b",
+   "match": true
+  }
+ },
+ "moon": {
+  "n_records": 2880000,
+  "cols": {
+   "th_mean": {
+    "set_n": 2880000,
+    "n_excluded": 0,
+    "sites": {
+     "connecting_ridge_c1": {
+      "n": 613,
+      "value_median_K": 129.226,
+      "rank_median": 47.037708333333335,
+      "rank_spread_iqr_1349": 23.901063545012768
+     },
+     "shackleton_rim": {
+      "n": 612,
+      "value_median_K": 115.2695,
+      "rank_median": 33.59987847222222,
+      "rank_spread_iqr_1349": 28.20868145642863
+     }
+    }
+   },
+   "th_max": {
+    "set_n": 2880000,
+    "n_excluded": 0,
+    "sites": {
+     "connecting_ridge_c1": {
+      "n": 613,
+      "value_median_K": 238.191,
+      "rank_median": 36.230815972222224,
+      "rank_spread_iqr_1349": 36.97860040359114
+     },
+     "shackleton_rim": {
+      "n": 612,
+      "value_median_K": 263.82,
+      "rank_median": 69.12833333333333,
+      "rank_spread_iqr_1349": 42.57326028539659
+     }
+    }
+   }
+  }
+ },
+ "mars": {
+  "set_n": 21412263,
+  "n_pixels_total": 25920000,
+  "jezero": {
+   "n_in_R": 38,
+   "n_used": 38,
+   "value_median": 301.0,
+   "day_median_all_positive": 293.0,
+   "night_median_all_positive": 304.0,
+   "rank_median": 82.30858060168606,
+   "rank_spread_iqr_1349": 3.0958354839861095
+  }
+ },
+ "cross_check_role_b": {
+  "connecting_ridge_c1_avg": {
+   "mine": 129.226,
+   "role_b": 129.226,
+   "rel_diff": 0.0,
+   "n_mine": 613,
+   "n_role_b": 613,
+   "ok": true
+  },
+  "connecting_ridge_c1_max": {
+   "mine": 238.191,
+   "role_b": 238.191,
+   "rel_diff": 0.0,
+   "n_mine": 613,
+   "n_role_b": 613,
+   "ok": true
+  },
+  "shackleton_rim_avg": {
+   "mine": 115.2695,
+   "role_b": 115.269,
+   "rel_diff": 4.337679688278519e-06,
+   "n_mine": 612,
+   "n_role_b": 612,
+   "ok": true
+  },
+  "shackleton_rim_max": {
+   "mine": 263.82,
+   "role_b": 263.82,
+   "rel_diff": 0.0,
+   "n_mine": 612,
+   "n_role_b": 612,
+   "ok": true
+  },
+  "jezero_day": {
+   "mine": 293.0,
+   "role_b": 293.0,
+   "rel_diff": 0.0,
+   "ok": true
+  },
+  "jezero_night": {
+   "mine": 304.0,
+   "role_b": 304.0,
+   "rel_diff": 0.0,
+   "ok": true
+  }
+ },
+ "cross_check_all_ok": true
+}
