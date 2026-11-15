@@ -1,8 +1,8 @@
 # STATUS_D (ROLE D, fitted thermal terms, leave-one-site-out)
 
-- updated: 2026-11-15 10:05 IST
+- updated: 2026-11-15 09:35 IST
 - hard stop: 2026-11-15 17:00 IST
-- stage: PREREG_D committed; waiting for Role A's global Earth thermal layer
-- done: worktree sim-d on v2/d-fitted; v1 engine (a7d96d9) brought in; negative set drawn from non-thermal columns; PREREG_D and prereg_d.sha256 recorded
-- next: rebuild Moon and Mars reference ranks from raw products; build scoring code and test on the v1 file; poll STATUS_A.md every 10 min for the finished layer (NOT RUN if absent at 14:00 IST)
+- stage: waiting for Role A's global Earth thermal layer (pull about 15 percent done at 09:10 IST per STATUS_A)
+- done: PREREG_D committed and hashed (single-tile metrics, shuffled-feature baseline, Moon with and without illumination); reference side rebuilt from raw products, sha256 match Role B, value-space medians match Role B rows; scoring, fit, shuffle and report scripts written and tested on a synthetic layer (not kept); engine check reproduces v1 base scores exactly
+- next: poll STATUS_A.md every 10 min; when the layer is listed: copy it, run prep, real, shuffle (1000 draws), report; push after each stage
 - failures: none
