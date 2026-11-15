@@ -171,6 +171,7 @@ def gate(gid: str, label: str, val_key: str, thr: float, cmp: str, what: str) ->
     e = {"id": gid, "group": "gate", "label": label, "unit": "status", "value": v, "display": fmt(val_key, v), "status": status, "threshold": thr,
          "comparison": "at most" if cmp == "le" else "at least", "reason": reason, "inside_shuffled_range": inside,
          "chance": ({"min": b["min"], "median": b["median"], "max": b["max"], "n_draws": b["n_draws"]} if b else None),
+         "descriptive_only": gid == "gate.D2",
          "source_file": SRC["real"][0], "sha256": SRC["real"][1], "what_this_means_for_the_analogy": what}
     entries.append(e)
     claim(gid, fmt(val_key, v), "real")
@@ -181,7 +182,7 @@ def gate(gid: str, label: str, val_key: str, thr: float, cmp: str, what: str) ->
 D1 = gate("gate.D1", "D1: negative-set false-positive rate at top 25 percent, M3 held-out, at most 10 percent", "M3.fpr25_moon_all", 0.10, "le",
           "A pass means the fitted score does not rank deserts high; it does not show the analogy holds.")
 D2 = gate("gate.D2", "D2: Mars leave-one-out recall at top 10 percent, M3, at least 50 percent", "M3.recall10", 0.50, "ge",
-          "A pass would rest on very few positives; a fail means thermal inertia plus terrain does not pull the known Mars analog sites to the top.")
+          "Descriptive only (instruction of 15 Nov after registration): the threshold comparison is shown but is not a pass or fail claim. It rests on very few positives.")
 entries.append({"id": "gate.moon_recall", "group": "gate", "label": "Moon recall of known sites", "unit": "status", "value": None, "display": "NOT TESTED",
                 "status": "NOT TESTED", "reason": "two Moon positives, one of them not scorable", "source_file": SRC["prep"][0], "sha256": SRC["prep"][1],
                 "what_this_means_for_the_analogy": "No claim is made about Moon recall."})
@@ -263,14 +264,14 @@ def table(variant: str) -> list[str]:
 gt = ["| Gate | Value (M3 held-out) | Threshold | Shuffled range | Status |", "|---|---|---|---|---|"]
 for g in (D1, D2):
     ch = g["chance"]
-    gt.append(f"| {g['id'][5:]} | {g['display']} | {g['comparison']} {100 * g['threshold']:.0f}% | "
-              + (f"{fmt(GATE_KEY[g['id']], ch['min'])} to {fmt(GATE_KEY[g['id']], ch['max'])}" if ch else "n/a") + f" | {g['status']}" + (f" ({g['reason']})" if g["reason"] else "") + " |")
+    gt.append(f"| {g['id'][5:]}{' (descriptive only)' if g.get('descriptive_only') else ''} | {g['display']} | {g['comparison']} {100 * g['threshold']:.0f}% | "
+              + (f"{fmt(GATE_KEY[g['id']], ch['min'])} to {fmt(GATE_KEY[g['id']], ch['max'])}" if ch else "n/a") + f" | {('would be ' + g['status'] + ', descriptive only') if g.get('descriptive_only') else g['status']}" + (f" ({g['reason']})" if g["reason"] else "") + " |")
 gt.append("| Moon recall | n/a | n/a | n/a | NOT TESTED (two Moon positives, one not scorable) |")
 for g in (D1, D2):
     if g["status"] == "FAIL":
         pass
 
-fails = [f"{g['id']} FAIL: value {g['display']} against {g['comparison']} {100 * g['threshold']:.0f}%" for g in (D1, D2) if g["status"] == "FAIL"]
+fails = [f"{g['id']} FAIL: value {g['display']} against {g['comparison']} {100 * g['threshold']:.0f}%" for g in (D1,) if g["status"] == "FAIL"]
 nt = [f"{g['id']} NOT TESTED: {g['reason']}" for g in (D1, D2) if g["status"] == "NOT TESTED"] + ["Moon recall NOT TESTED: two Moon positives, one not scorable.",
                                                                                                      "Arcadia: no centre, no thermal reference."]
 within = [g["id"] for g in (D1, D2) if g.get("inside_shuffled_range")]
@@ -291,11 +292,45 @@ md += ["## Fit", "", f"- w fitted on all units (in-sample, Moon without illumina
 md += ["## Universe", "", f"- Moon: {PREP['meta']['moon_universe']['n_U']} tiles; Mars: {PREP['meta']['mars_universe']['n_U']} tiles (v1 gates plus valid thermal values).",
        f"- Share of v1 land tiles in latitude -55 to 60 with a valid `th_mean`: {100 * LAYER_SHARE:.1f}%.",
        f"- Engine check against v1 base scores: {'reproduced to 1e-3' if eng_ok else 'NOT reproduced'}.", ""]
+def why(r):
+    return {"vegetated": "own tile fails the v1 NDVI gate (median NDVI above 0.2)", "built_or_cropland": "own tile fails the v1 built or crop gate (above 20 percent)",
+            "open_water_or_ice": "own tile fails the v1 open water or ice gate (above 50 percent)", "missing_data": "own tile has missing terrain or gate data",
+            "not a v1 land tile": "the point lies outside every v1 land tile (under 50 percent land in the tile or off the grid)",
+            "thermal value invalid": "own tile has no valid MODIS thermal value"}.get(r, r)
+
+
+md += ["## Labelled sites that cannot be scored by their own tile", "",
+       "| Site | Group | Moon profile | Mars profile |", "|---|---|---|---|"]
+for n, u in PREP["units"].items():
+    mo = unsc_m.get(n)
+    ma = unsc_r.get(n)
+    md.append(f"| {n} | {'positive' if u['group'] == 'pos' else 'negative control'} | {'scored' if mo is None else 'not scored: ' + why(mo)} | {'scored' if ma is None else 'not scored: ' + why(ma)} |")
+tm = {}
+for n, r in unsc_m.items():
+    if n.startswith("neg"):
+        tm[r] = tm.get(r, 0) + 1
+md += ["", f"Of the 200 sampled negative tiles, {sum(tm.values())} are not scored under the Moon profile" + (": " + ", ".join(f"{v}, {why(k)}" for k, v in tm.items()) if tm else "") + ".", ""]
+md += ["## Earth tiles with missing thermal values, by latitude band", "",
+       "Tiles are v1 land tiles. A thermal value is missing where the MODIS layer is NaN or the valid share is under 0.5. Bands with |latitude| above 60 are the polar bands (south polar: -90 to -60; north polar: 60 to 90).", "",
+       "| Band | Region | Land tiles | Missing th_mean | Missing th_max | Missing th_ti | Missing share th_mean |", "|---|---|---|---|---|---|---|"]
+for lb in PREP["lat_bands"]:
+    reg = "south polar" if lb["hi"] <= -60 else ("north polar" if lb["lo"] >= 60 else "")
+    sh = (100 * lb["missing_th_mean"] / lb["n_land_tiles"]) if lb["n_land_tiles"] else 0.0
+    md.append(f"| {lb['lo']} to {lb['hi']} | {reg} | {lb['n_land_tiles']} | {lb['missing_th_mean']} | {lb['missing_th_max']} | {lb['missing_th_ti']} | {sh:.1f}% |")
+    claim(f"d.latband.{lb['lo']}_{lb['hi']}.n_land", str(lb["n_land_tiles"]), "prep")
+    for c in ("th_mean", "th_max", "th_ti"):
+        claim(f"d.latband.{lb['lo']}_{lb['hi']}.missing_{c}", str(lb[f"missing_{c}"]), "prep")
+polar_miss = sum(lb["missing_th_mean"] for lb in PREP["lat_bands"] if lb["polar"])
+all_miss = sum(lb["missing_th_mean"] for lb in PREP["lat_bands"])
+md += ["", f"Polar bands hold {polar_miss} of the {all_miss} tiles missing `th_mean`.", ""]
+claim("d.latband.polar_missing_th_mean", str(polar_miss), "prep")
+claim("d.latband.all_missing_th_mean", str(all_miss), "prep")
 md += ["## What failed", ""] + ([f"- {x}" for x in fails] or ["- No gate returned FAIL."]) + [""]
+md += ["## D2 is descriptive only", "", "D2 (Mars leave-one-out recall at top 10 percent) was registered as a gate. Anay instructed on 15 Nov, after registration, that D2 is descriptive only. The table shows what it would read against the threshold; it is not a pass or fail claim, because it rests on a handful of scorable positives.", ""]
 md += ["## NOT TESTED", ""] + [f"- {x}" for x in nt] + [""]
 md += ["## Units not scorable (own tile not scored)", ""] + [f"- {n}: {w}" for n, w in {**unsc_r}.items()] + [""]
 md += ["## Limits", "", *[f"- {e['statement']}" for e in led if e["id"].startswith("limit.")], ""]
-md += ["## Deviations", "", "- Negative-set cover rule uses a low-NDVI proxy, stated in PREREG_D at registration.",
+md += ["## Deviations", "", "- D2 treated as descriptive only, by instruction of 15 Nov after PREREG_D was recorded. The D2 entry keeps its threshold comparison and carries `descriptive_only: true`.", "- Two sections added at Anay's request on 15 Nov: unscored labelled sites, and missing thermal values by latitude band.", "- Negative-set cover rule uses a low-NDVI proxy, stated in PREREG_D at registration.",
        "- Negative units scorable under the Mars profile but not the Moon profile use `w_full` for their Mars rank in the M3 AUC (they are not in the fit set).",
        "- Role A's layer was copied after its pull finished; layer sha256 is above."]
 (OUT / "results_d.md").write_text("\n".join(md) + "\n", encoding="utf-8")

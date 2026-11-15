@@ -121,6 +121,16 @@ def prep(layer_path: Path, work: Path) -> None:
     e, linfo = load_earth(layer_path)
     tp = target_profiles()
     out = {"layer_info": linfo}
+    edges = list(range(-90, 91, 10))
+    latv = e["lat"].to_numpy()
+    bands = []
+    for lo, hi in zip(edges[:-1], edges[1:]):
+        m = (latv >= lo) & ((latv < hi) if hi < 90 else (latv <= hi))
+        row = {"lo": lo, "hi": hi, "polar": bool(hi <= -60 or lo >= 60), "n_land_tiles": int(m.sum())}
+        for c in ("th_mean", "th_max", "th_ti"):
+            row[f"missing_{c}"] = int(np.isnan(e[c].to_numpy()[m]).sum())
+        bands.append(row)
+    out["lat_bands"] = bands
     out["engine_check"] = engine_check(cfg, e, tp)
     units = sites_units(cfg)
     neg = pd.read_csv(ROOT / "runs" / "v2" / "negative_set_d.csv")
