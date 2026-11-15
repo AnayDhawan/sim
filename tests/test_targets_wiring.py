@@ -86,7 +86,7 @@ def test_psr_water_index_survives_any_declared_nodata(tmp_path, nodata):
     cfg = {**CFG, "targets": {**CFG["targets"], "moon": {"c": {"lat": -89.9, "lon_e": 0.0, "source": "test"}}}}
     row = {r["col"]: r for r in moon.build(cfg, None, psr)}["water_index"]
     assert not row["unavailable"], f"nodata={nodata}: water_index was dropped"
-    assert 0.0 < row["value"] < 1.0 or row["value"] in (0.0, 1.0)
+    assert row["value"] == pytest.approx(0.5)                # left half shadowed: tile shares 1, .75, .25, 0, median .5
     assert row["evidence_grade"] == "B"                                       # encoding not confirmed: not A
     assert "CONFIRM the encoding" in row["source"]                           # PSR_NOTE is in the row
 
@@ -101,6 +101,35 @@ def test_psr_value_is_the_same_with_and_without_a_declared_nodata(tmp_path):
     assert vals[0] == pytest.approx(vals[1])
 
 
+def _psr_row(path):
+    cfg = {**CFG, "targets": {**CFG["targets"], "moon": {"c": {"lat": -89.9, "lon_e": 0.0, "source": "test"}}}}
+    return {r["col"]: r for r in moon.build(cfg, None, path)}["water_index"]
+
+
+@pytest.mark.parametrize("nodata", [None, 0.0])
+def test_psr_mask_with_no_shadow_gives_share_zero_not_unavailable(tmp_path, nodata):
+    p = tmp_path / "none.tif"
+    _mask_tif(p, nodata)
+    with rasterio.open(p, "r+") as ds:
+        ds.write(np.zeros((ds.height, ds.width), dtype="float32"), 1)
+    row = _psr_row(p)
+    assert not row["unavailable"] and row["value"] == 0.0
+
+
+@pytest.mark.parametrize("nodata", [-9999.0, 255.0])
+def test_psr_mask_nonzero_nodata_is_missing_not_unshadowed(tmp_path, nodata):
+    """A declared nodata other than 0 marks cells with no data. Reading them as 0 would count them as 'not shadowed'."""
+    p = tmp_path / "gap.tif"
+    _mask_tif(p, nodata)
+    with rasterio.open(p, "r+") as ds:
+        a = ds.read(1)
+        a[:, :] = nodata                                    # no data anywhere
+        ds.write(a, 1)
+    assert _psr_row(p)["unavailable"]
+    m, _ = C.read_window(p, -89.9, 0.0, 5.0, "zero")
+    assert np.isnan(m).all()
+
+
 def test_dem_nodata_is_still_nan_but_mask_nodata_is_zero(tmp_path):
     p = tmp_path / "m.tif"
     _mask_tif(p, 0.0)
@@ -109,6 +138,25 @@ def test_dem_nodata_is_still_nan_but_mask_nodata_is_zero(tmp_path):
     assert np.isnan(dem).any() and np.isfinite(mask).all()
     with pytest.raises(ValueError):
         C.read_window(p, -89.9, 0.0, 5.0, "other")
+
+
+@pytest.mark.parametrize("dtype", ["uint8", "int16", "float32"])
+def test_cells_outside_the_raster_are_nan_for_every_dtype(tmp_path, dtype):
+    """A boundless read with fill_value=NaN cast the fill to the dtype: an integer raster got 0 outside its edge."""
+    p = tmp_path / f"edge_{dtype}.tif"
+    n, cell, half_km = 400, 100.0, 20
+    crs = "+proj=stere +lat_0=-90 +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=1737400 +b=1737400 +units=m +no_defs"
+    with rasterio.open(p, "w", driver="GTiff", height=n, width=n, count=1, dtype=dtype, crs=crs,
+                       transform=from_origin(-half_km * 1000.0, half_km * 1000.0, cell, cell)) as ds:
+        ds.write(np.ones((n, n), dtype=dtype), 1)
+    for mode in ("nan", "zero"):
+        a, _ = C.read_window(p, -89.35, 90.0, 17.0, mode)          # x about +19.7 km: half the window is past the edge
+        assert a.shape == (170, 170)
+        inside = np.isfinite(a)
+        assert 0 < inside.sum() < a.size and np.all(a[inside] == 1.0), (mode, np.unique(a[inside]))
+        assert np.isnan(a[:, -1]).all() and np.isfinite(a[:, 0]).all()
+    far, _ = C.read_window(p, -80.0, 0.0, 17.0)                    # no overlap at all
+    assert np.isnan(far).all()
 
 
 def test_central_crop_is_the_central_window():

@@ -37,5 +37,5 @@
 - Arcadia centre from the SWIM ice map.
 - Ledger relevance matrix (Anay and Vihaan).
 - Sigma floors (measurement uncertainties) and the cross-machine tolerances.
-- `rough_a` and `rough_b` baselines (100 m and 1000 m) with Vihaan.
+- `rough_a` and `rough_b` baselines (300 m, target-side E22, and 1000 m) with Vihaan.
 - The validation site-score rule (mean over targets).

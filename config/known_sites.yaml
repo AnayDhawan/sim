@@ -35,13 +35,25 @@ gate_tests:   # a correct pipeline must reject all three
   # 40% herbaceous wetland; open water is 40-59% within +-2 km, so rejection is marginal unless wetland counts as water.
   samoylov:            {lat: 72.37,  lon: 126.48,  expect: rejected, confirmed: true}   # AWI Gukov et al. 2007: 72d22'N 126d30'E (0.8 km away)
 negative_controls: # must score low
-  # amazon_basin is an arbitrary control point, but it is 13.5 km from central Manaus: a 6 km tile here may be 35-40%
-  # built-up (WorldCover), above the 20% built gate. A cleaner control (for example -2.9, -60.0: 91.5% trees) may be
-  # needed. NOT changed here: nobody should move a control after seeing results, so decide before the first real run.
-  amazon_basin:        {lat: -3.0,   lon: -60.0,   confirmed: false}
+  # amazon_basin: E14 (Confirmed by Anay 2026-11-13), moved BEFORE any real run. The old point (-3.0, -60.0) is 13.5 km from
+  # central Manaus (-3.119, -60.022, Wikipedia) and its 6 km box is 45.3% built-up, 42.1% trees (WorldCover 2021 v200, read
+  # 2026-11-13), far above the 20% built gate, so a control there would be gated out and never ranked. The new point's box
+  # is 91.5% trees, 0.8% built. A control is a design choice, so no source can state its coordinates: confirmed stays false.
+  amazon_basin:        {lat: -2.9,   lon: -60.0,   confirmed: false}
   congo_basin:         {lat: -0.5,   lon: 23.0,    confirmed: false}   # WorldCover: 99.8% tree cover near here
+  # E30 (decided 2026-11-14 before any real run, chosen by principle, no score seen): flat sand seas pass the NDVI and
+  # cropland gates but their terrain is nothing like a 9 to 17 deg polar slope. Moon only (bodies), Mars keeps the two above.
+  # rub_al_khali: GeoNames feature 102788 "Rub' al Khali", class T, code DSRT (desert), Saudi Arabia, lat 21, lng 51
+  #   (https://www.geonames.org/102788/rub-al-khali.html, read 2026-11-14). A whole-degree gazetteer centroid of the sand
+  #   sea, deep inside it (NASA Earth Observatory: "The Empty Quarter covers 583,000 square kilometers"), not a surveyed point.
+  rub_al_khali:        {lat: 21.0,   lon: 51.0,    bodies: [moon], confirmed: false}
+  # namib_sand_sea: UNESCO World Heritage List 1430, Namib Sand Sea, coordinates "S24 53 7 E15 24 28"
+  #   (https://whc.unesco.org/en/list/1430/, read 2026-11-14), the property's own point; about 70 km from the coast and
+  #   150 km south of the Kuiseb River, the sand sea's western and northern boundaries per IUCN World Heritage Outlook.
+  namib_sand_sea:      {lat: -24.8853, lon: 15.4078, bodies: [moon], confirmed: true}
 # Pre-registered pass criteria. Written into validation.json before anything is computed. Do not tune weights to pass.
 criteria:
   primary_median_rank_pct_min: 90
   negative_control_rank_pct_max: 25
   gate_tests_all_rejected: true
+  primary_min_scorable_sites: 2    # E28 (2026-11-14, before any real run): gated_out primary sites leave the median; fewer than this many scorable -> not_testable

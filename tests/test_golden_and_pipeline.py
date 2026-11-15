@@ -58,7 +58,7 @@ def _body_run(tmp_path, body, earth, cfg):
 
 def _cfg():
     cfg = copy.deepcopy(CFG)
-    cfg["run"].update({"batch_runs": 25, "convergence_checkpoints": [25, 50]})
+    cfg["run"].update({"batch_runs": 25, "convergence_checkpoints": [25, 50], "drop_columns": [], "skip_profiles": {}})
     cfg["targets"]["moon"] = {"t1": {"lat": -89.0, "lon_e": 0.0, "source": "synthetic"}}
     cfg["targets"]["mars"] = {"t1": {"lat": 18.0, "lon_e": 77.0, "source": "synthetic"},
                               "arcadia": {"lat": None, "lon_e": None, "status": "unscored_no_target_data"}}

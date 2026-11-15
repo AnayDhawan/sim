@@ -227,6 +227,12 @@ def _check_manifest(work: Path, spec: MCSpec, x_hash: str, chunk_ok: bool = True
             raise RuntimeError(f"{work}: manifest mismatch {have} vs {want}. Refusing to mix chunkings or inputs. "
                                "Delete the folder to start over.")
     else:
+        # No manifest means the folder was cleaned or is new: any batch file left in it belongs to an unknown input
+        # (the cleanup after a finished job removes the manifest but a smoke run leaves its pass1 batches), so a later
+        # run with different tiles would merge them. Drop them.
+        import shutil
+        for sub in ("pass1", "pass2"):
+            shutil.rmtree(work / sub, ignore_errors=True)
         write_json(man, want)
 
 

@@ -1,5 +1,7 @@
 # Handoff for S (macOS, Apple M1)
 
+> **Update 2026-11-13:** Anay now runs both Moon and Mars on one machine. This file is only needed if S is asked to run something later. If so, S needs the Earth feature file, `uv`, and the steps below.
+
 You run the Mars targets. Do not edit code. If anything fails, send the full error text and the output of `uv run gsop doctor`.
 
 1. Unzip the sim zip Anay sent. Install `uv` (`brew install uv`, or `curl -LsSf https://astral.sh/uv/install.sh | sh`). In the unzipped `gsop-sim` folder:

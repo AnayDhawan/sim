@@ -11,6 +11,7 @@ from gsop.config import load_all
 from gsop.synthetic import make_earth, plant, target_profile
 
 CFG = load_all()
+CFG["run"].update({"drop_columns": [], "skip_profiles": {}})   # synthetic tests score every column, whatever run.yaml drops
 MOON_TARGET = {"slope_med": 4.0, "slope_p90": 9.0, "relief": 150.0, "rough_a": 0.4, "rough_b": 4.0,
                "sun_max_elev": 40.0, "sun_low_share": 0.2, "water_index": 0.5, "t_mean": 280.0,
                "t_coldest": 262.0, "silica_index": 1.0, "ti_proxy": 18.0}
@@ -93,6 +94,18 @@ def test_manifest_mismatch_refuses_to_mix(tmp_path):
         _run(job, 50, 1, tmp_path / "w")
 
 
+def test_stale_batches_from_a_cleaned_folder_are_not_reused(tmp_path):
+    """A finished job removes its manifest but a smoke run can leave pass1 batches. A later run with a different tile
+    count in the same folder must not merge them (it crashed with a shape mismatch on the real Moon run)."""
+    small, _ = _job(n=2000)
+    _run(small, 50, 1, tmp_path / "w", keep_work=True)
+    (tmp_path / "w" / "manifest.json").unlink()                 # what the cleanup after a finished job does
+    (tmp_path / "w" / "X.npy").unlink()
+    big, _ = _job(n=3000)
+    res = _run(big, 50, 1, tmp_path / "w")                      # would raise a broadcast error with stale batch 0
+    assert len(res.candidates) > 0
+
+
 def test_memory_stays_inside_the_chunk_budget(tmp_path):
     n, ncols = 4_000_000, 12
     rng = np.random.default_rng(0)
@@ -104,6 +117,21 @@ def test_memory_stays_inside_the_chunk_budget(tmp_path):
                      batch_runs=2)
     free = psutil.virtual_memory().available
     plan = MC.memory_plan(n, ncols, 1, free, 0.40)
+    # Skip, do not fail, when free RAM is too low for the budget to hold at all. The budget is 40 percent of free RAM, but the
+    # run adds a floor of about 520 to 590 MiB whatever the chunk size (measured on Windows: 516 MiB at a 1,000-tile chunk,
+    # 569 MiB at a 4,000,000-tile chunk; 586 MiB seen once). memory_plan sizes the chunk so that fixed arrays + shared X +
+    # chunk temporaries equal the budget, and it cannot shrink the unmodelled part (the contiguous copy of X and the
+    # interpreter), so below the point where the whole table fits as one chunk the run lands a few tens of MB over budget.
+    # That point, from the memory_plan arithmetic (n = 4,000,000, 12 columns, 1 worker):
+    #   fixed 120 MB + shared X 192 MB + chunk temporaries n * 4 * (12 + 6) = 288 MB = 600 MB of budget,
+    # plus 10 percent for the unmodelled part (660 MB), so free RAM must be at least 660 MB / 0.40 = 1.65 GB.
+    # Between about 0.8 GB (plan["fits"] turns false) and 1.65 GB the assertions below would fail for a reason that is
+    # about this machine's free RAM, not about the chunk planning. With more free RAM they stay strict.
+    plan_need = plan["fixed_per_worker_bytes"] + plan["x_shared_bytes"] + n * 4 * (ncols + 6)
+    min_free = 1.10 * plan_need / 0.40
+    if free < min_free:
+        pytest.skip(f"free RAM {free / 2**30:.2f} GiB is below {min_free / 2**30:.2f} GiB: 40 percent of it "
+                    f"({0.40 * free / 2**20:.0f} MiB) cannot hold the {1.10 * plan_need / 2**20:.0f} MiB this run needs")
     assert plan["fits"]
     proc = psutil.Process()
     base = proc.memory_info().rss

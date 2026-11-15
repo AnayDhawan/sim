@@ -13,8 +13,22 @@ discovery: {min_distance_km: 100, top_n: 50}
 ml: {site_radius_km: 10, block_km: 100, n_negatives: 5000, min_sites_for_signal: 3, min_mean_auc: 0.6}
 # Cross-machine comparison tolerances (TODO: Anay and Vihaan confirm). Outputs are not bit-identical across BLAS/SIMD.
 compare: {score_abs: 1.0e-4, mc_abs: 1.0e-3, jaccard_min: 0.99}
-# Columns that cannot be built. Empty by default: an unavailable column rejects every tile and the run stops loudly.
-# Listing a column here is a deliberate, logged decision: it is dropped from its family and weights are renormalised.
-drop_columns: []
+# Columns that cannot be built. An unavailable column rejects every tile and the run stops loudly, unless it is listed
+# here: a deliberate, logged decision (docs/DECISIONS.md); it leaves its family and the weights are renormalised.
+# Two forms: a list (dropped for every body), or a mapping {all: [...], moon: [...], mars: [...]} (pipeline.drop_columns_for).
+# The golden slice and the pipeline tests ignore this list (they score all 15 synthetic columns).
+drop_columns:
+  # Moon, decided by Anay 2026-11-13 (DECISIONS E19): water_index (the Earth column is aridity only, high = dry, while
+  # the Moon target is a PSR share near 0, so the match would run backwards); silica_index (the Diviner Christiansen grid
+  # stops at 70 deg, Zenodo 4558235); t_mean, t_coldest, ti_proxy (Diviner temperatures are not available at the pole).
+  moon: [water_index, silica_index, t_mean, t_coldest, ti_proxy]
+  # Mars, decided by Anay 2026-11-13 (DECISIONS E20): rough_a, rough_b (MOLA 463 m cells cannot resolve a 300 m or
+  # 1000 m plane-fit window); silica_index, water_index, ti_proxy, dust_index, t_mean, t_coldest (no verified source).
+  mars: [rough_a, rough_b, silica_index, water_index, ti_proxy, dust_index, t_mean, t_coldest]
+# Purpose profiles not run, decided by Anay 2026-11-13 (DECISIONS E19): {body: {profile: [missing columns]}}. A skipped
+# profile is listed in every output as "not run" with these columns named. The golden slice and the tests ignore this.
+skip_profiles:
+  moon: {ice_resources: [water_index, t_mean, t_coldest, ti_proxy]}   # every family it boosts is dropped
+  mars: {geology_life: [silica_index, water_index]}                     # both families it boosts are dropped
 # gsop check-operators (Earth Engine vs numpy terrain operator, issue #2). The threshold is not to be loosened.
 operator_check: {threshold: 0.10, n_tiles: 5, center_lonlat: [76.51, 19.98]}   # the working grid is features.yaml operator.work_cell_m

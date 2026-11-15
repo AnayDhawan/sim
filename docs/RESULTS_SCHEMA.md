@@ -38,4 +38,8 @@ Each candidate (top 500, robust first, then by `mc_median`):
 
 ## `validation.json`
 
-`{preregistered: {...}, preregistered_sha256, registered_at, status, provisional, results: {primary, negative_controls, secondary, gate_tests, primary_median_rank_pct, negative_control_max_rank_pct, pass: {...}}}`. Always `provisional: true` until site coordinates are confirmed.
+`{preregistered: {criteria, radius_km_source, body, site_score_rule, gated_out_rule, amendment, control_rule, unconfirmed_sites}, preregistered_sha256, registered_at, status, provisional, slope_ground_scale_corrected, slope_limitation, results: {primary, negative_controls, secondary, gate_tests, primary_median_rank_pct, negative_control_max_rank_pct, criteria_status: {<criterion>: {status: pass|fail|not_testable, reason}}, pass: {<criterion>: true|false|null, all}, n_primary_sites, n_scorable_primary_sites, gated_out_primary_sites}}`. Always `provisional: true` until site coordinates are confirmed.
+
+Each primary, negative-control and secondary site has `status`: `scored` (`rank_pct`, `per_target`), `no_gated_tile` (`rank_pct` 0, `per_target` notes) or `gated_out` (`rank_pct` null, `n_tiles_within_radius`, `gate_reasons`, `first_gate_reason`, `ungated_terrain_only: {label: "outside the pre-registered test, informational", rule, status: computed|no_terrain_yet|..., per_target: {<target>: {best_tile, best_score, rank_pct_among_gated}}, rank_pct}`). E28, SPEC section 10. `negative_controls` lists only the controls whose `bodies` include the run's body (E30: rub_al_khali and namib_sand_sea are Moon only).
+
+Slope label (E29): `run_meta.json`, `validation.json`, every `summary.json`, and `export/index.json`, `export/fidelity.json`, `export/candidates__*.json` carry `slope_ground_scale_corrected: false` and `slope_limitation`. A `--lat-band` run adds `lat_band_abs_deg` and `lat_band_note` to `run_meta.json` and `export/index.json`.

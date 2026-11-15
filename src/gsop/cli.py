@@ -66,7 +66,22 @@ def _check_body(body: str) -> str:
     return body
 
 
-def _body_run(body: str, runs: Optional[int], workers: Optional[int], store: bool = True) -> BodyRun:
+def band_label(lat_band: Optional[tuple[float, float]]) -> str:
+    return "" if not lat_band else f"_lat{lat_band[0]:g}-{lat_band[1]:g}"
+
+
+def restrict_lat_band(earth: pd.DataFrame, lat_band: tuple[float, float]) -> pd.DataFrame:
+    """Earth tiles with absolute latitude between lat_band[0] and lat_band[1], inclusive (robustness run, E29). This
+    restricts which tiles are scored; it is not a gate and never appears as a rejection reason."""
+    lo, hi = float(lat_band[0]), float(lat_band[1])
+    if not 0.0 <= lo < hi <= 90.0:
+        raise typer.BadParameter("--lat-band needs 0 <= low < high <= 90 (absolute latitude in degrees)")
+    a = earth["lat"].abs()
+    return earth[(a >= lo) & (a <= hi)].reset_index(drop=True)
+
+
+def _body_run(body: str, runs: Optional[int], workers: Optional[int], store: bool = True,
+              lat_band: Optional[tuple[float, float]] = None) -> BodyRun:
     body = _check_body(body)
     cfg = load_all()
     ep = EARTH()
@@ -79,10 +94,23 @@ def _body_run(body: str, runs: Optional[int], workers: Optional[int], store: boo
         console.print(f"[FAIL] {tp_path} not found. Run `gsop s2 targets --body {body}`.")
         raise typer.Exit(1)
     earth = pd.read_parquet(ep)
-    return BodyRun(body, cfg, earth, P.load_target_profiles(tp_path), results_dir(body),
-                   data_dir("interim") / "mc" / body, int(runs or cfg["run"]["runs"]),
-                   int(workers or os.cpu_count() or 1), float(psutil.virtual_memory().available), sha256_file(ep),
-                   use_store=store)
+    ehash = sha256_file(ep)
+    label = band_label(lat_band)
+    if lat_band:
+        n_all = len(earth)
+        earth = restrict_lat_band(earth, lat_band)
+        ehash = f"{ehash}{label}"
+        console.print(f"lat band {lat_band[0]:g} to {lat_band[1]:g} deg (absolute): {len(earth):,} of {n_all:,} Earth tiles "
+                      f"scored; results -> results/{body}{label}/")
+    br = BodyRun(body, cfg, earth, P.load_target_profiles(tp_path), results_dir(body + label),
+                 data_dir("interim") / "mc" / (body + label), int(runs or cfg["run"]["runs"]),
+                 int(workers or os.cpu_count() or 1), float(psutil.virtual_memory().available), ehash,
+                 use_store=store)
+    if lat_band:
+        br.extra_meta["lat_band_abs_deg"] = [float(lat_band[0]), float(lat_band[1])]
+        br.extra_meta["lat_band_note"] = ("robustness run: only Earth tiles with absolute latitude in the band are scored "
+                                          "(not a gate); sites outside the band have no tiles")
+    return br
 
 
 RunsOpt = typer.Option(None, "--runs", help="Monte Carlo runs (default from config/run.yaml)")
@@ -134,48 +162,85 @@ def s1_tiles(raster: Path = typer.Option(..., "--raster", help="6 km EPSG:6933 G
 @s2.command("earth")
 def s2_earth(source: str = typer.Option("local", "--source", help="gee or local"),
              src: Optional[Path] = typer.Option(None, "--src", help="local: GeoTIFF or folder of 6 km rasters"),
-             plan: Optional[Path] = typer.Option(None, "--plan", help="local: the gee_export `<name>_export_plan.json` that lists "
-                                                 "the GeoTIFFs, if it is not in the --src folder"),
-             add_solar: bool = typer.Option(False, "--add-solar", help="local: add sun_max_elev, sun_low_share, insol_annual "
-                                            "computed from latitude only (earth/solar.py)"),
-             verify: bool = typer.Option(False, "--verify", help="gee: check every collection id in the live catalog and stop"),
-             bbox: Optional[str] = typer.Option(None, "--bbox", help="gee: lon_min,lat_min,lon_max,lat_max (default: global)"),
-             name: str = typer.Option("gsop_earth", "--name", help="gee: export task prefix"),
-             project: Optional[str] = typer.Option(None, "--project", help="gee: Cloud project id (or set GSOP_EE_PROJECT)"),
-             dry_run: bool = typer.Option(False, "--dry-run", help="gee: print the export plan, start nothing")) -> None:
-    """Earth features -> data/processed/earth_features_6km.parquet (+ grid.json, MANIFEST sha256)."""
-    out = EARTH()
+             plan: Optional[Path] = typer.Option(None, "--plan", help="local: a gee_export_layers `<name>_export_plan.json` "
+                                                 "that lists the GeoTIFFs, if it is not in the --src folder"),
+             add_solar: bool = typer.Option(True, "--add-solar/--no-add-solar", help="local: add sun_max_elev, "
+                                            "sun_low_share, insol_annual (latitude only, earth/solar.py) and air_density "
+                                            "(from elev_mean, astro.py)"),
+             verify: bool = typer.Option(False, "--verify", help="gee: check every dataset id against the live catalog"),
+             test_box: bool = typer.Option(False, "--test-box", help="gee: download a small box and build data/interim/earth_test.parquet"),
+             export: bool = typer.Option(False, "--export", help="gee: start the global export tasks (Google Drive)"),
+             project: Optional[str] = typer.Option(None, "--project", help="gee: Google Cloud project id (default: gee_export.PROJECT)"),
+             lon: float = typer.Option(76.51, "--lon", help="gee --test-box: centre longitude"),
+             lat: float = typer.Option(19.98, "--lat", help="gee --test-box: centre latitude"),
+             half_km: float = typer.Option(60.0, "--half-km", help="gee --test-box: half side of the box in km")) -> None:
+    """Earth features -> data/processed/earth_features_6km.parquet (+ grid.json, MANIFEST sha256).
+    For the gate and terrain90 Drive downloads use `gsop s2 assemble` instead."""
+    if source not in ("gee", "local"):
+        raise typer.BadParameter("source must be gee or local")
+    from .earth.local_loaders import build_earth_table
     if source == "gee":
         from .earth import gee_export
-        from .earth import open_data as OD
+        if not (verify or test_box or export):
+            console.print("[FAIL] with --source gee give one of --verify, --test-box, --export")
+            raise typer.Exit(2)
+        project = project or gee_export.PROJECT
         if verify:
+            results, error = [], None
             try:
-                rows = gee_export.verify(project)
-            except RuntimeError as e:
-                console.print(f"[FAIL] {e}")
+                results = gee_export.verify_catalog(project)
+            except Exception as e:  # noqa: BLE001
+                error = e
+            if error is not None:   # raised outside the try: typer.Exit is a RuntimeError subclass
+                console.print(f"[FAIL] Earth Engine is not ready ({error}). Run `earthengine authenticate`.")
                 raise typer.Exit(1)
-            bad = [r for r in rows if not r["reachable"] or r.get("bands_missing")]
-            for r in rows:
-                console.print(f"[{'FAIL' if r in bad else 'PASS'}] {r['id']}: {r.get('error') or r.get('bands_missing') or 'ok'}")
-            # typer.Exit is a RuntimeError, so it must never be raised inside a try that catches RuntimeError
-            raise typer.Exit(1 if bad else 0)
-        box = _parse_bbox(bbox)
-        try:
-            tasks = gee_export.run(box, name, project=project, dry_run=dry_run)
-        except RuntimeError as e:
-            console.print(f"[FAIL] {e}")
-            raise typer.Exit(1)
-        plan_file = data_dir("raw") / "earth" / f"{name}_export_plan.json"
-        console.print(f"[PASS] {len(tasks)} export task(s) {'planned' if dry_run else 'started'}. Plan: {plan_file}")
-        console.print("Download the GeoTIFFs from Drive. The loader names their bands from this plan, so either copy the plan "
-                      "JSON into the same folder as the GeoTIFFs, or pass it with --plan:")
-        console.print("  uv run gsop s2 earth --source local --src <folder> --plan <plan json> --add-solar")
+            for r in results:
+                console.print(f"[{'PASS' if r['ok'] else 'FAIL'}] {r['key']}: {r['id']} ({r['detail']})")
+            if not results or not all(r["ok"] for r in results):
+                raise typer.Exit(1)
+        if test_box:
+            gee_export.init(project)
+            box = gee_export.download_test_box(lon, lat, half_km, data_dir("raw") / "earth_test")
+            out_t = data_dir("interim") / "earth_test.parquet"
+            df = build_earth_table(box, out_t, add_solar=True)
+            console.print(f"[PASS] test box: {len(df):,} tiles -> {out_t}")
+        if export:
+            gee_export.init(project)
+            tasks = gee_export.start_global_export()
+            tp = data_dir("raw") / "earth" / "export_tasks.json"
+            write_json(tp, tasks)
+            console.print(f"[PASS] {len(tasks)} export tasks started (Google Drive folder gsop_earth); list -> {tp}")
         return
-    from .earth.local_loaders import build_earth_table
+    out = EARTH()
     s = src or data_dir("raw") / "earth"
     df = build_earth_table(s, out, add_solar=add_solar, plan=plan)
     T.write_data_manifest(out.parent)
     console.print(f"[PASS] {len(df):,} tiles -> {out}; MANIFEST.json written (send it with the parquet and grid.json)")
+
+
+@s2.command("assemble")
+def s2_assemble(gate: Path = typer.Option(..., "--gate", help="folder with the gsop_gate GeoTIFFs (gate_6km_*.tif)"),
+                terrain: Optional[Path] = typer.Option(None, "--terrain", help="folder with the gsop_terrain90 GeoTIFFs (SRTM90)"),
+                terrain_hi: Optional[Path] = typer.Option(None, "--terrain-hi", help="folder with the gsop_terrain90_hi GeoTIFFs (GLO30)"),
+                out: Optional[Path] = typer.Option(None, "--out", help="output parquet (default data/processed/earth_features_6km.parquet)"),
+                add_solar: bool = typer.Option(True, "--add-solar/--no-add-solar", help="add sun columns and air_density")) -> None:
+    """Earth features from the Earth Engine Drive downloads (gate + terrain90 + GLO30) -> earth_features_6km.parquet,
+    grid.json, earth_coverage.json and MANIFEST.json (SPEC section 3e)."""
+    from .earth import assemble as A
+    t0 = time.perf_counter()
+    try:
+        df, rep = A.assemble(gate, terrain, terrain_hi, add_solar=add_solar)
+    except (A.OverlapError, FileNotFoundError, ValueError) as e:
+        console.print(f"[FAIL] {e}")
+        raise typer.Exit(1)
+    o = out or EARTH()
+    A.write_outputs(df, rep, o)
+    for line in A.format_report(rep):
+        console.print(f"  {line}")
+    if out is None:
+        T.write_data_manifest(o.parent)
+    console.print(f"[PASS] {len(df):,} land tiles -> {o} in {time.perf_counter() - t0:.0f} s; coverage report "
+                  f"{o.parent / 'earth_coverage.json'}" + ("; MANIFEST.json written" if out is None else ""))
 
 
 @s2.command("open-data")
@@ -198,16 +263,22 @@ def s2_open_data(spec: Path = typer.Option(Path("config/open_data.yaml"), "--spe
 
 @s2.command("targets")
 def s2_targets(body: str = BodyOpt, dem: Optional[Path] = typer.Option(None, "--dem", help="DEM GeoTIFF (LOLA or MOLA)"),
-               psr: Optional[Path] = typer.Option(None, "--psr", help="moon: PSR raster (non-zero = permanently shadowed)")) -> None:
+               psr: Optional[Path] = typer.Option(None, "--psr", help="moon: PSR raster (non-zero = permanently shadowed)"),
+               themis: Optional[Path] = typer.Option(None, "--themis", help="mars: THEMIS thermal inertia GeoTIFF (Zenodo "
+                                                     "4931348, nodata 0) -> aux_thermal_inertia_si"),
+               mcd: Optional[Path] = typer.Option(None, "--mcd", help="mars: MCD surface temperature table written by "
+                                                  "scripts/mcd_jezero.py -> t_mean, t_coldest")) -> None:
     """Target profiles -> data/processed/targets_{body}.parquet."""
     from .targets import common, mars, moon
     cfg = load_all()
     if _check_body(body) == "moon":
+        if themis or mcd:
+            raise typer.BadParameter("--themis and --mcd are for Mars only")
         rows = moon.build(cfg, dem, psr)
     else:
         if psr:
             raise typer.BadParameter("--psr is for the Moon only")
-        rows = mars.build(cfg, dem)
+        rows = mars.build(cfg, dem, themis, mcd)
     df = common.write_profile(rows, data_dir("processed") / f"targets_{body}.parquet")
     un = df[df["unavailable"]].groupby("target")["col"].apply(list).to_dict()
     console.print(f"[PASS] {df['target'].nunique()} targets written")
@@ -233,14 +304,17 @@ _stage_cmd(s9, "discover", ("discover",), "discovery: robust and novel candidate
 
 
 @app.command()
-def run(body: str = BodyOpt, runs: Optional[int] = RunsOpt, workers: Optional[int] = WorkersOpt) -> None:
+def run(body: str = BodyOpt, runs: Optional[int] = RunsOpt, workers: Optional[int] = WorkersOpt,
+        lat_band: Optional[tuple[float, float]] = typer.Option(None, "--lat-band", help="robustness run: score only Earth "
+                                                                "tiles with absolute latitude LOW..HIGH (inclusive), "
+                                                                "results in results/<body>_latLOW-HIGH/")) -> None:
     """Runs s3..s7 (+s8, s9) in order, resumable. Writes results/<body>/run_meta.json."""
-    br = _body_run(body, runs, workers)
+    br = _body_run(body, runs, workers, lat_band=lat_band)
     br.run(STAGES)
     if br.unscored:
         for k, v in br.unscored.items():
             console.print(f"[WARN] {k}: {v}")
-    console.print(f"[PASS] run complete: results/{body}/")
+    console.print(f"[PASS] run complete: results/{body}{band_label(lat_band)}/")
 
 
 @app.command()

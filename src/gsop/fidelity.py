@@ -28,5 +28,6 @@ def fidelity(ledger: dict[str, Any], body: str, profile: str) -> dict[str, Any]:
 
 
 def ledger_table(ledger: dict[str, Any], body: str) -> list[dict[str, Any]]:
-    return [{k: r.get(k) for k in ("id", "property", "target", "earth", "status", "source", "provisional")}
+    return [{k: r.get(k) for k in ("id", "property", "target", "earth", "status", "source", "provisional", "limits_note", "check_note",
+                                  "limits_note_provisional")}
             for r in ledger["rows"] if body in r["bodies"]]

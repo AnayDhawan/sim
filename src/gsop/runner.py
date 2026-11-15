@@ -35,12 +35,21 @@ class BodyRun:
         self.runs, self.workers, self.free_bytes = runs, workers, free_bytes
         self.earth_hash = earth_hash
         self.store = StageStore(self.res_dir) if use_store else None
-        self.profiles = cfg["purposes"]["profiles"][body]
+        self.skipped_profiles = P.skip_profiles_for(cfg, body)
+        self.profiles = [p for p in cfg["purposes"]["profiles"][body] if p not in self.skipped_profiles]
         self.cfg_hash = config_hash({k: cfg[k] for k in cfg})
         self._gates: dict[str, pd.DataFrame] = {}
         self.summaries: dict[str, dict[str, Any]] = {}
         self.timings: dict[str, float] = {}
+        self.extra_meta: dict[str, Any] = {}          # stamped into run_meta.json and export/index.json (e.g. lat band)
         self.targets, self.unscored = self._split_targets()
+        for t in self.targets:
+            for prof, cols in self.skipped_profiles.items():
+                self.unscored[f"{t}__{prof}"] = (f"not run: profile {prof!r} skipped by config/run.yaml skip_profiles; "
+                                                 f"missing column(s) {cols}")
+        if self.skipped_profiles:
+            print(f"NOTE {body}: profiles not run (config/run.yaml skip_profiles): "
+                  + "; ".join(f"{p} (missing {', '.join(c)})" for p, c in self.skipped_profiles.items()))
         for sp in sorted(self.res_dir.glob("*/summary.json")):      # lets s6 to s9 run as separate commands
             self.summaries[sp.parent.name] = read_json(sp)
 
@@ -78,7 +87,7 @@ class BodyRun:
         return self._gates[profile]
 
     def _columns(self) -> list[str]:
-        drop = list(self.cfg["run"].get("drop_columns") or [])
+        drop = P.drop_columns_for(self.cfg["run"], self.body, self.cfg["weights"][self.body])
         bc = P.active_body_cfg(self.cfg["weights"][self.body], drop)
         return list(dict.fromkeys(c for f in bc.values() for c in f["columns"]))
 
@@ -163,9 +172,17 @@ class BodyRun:
                 path.unlink()
             scores = {n.split("__")[0]: pd.read_parquet(self.res_dir / n / "base_scores.parquet").set_index("tile_id")["score"]
                       for n in names}
-            gate = self.gate_table("base", self._columns())
+            cols = self._columns()
+            gate = self.gate_table("base", cols)
+            jobs: dict[str, P.Job] = {}
+
+            def scorer(t: str, rows: np.ndarray) -> np.ndarray:
+                if t not in jobs:
+                    jobs[t] = self.job(t, "base")
+                return P.score_rows(jobs[t], rows)
             V.validate_body(self.body, self.cfg["known_sites"], float(self.cfg["run"]["site_match_radius_km"]),
-                            self.earth, {t: gate for t in scores}, scores, path)
+                            self.earth, {t: gate for t in scores}, scores, path, gates_cfg=self.cfg["gates"],
+                            used_columns=cols, ungated_scorer=scorer)
         self._stage("validate", "body", {}, go)
 
     # ------------------------------------------------------------------ s9
@@ -193,7 +210,8 @@ class BodyRun:
             sp = self.res_dir / name / "summary.json"
             if sp.exists():
                 self.summaries[name] = read_json(sp)
-        export_body(self.body, self.res_dir, self.cfg["ledger"], self.summaries, self.unscored, list(self.profiles))
+        export_body(self.body, self.res_dir, self.cfg["ledger"], self.summaries, self.unscored, list(self.profiles),
+                    extra=self.extra_meta)
 
     # ------------------------------------------------------------------ all
     def run(self, stages: tuple[str, ...] = STAGES) -> None:
@@ -206,4 +224,4 @@ class BodyRun:
             self.cfg_hash, {"master_seed": self.cfg["run"]["master_seed"]},
             {**self.timings, "total": time.perf_counter() - t0},
             {"body": self.body, "runs": self.runs, "workers": self.workers, "earth_hash": self.earth_hash,
-             "unscored": self.unscored, "stages": list(stages)}))
+             "unscored": self.unscored, "stages": list(stages), **self.extra_meta}))

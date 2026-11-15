@@ -29,14 +29,15 @@ Earth Engine facts that this file depends on (reported by Anay after a real run)
   * reduceResolution needs a default projection on any image made by a collection reducer (mean, median, mosaic, blend):
     call `setDefaultProjection` first.
   * images made with `.map(...)` lose `system:time_start`: copyProperties before calendarRange.
-  * reduceResolution(maxPixels) must cover the cell ratio (100 m into a 6 km tile needs 3,600).
+  * reduceResolution(maxPixels) must cover the cell ratio (300 m into a 6 km tile needs 400; a 25 m work cell needs 57,600).
   * mean(z^2) - mean(z)^2 on raw elevations cancels to exactly 0 in float32. Each window's own mean is subtracted first.
 
 Known places where the two sides can differ (reported by `gsop check-operators`, not hidden):
   * percentile interpolation: numpy interpolates linearly, Earth Engine picks an order statistic;
   * the DEM is resampled bilinearly onto the working grid before either side computes anything; both sides use the SAME
     resampled surface in the check;
-  * rough_a (100 m) needs a whole number of cells: 100 / 25 = 4 works, 100 / 30 does not, so the check grid is 25 m.
+  * rough_a (300 m, target-side E22) needs a whole number of at least 3 cells: 300 / 25 = 12 and 300 / 100 = 3 work,
+    300 / 30 = 10 also works, but 500 / 30 does not, so the check grid is 25 m.
 """
 
 from __future__ import annotations

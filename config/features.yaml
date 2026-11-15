@@ -2,10 +2,10 @@
 # Terrain operator: one numpy operator (src/gsop/operators.py) on Earth, Moon and Mars.
 operator:
   slope_baseline_m: 500            # slope is computed on a 500 m mean-resampled DEM (Horn 3x3), then reduced to the tile
-  rough_a_baseline_m: 100          # TODO confirm with Vihaan
+  rough_a_baseline_m: 300          # target-side E22: 300 m on all bodies, because Earth terrain comes from a 90 m DEM (SRTM90 on a 100 m grid: 3 cells, the operator's minimum)
   rough_b_baseline_m: 1000         # TODO confirm with Vihaan
   tile_m: 6000
-  work_cell_m: 25                  # working grid of the Earth Engine export and of `check-operators`: DEM resampled bilinearly to this cell, so 100 m and 1000 m divide it (100/30 does not)
+  work_cell_m: 25                  # working grid of the Earth Engine export and of `check-operators`: DEM resampled bilinearly to this cell, so 300 m, 500 m and 1000 m divide it (the SRTM90 route uses 100 m, which divides them too)
   stride_m: 3000                   # target windows only
 sun_low_threshold_deg: 5           # sun_low_share = share of daylight with the Sun under this elevation
 # Earth solar geometry (src/gsop/earth/solar.py): latitude and obliquity only, flat horizon, circular orbit. DEVIATION from
@@ -26,7 +26,7 @@ columns:
   rough_b:    {unit: m, what: "RMS height after plane removal, long baseline", earth: "as slope_med", moon: "LOLA", mars: "MOLA"}
   sun_max_elev: {unit: deg, what: "maximum Sun elevation over the year, from latitude, obliquity, slope and aspect", earth: "computed", moon: "computed; pole targets about 1.5 deg", mars: "computed"}
   sun_low_share: {unit: fraction, what: "share of daylight with the Sun under 5 deg", earth: "computed", moon: "pole targets about 1.0", mars: "computed"}
-  insol_annual: {unit: W/m2, what: "annual mean insolation", earth: "computed", moon: "n/a", mars: "computed"}
+  insol_annual: {unit: W/m2, what: "annual mean top-of-atmosphere insolation on a horizontal surface, S0 x mean(max(0, sin Sun elevation)); latitude and obliquity only, no slope or aspect, no atmosphere", earth: "computed locally (earth/solar.py via astro.py, S0 = solar.s0_w_m2)", moon: "n/a", mars: "computed (earth/solar.py, Mars S0 and obliquity from config/targets.yaml mars_solar)"}
   t_mean:     {unit: K, what: "annual mean surface temperature", earth: "MODIS LST 2015-2024 climatology (lead)", moon: "Diviner (not at the pole; flag)", mars: "climate data"}
   t_coldest:  {unit: K, what: "coldest-month surface temperature", earth: "MODIS LST (lead)", moon: "Diviner (not at the pole; flag)", mars: "climate data"}
   ti_proxy:   {unit: K, what: "day-night temperature swing in the dry season (three driest consecutive months; fall back to annual median and flag)", earth: "MODIS (lead)", moon: "Diviner", mars: "THEMIS"}
