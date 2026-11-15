@@ -1,6 +1,6 @@
 """Pull all Earth thermal blocks (PREREG_A). Resumable: a block with a cached .npy is skipped. Failures logged, never filled."""
 from __future__ import annotations
-import json, sys, time, threading
+import json, os, sys, time, threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import numpy as np
@@ -33,6 +33,9 @@ def main(workers=8):
     LOGS.mkdir(parents=True, exist_ok=True); M.CACHE.mkdir(parents=True, exist_ok=True)
     M.init()
     blocks = land_blocks()
+    blocks = sorted(blocks, key=lambda w: abs(w[1] + w[3] / 2 - 1224))
+    if os.environ.get('PULL_REV'):
+        blocks = blocks[::-1]
     todo = [w for w in blocks if not (M.CACHE / f"done_{w[0]}_{w[1]}.flag").exists()]
     print(f"{len(blocks)} land blocks, {len(todo)} to do", flush=True)
     state = {"done": len(blocks) - len(todo), "failed": []}
@@ -40,6 +43,9 @@ def main(workers=8):
 
     def work(w):
         stack = [w]
+        if abs(w[1] + w[3] / 2 - 1224) > 880:          # high latitude: memory limit hit at 50 tiles, start at 25
+            stack = [(w[0] + dx, w[1] + dy, min(25, w[2] - dx), min(25, w[3] - dy)) for dy in (0, 25) for dx in (0, 25)
+                     if w[2] - dx > 0 and w[3] - dy > 0]
         while stack:
             cw = stack.pop()
             f = M.CACHE / f"b_{cw[0]}_{cw[1]}_{cw[2]}_{cw[3]}.npy"
@@ -70,8 +76,8 @@ def main(workers=8):
                     state["failed"].append({"window": list(w), "error": str(e)[:300]})
                 if (state["done"] + len(state["failed"])) % 10 == 0:
                     print(f"{time.strftime('%H:%M:%S')} done {state['done']}/{len(blocks)} failed {len(state['failed'])} elapsed {time.time()-t0:.0f}s", flush=True)
-                    (LOGS / "pull_state.json").write_text(json.dumps({"total": len(blocks), **state, "t": time.strftime('%H:%M:%S')}))
-    (LOGS / "pull_state.json").write_text(json.dumps({"total": len(blocks), **state, "finished": True}))
+                    (LOGS / ("pull_state_rev.json" if os.environ.get("PULL_REV") else "pull_state.json")).write_text(json.dumps({"total": len(blocks), **state, "t": time.strftime('%H:%M:%S')}))
+    (LOGS / ("pull_state_rev.json" if os.environ.get("PULL_REV") else "pull_state.json")).write_text(json.dumps({"total": len(blocks), **state, "finished": True}))
     print("finished", state["done"], "failed", len(state["failed"]), flush=True)
 
 if __name__ == "__main__":

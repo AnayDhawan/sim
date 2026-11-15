@@ -1,8 +1,9 @@
 # STATUS_A (ROLE A, Earth thermal layer and scoring)
 
-- updated: 2026-11-15 08:50 IST
+- updated: 2026-11-15 08:56 IST
 - hard stop: 2026-11-15 17:00 IST
-- stage: pull and reference sets
-- done: PREREG_A committed and pushed (sha256 1758b132...). v1 engine a7d96d9 imported (v1 results were produced by a7d96d9, not origin/main ca9a816). EE block pull and Moon/Mars raw download started.
-- next: Earth thermal assembly, rank columns, scoring
-- failures: none yet
+- stage: Earth Engine pull running (two processes), pipeline tested on partial data
+- done: PREREG_A pushed; engine imported; baseline run reproduces v1 (Namib 90.19, Rub al Khali 75.56, Mars median 61.29); Moon/Mars reference sets rebuilt, sha256 match Role B, site medians match Role B rows; scripts for assemble, scoring, gates written
+- next: finish pull, assemble Earth thermal ranks, thermal scoring with Monte Carlo (2000 runs), gates, results
+- failures: none
+- Earth Engine pull: 30/2377 land blocks, 0 failed
