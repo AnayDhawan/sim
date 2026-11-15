@@ -76,6 +76,34 @@ def main() -> None:
         cl("v1 land tiles", asm["n_v1_land_tiles"], "data/interim/a_thermal/assemble.json")
         cl("valid in all three thermal features", asm["valid_all_three"], "data/interim/a_thermal/assemble.json")
     A("")
+    A("### Tiles with missing thermal values by latitude band\n")
+    try:
+        import numpy as np
+        import pandas as pd
+        e = pd.read_parquet(ROOT / "data/processed/earth_features_v2_6km.parquet", columns=["lat", "th_mean_K", "th_max_K", "th_dn_K"])
+        edges = [-90, -80, -70, -60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+        names = {-90: "Antarctica (south polar plateau)", -80: "Antarctica (interior, shelves and coast)",
+                 -70: "Antarctica (coast and peninsula)", -60: "Southern Ocean margin (sub-Antarctic islands, Patagonia tip)",
+                 60: "Arctic fringe", 70: "Arctic (Greenland, Arctic islands)", 80: "high Arctic (north Greenland, Ellesmere)"}
+        A("| Latitude band | Land tiles | Missing th_mean_K | Missing share | Missing th_max_K | Note |")
+        A("|---|---|---|---|---|---|")
+        lat = e["lat"].to_numpy()
+        for lo, hi in zip(edges[:-1], edges[1:]):
+            m = (lat >= lo) & (lat < hi) if hi < 90 else (lat >= lo) & (lat <= hi)
+            n = int(m.sum())
+            if n == 0:
+                continue
+            mm = int(e["th_mean_K"].isna()[m].sum())
+            mx = int(e["th_max_K"].isna()[m].sum())
+            A(f"| {lo} to {hi} | {n:,} | {mm:,} | {mm / n:.3f} | {mx:,} | {names.get(lo, '')} |")
+            cl(f"land tiles with missing th_mean_K, latitude {lo} to {hi}", mm, "data/processed/earth_features_v2_6km.parquet")
+        vmin = float(np.nanmin(e["th_mean_K"]))
+        A("")
+        A(f"The lowest valid `th_mean_K` is {vmin:.2f} K. Tiles with no thermal value are left out of the Earth percentile set (it is built only from valid tiles) and are rejected as missing data when scoring. The polar plateau and the high-latitude interior are the least covered bands, so the coldest Earth tiles may be absent from the thermal ranking. A Moon polar value that ranks low within the Moon set is therefore compared with an Earth set that lacks the coldest Earth surfaces, and the low end of the Earth ranking is less reliable than the middle.\n")
+        cl("lowest valid Earth th_mean_K", f"{vmin:.4f}", "data/processed/earth_features_v2_6km.parquet")
+    except Exception as ex:  # noqa: BLE001
+        A(f"Latitude-band table not available: {type(ex).__name__}: {ex}\n")
+    A("")
     A("## Descriptive results, whatever the gate status\n")
     A("Percentiles are 100 * share of gated tiles of the view scoring below the site value. Best-of-radius is the v1 statistic (best gated tile within 20 km). Own tile is the tile nearest the site point. Chance = mean of 1000 shuffled-feature draws (seed 20261114) with the 2.5 to 97.5 percentile range and min to max. Mean over the body's targets. `gated_out` = no gated tile.\n")
     for body in ("moon", "mars"):
@@ -97,6 +125,23 @@ def main() -> None:
                     cl(f"{body} {name} own-tile percentile, {v}", f"{d['mean_own_tile_pct']:.4f}", src)
         A("")
         A("Chance column shows the first target's draw summary; the mean over targets is in `results/a_<variant>/secondary.json`.\n")
+    A("### Mars positives, own-tile percentile (single nearest tile) against chance\n")
+    A("Own tile = the tile nearest the site point, percentile among the gated tiles of the Jezero view. Chance = 1000 shuffled-feature draws, seed 20261114: mean (2.5 to 97.5 percentile range; min to max). `gated_out` = the nearest tile is rejected by a gate, so there is no number.\n")
+    A("| Weighting | Site | Own tile | Chance, own tile | Best-of-radius | Chance, best-of-radius |")
+    A("|---|---|---|---|---|---|")
+    for v in ORDER:
+        s = (sec.get(v) or {}).get("bodies", {}).get("mars")
+        if not s:
+            continue
+        for name, d in s.items():
+            if d["role"] != "positive":
+                continue
+            t0 = next(iter(d["targets"].values()), None)
+            if not t0:
+                continue
+            ownv = f1(t0.get("own_tile_pct")) if t0.get("own_status") == "scored" else "gated_out"
+            A(f"| {LABEL[v]} | {name} | {ownv} | {chance(t0['chance_own'])} | {f1(t0.get('best_of_radius_pct'))} | {chance(t0['chance_best'])} |")
+    A("")
     A("### Mars primary median rank percentile (v1 rule, scorable and no-gated-tile sites as v1 reports them)\n")
     A("| Weighting | Median |\n|---|---|")
     for v in ORDER:
