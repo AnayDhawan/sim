@@ -19,6 +19,7 @@ import sys
 import threading
 import time
 import unicodedata
+import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -77,6 +78,9 @@ COLUMNS = ["site_name", "body", "list", "radius_km", "coord_flag", "dataset", "v
            "lat", "lon", "scale_m", "page_ok", "note", "pulled_utc"]
 
 log = logging.getLogger("site_evidence")
+
+
+CHIP_SEM = threading.Semaphore(2)
 
 
 class StopRun(Exception):
@@ -164,17 +168,20 @@ def terrain(lat, lon, r_m, _scale):
                 .resample("bilinear").reproject(crs=P, scale=30))
 
     cop = prep("COPERNICUS/DEM/GLO30_2024_1", "DEM")
-    alos = prep("JAXA/ALOS/AW3D30/V4_1", "DSM")
+    alos_n = ee.ImageCollection("JAXA/ALOS/AW3D30/V4_1").filterBounds(tiles).size().getInfo()
     img_c = cop.rename("e").addBands(ee.Terrain.slope(cop).rename("s"))
-    img_a = alos.rename("e").addBands(ee.Terrain.slope(alos).rename("s"))
-    d = alos.subtract(cop)
-    img_d = d.rename("d").addBands(d.abs().rename("a")).addBands(d.pow(2).rename("q"))
     kw = dict(geometry=geom, scale=30, crs=P, maxPixels=1e9, tileScale=4)
-    out = ee.Dictionary({
-        "cop": img_c.reduceRegion(reducer=red_terrain(), **kw),
-        "alos": img_a.reduceRegion(reducer=red_terrain(), **kw),
-        "diff": img_d.reduceRegion(reducer=mean_count(), **kw),
-    }).getInfo()
+    parts = {"cop": img_c.reduceRegion(reducer=red_terrain(), **kw)}
+    if alos_n > 0:
+        alos = prep("JAXA/ALOS/AW3D30/V4_1", "DSM")
+        img_a = alos.rename("e").addBands(ee.Terrain.slope(alos).rename("s"))
+        d = alos.subtract(cop)
+        img_d = d.rename("d").addBands(d.abs().rename("a")).addBands(d.pow(2).rename("q"))
+        parts["alos"] = img_a.reduceRegion(reducer=red_terrain(), **kw)
+        parts["diff"] = img_d.reduceRegion(reducer=mean_count(), **kw)
+    out = ee.Dictionary(parts).getInfo()
+    out.setdefault("alos", None)
+    out.setdefault("diff", None)
     rows = []
     for ds, key in (("cop_dem", "cop"), ("alos_dem", "alos")):
         d_ = out[key]
@@ -200,6 +207,10 @@ def terrain(lat, lon, r_m, _scale):
         rows.append(rec("dem_crosscheck", f"{var}_{stat}_diff_alos_minus_cop", "difference",
                         None if a is None or c is None else a - c, units, n, 30,
                         "derived" if a is not None and c is not None else ""))
+    if alos_n == 0:
+        for x in rows:
+            if x["dataset"] in ("alos_dem", "dem_crosscheck") and x["value"] is None:
+                x["note"] = "no_images (no ALOS tiles at site)"
     return rows
 
 
@@ -327,6 +338,20 @@ def s1(lat, lon, r_m, scale):
     return rows
 
 
+def with_429(fn, tries=7):
+    """Retry the same request on rate limiting (HTTP 429/503 or EE concurrency errors)."""
+    for k in range(tries):
+        try:
+            return fn()
+        except urllib.error.HTTPError as e:
+            if e.code not in (429, 503) or k == tries - 1:
+                raise
+        except ee.EEException as e:
+            if ("Too Many Requests" not in str(e) and "concurrency" not in str(e)) or k == tries - 1:
+                raise
+        time.sleep(min(20 * 2 ** k, 300))
+
+
 def fetch_thumb(img, P, n):
     """512 x 512 render of the 20 km box, fetched as n x n tiles (same pixels as one request, less memory)."""
     px, side = 512 // n, 20000 / n
@@ -336,8 +361,11 @@ def fetch_thumb(img, P, n):
             x0 = -10000 + ix * side
             y1 = 10000 - iy * side
             reg = ee.Geometry.Rectangle([x0, y1 - side, x0 + side, y1], proj=ee.Projection(P), geodesic=False)
-            url = img.getThumbURL({"region": reg, "dimensions": f"{px}x{px}", "crs": P, "format": "png"})
-            t = Image.open(io.BytesIO(urllib.request.urlopen(url, timeout=600).read())).convert("RGB")
+            def get(reg=reg):
+                url = img.getThumbURL({"region": reg, "dimensions": f"{px}x{px}", "crs": P, "format": "png"})
+                return urllib.request.urlopen(url, timeout=600).read()
+
+            t = Image.open(io.BytesIO(with_429(get))).convert("RGB")
             if t.size != (px, px):
                 t = t.resize((px, px))
             full.paste(t, (ix * px, iy * px))
@@ -394,6 +422,7 @@ class Runner:
         self.failures: list[str] = []
         self.active: dict[str, str] = {}
         self.stopped = False
+        self.only: dict[str, set] = {}
 
     def write_rows(self, rows: list[dict]):
         with self.lock:
@@ -445,13 +474,17 @@ class Runner:
                       ("s1", r_m, s1, (10, 10, 20, 30, 60))]
         tasks.append(("chip", 10000, None, None))
         results: list[tuple[int, dict]] = []
+        only = self.only.get(key)
         for name, r_m, fn, ladder in tasks:
+            if only is not None and (name, r_m) not in only:
+                continue
             self.active[slug] = f"{name} r={r_m}"
             label = f"{slug}:{name}:{r_m}"
             pulled = utc_iso()
             try:
                 if name == "chip":
-                    recs, sc = run_task(label, lambda s: chip(lat, lon, slug, s), (1, 2, 4, 8, 8)), None
+                    with CHIP_SEM:
+                        recs, sc = run_task(label, lambda s: chip(lat, lon, slug, s), (1, 2, 4, 8, 8)), None
                     recs = recs[0]
                 else:
                     recs, sc = run_task(label, lambda s, fn=fn, r_m=r_m: fn(lat, lon, r_m, s), ladder or (None,) * 5)
@@ -532,10 +565,35 @@ def load_groups(only: list[str] | None) -> list[list[dict]]:
     return out
 
 
+def redo_failed(groups: list[list[dict]], workers: int) -> int:
+    """Re-run tasks whose rows are FAILED in the output CSV, replacing those rows."""
+    df = pd.read_csv(OUT_CSV, dtype=str, keep_default_na=False)
+    bad = df[df["stat"] == "FAILED"]
+    only: dict[str, set] = {}
+    for _, r in bad.iterrows():
+        m = re.match(r"FAILED: [^:]+:([a-z0-9_]+):(\d+)", r["note"])
+        if m:
+            only.setdefault(f"{float(r['lat'])},{float(r['lon'])}", set()).add((m.group(1), int(m.group(2))))
+    log.info("redo: %d coordinates, %d tasks", len(only), sum(len(v) for v in only.values()))
+    if not only:
+        return 0
+    df[df["stat"] != "FAILED"].to_csv(OUT_CSV, index=False, lineterminator=chr(10))
+    sel = [g_ for g_ in groups if f"{g_[0]['lat']},{g_[0]['lon']}" in only]
+    (CACHE / "redo_done.txt").unlink(missing_ok=True)
+    runner = Runner(OUT_CSV, CACHE / "redo_done.txt", workers)
+    runner.only = only
+    ok = runner.run(sel)
+    log.info("redo finished ok=%s failures=%d", ok, len(runner.failures))
+    for x in runner.failures:
+        print("FAILED:", x)
+    return 0 if ok else 2
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--redo-failed", action="store_true")
     a = ap.parse_args()
     LOGS.mkdir(parents=True, exist_ok=True)
     CACHE.mkdir(parents=True, exist_ok=True)
@@ -545,6 +603,8 @@ def main() -> int:
     ee.Initialize(project=PROJECT)
     ee.data.setDeadline(900000)
     groups = load_groups(SMOKE_SITES if a.smoke else None)
+    if a.redo_failed:
+        return redo_failed(groups, a.workers)
     if a.smoke:
         runner = Runner(CACHE / "smoke_site_measurements.csv", CACHE / "smoke_done.txt", min(a.workers, 3))
     else:

@@ -139,6 +139,21 @@ def main() -> int:
             total += jp.stat().st_size
         sites[st["slug"]] = dict(status=st["status"], clear_fraction=st["clear_fraction"],
                                  scene_count=st["scene_count"], credit=CREDIT if st["status"] == "ok" else None)
+    # rows that share coordinates share one chip: copy it under each extra slug, labelled as an alias
+    names: dict[tuple, set] = defaultdict(set)
+    for r in rows:
+        names[(r["lat"], r["lon"])].add(r["site_name"])
+    for nm in names.values():
+        slugs = sorted({slugify(n) for n in nm})
+        have = [s_ for s_ in slugs if s_ in sites]
+        if len(slugs) > 1 and have:
+            base = have[0]
+            for s_ in slugs:
+                if s_ != base:
+                    sites[s_] = dict(sites[base], alias_of=base)
+                    if (CHIP_DIR / f"{base}.jpg").exists():
+                        (CHIP_DIR / f"{s_}.jpg").write_bytes((CHIP_DIR / f"{base}.jpg").read_bytes())
+    total = sum(p.stat().st_size for p in CHIP_DIR.glob("*.jpg"))
     (CHIP_DIR / "credits.json").write_text(json.dumps(dict(
         credit=CREDIT, window="2024-01-01 to 2025-12-31", product="COPERNICUS/S2_SR_HARMONIZED",
         box="20 km x 20 km centred on the site, 512 x 512 px", sites=sites), indent=1) + "\n", encoding="utf-8")

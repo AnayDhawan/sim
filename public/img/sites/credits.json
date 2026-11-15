@@ -1,0 +1,727 @@
+{
+ "credit": "Contains modified Copernicus Sentinel data (2024-2025)",
+ "window": "2024-01-01 to 2025-12-31",
+ "product": "COPERNICUS/S2_SR_HARMONIZED",
+ "box": "20 km x 20 km centred on the site, 512 x 512 px",
+ "sites": {
+  "arkaroola-mars-oz": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 163,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "askja-caldera": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 841,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "atacama-desert-cmu-nomad-rover-traverse": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 640,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "atacama-desert-yungay-core": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 640,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "atacama-maria-elena-south": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 322,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "axel-heiberg-gypsum-hill-and-lost-hammer-springs": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 1839,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "barranco-del-jaroso-sierra-almagrera": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 525,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "beacon-valley-and-university-valley-dry-valleys": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 385,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "black-point-lava-flow": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 326,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "bockfjord-volcanic-complex-amase": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 2107,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "bodele-depression-diatomite-deflation-basin": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 684,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "bunge-land-zemlya-bunge": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 960,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "channeled-scablands-dry-falls": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 633,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "chott-el-djerid": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 177,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "cinder-lake-crater-field": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 642,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "concordia-station-dome-c": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 699,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "craters-of-the-moon-national-monument": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 591,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "cuatro-cienegas": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 324,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "dallol": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 176,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "dasht-e-lut-kalut-yardang-field": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 363,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "death-valley-ubehebe-crater-and-basin-floor": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 346,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "dhofar-desert-amadee-18": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 624,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "don-juan-pond": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 748,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "dumont-dunes": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 297,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "dunhuang-yardang-national-geopark": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 637,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "el-tatio-geyser-field": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 316,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "emi-koussi-volcano-tibesti": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 622,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "erfoud-merzouga-mars2013": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 324,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "esa-caves-site-sa-grutta-sardinia": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 173,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "fiskenaesset-anorthosite-complex-qeqertarsuatsiaq": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 1331,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "fukushima-robot-test-field-lunar-analog-moon-mars-garden": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 622,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "gilf-kebir-plateau-and-wadis": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 153,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "gosses-bluff-crater": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 322,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "grand-canyon-south-rim-and-inner-canyon": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 656,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "harrat-khaybar-and-umm-jirsan-lava-tube": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 488,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "haughton-crater-devon-island": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 1023,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "henbury-craters": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 642,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "hi-seas-habitat-mauna-loa": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 586,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "holuhraun-lava-field": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 1676,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "hopi-buttes-volcanic-field": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 159,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "huailai-lunar-landing-test-site": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 160,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "isro-challakere-lunar-terrain-test-facility": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 164,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "kamchatka-lunokhod-chassis-trials-tolbachik-area": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 620,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "kamil-crater": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 632,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "karakul-impact-structure-pamir": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 316,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "kaunertal-glacier-amadee-15": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 709,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "kilauea-caldera-and-ka-u-desert": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 292,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "kilauea-ka-u-desert-basalt": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 292,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "kilbourne-hole-and-potrillo-volcanic-field": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 651,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "kolyma-lowland-permafrost": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 814,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "kumtag-desert-yutu-rover-tests-dunhuang": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 162,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "kutch-matanomadh-jarosite": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 611,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "ladakh-tso-kar-and-puga": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 646,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "lake-abbe-hydrothermal-carbonate-chimneys": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 349,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "lake-gilmore-acid-saline-lakes": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 634,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "lanzarote-timanfaya-and-la-corona-lava-tube": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 338,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "lava-beds-national-monument": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 319,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "licancabur-volcano-summit-lake": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 313,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "lonar-crater": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 323,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "lop-nur-great-ear-salt-crust": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 317,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "lunar-crater-volcanic-field": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 165,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "lunodrom-simferopol-28-crimea": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 349,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "makhtesh-ramon-d-mars-amadee-20": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 350,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "mars-base-1-jinchang": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 324,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "mars-desert-research-station-lunar-crews": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 484,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "mauna-kea-pisces-isru-test-sites": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 1179,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "mcmurdo-dry-valleys-taylor-wright-valleys": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 682,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "merriam-crater-cinder-deposits": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 322,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "meteor-crater-barringer": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 640,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "mistastin-kamestastin-lake-crater": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 622,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "moses-lake-sand-dunes": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 643,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "mount-erebus-dante-i-robot": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 1082,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "mount-etna-summit-area-robex-arches": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 711,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "mount-howe-and-the-scott-glacier-moraines-southernmost-rock": {
+   "status": "no clear imagery",
+   "clear_fraction": 0.0,
+   "scene_count": 0,
+   "credit": null
+  },
+  "myvatn-and-krafla-lava-fields": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 1664,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "myvatn-namafjall-hydrothermal-rootless-cones": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 1664,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "namib-desert-gobabeb": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 638,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "navajo-sandstone-hematite-concretions-grand-staircase-escalante": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 162,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "neemo-aquarius-reef-base": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 160,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "newberry-volcano-big-obsidian-flow-lava-river-cave": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 322,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "nordlinger-ries-crater": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 379,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "ojos-del-salado-high-altitude-permafrost": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 638,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "orocopia-mountains": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 266,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "painted-desert-petrified-forest": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 639,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "pampas-de-la-joya": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 354,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "payun-matru-volcanic-field-and-pampas-onduladas-flow": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 161,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "peary-land-polar-desert-central-plateau": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 2037,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "pilbara-dresser-formation-stromatolites": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 318,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "pinacate-and-gran-desierto-el-pinacate": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 164,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "pisgah-volcanic-field-lavic-lake": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 297,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "pu-u-nene-cinder-cone-jsc-mars-1-source": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 589,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "qaidam-basin-dalangtan-playa": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 321,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "rio-grande-gorge-taos": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 325,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "rio-tinto-marte": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 349,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "salar-de-pajonales": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 319,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "salar-grande": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 650,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "samail-ophiolite-wadi-tayin-massif": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 158,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "schirmacher-oasis-near-maitri-station": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 161,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "sedan-crater-nevada-national-security-site": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 297,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "shark-bay-hamelin-pool-stromatolites": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 316,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "sittampundi-anorthosite-complex": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 319,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "sp-crater-and-sp-lava-flow": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 326,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "stillwater-complex": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 290,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "sudbury-basin": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 164,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "teide-las-canadas-caldera": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 174,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "tenoumer-crater": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 159,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "tirez-lake": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 177,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "tottori-sand-dunes-lunar-demonstration-field-luna-terrace": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 157,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "umm-al-samim-sabkha": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 326,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "valley-of-ten-thousand-smokes-katmai": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 730,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "vostok-station": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 245,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "white-sands-gypsum-dunes": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 159,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "wolfe-creek-crater": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 323,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "yellowstone-norris-geyser-basin": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 290,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)"
+  },
+  "haughton-crater-hmp-and-fmars": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 1023,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)",
+   "alias_of": "haughton-crater-devon-island"
+  },
+  "craters-of-the-moon-basalt": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 591,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)",
+   "alias_of": "craters-of-the-moon-national-monument"
+  },
+  "lanzarote-timanfaya": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 338,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)",
+   "alias_of": "lanzarote-timanfaya-and-la-corona-lava-tube"
+  },
+  "lonar-crater-mars-context": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 323,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)",
+   "alias_of": "lonar-crater"
+  },
+  "mars-desert-research-station-hanksville": {
+   "status": "ok",
+   "clear_fraction": 1,
+   "scene_count": 484,
+   "credit": "Contains modified Copernicus Sentinel data (2024-2025)",
+   "alias_of": "mars-desert-research-station-lunar-crews"
+  }
+ }
+}
